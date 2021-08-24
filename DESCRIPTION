@@ -1,5 +1,5 @@
 Package: speechcollectr
-Title: Tools for Collecting Speech Production & Perception Data
+Title: R Tools for Collecting Speech Production & Perception Data
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Abbey",
@@ -20,3 +20,5 @@ Depends:
     R (>= 2.10)
 SystemRequirements:
     JavaScript
+URL: https://github.com/abbey-thomas/speechcollectr
+BugReports: https://github.com/abbey-thomas/speechcollectr/issues
