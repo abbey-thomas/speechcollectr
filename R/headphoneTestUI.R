@@ -68,7 +68,7 @@ headphoneTestUI <- function(id = "headphone_test",
                                           htmltools:: tags$tr(htmltools::tags$th(style = "padding: 15px; text-align: center;","Let's make sure your headphones are functioning correctly for the experiment.")),
                                           htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;","Each of the next six pages will have a button you can click to play a recording. You can only play each sound once, so don't press the button until you are ready.")),
                                           htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;",
-                                                                                if (type = "huggins") {"Each recording contains three sounds. One of the sounds contains a faint tone. Your task is to find the noise with the hidden tone."
+                                                                                if (type == "huggins") {"Each recording contains three sounds. One of the sounds contains a faint tone. Your task is to find the noise with the hidden tone."
                                                                                 } else {"Each recording contains three sounds. Your job is to decide which noise is the QUIETEST."})),
                                           htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;",
                                                                                 if (type == "huggins") {"After you have heard all three sounds and know which one contains the tone, you will see three buttons. Click the button that corresponds to the sound you thought was contained the tone."}
