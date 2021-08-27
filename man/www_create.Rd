@@ -18,19 +18,19 @@ www_create(
 
 \item{is_dir}{Boolean. Is 'from' a directory?}
 
-\item{path}{A character vector naming the parent directory of 'www'. Defaults to working directory.}
+\item{path}{A character vector naming the path to the parent directory of 'www'. Defaults to working directory.}
 
-\item{volumeCalibration}{Boolean. Should \code{speechcollectr::cal_noise()} for testing headphone volume be copied to 'www'?}
+\item{volumeCalibration}{Boolean. Should \code{cal_noise()} for testing headphone volume be copied to 'www'?}
 
-\item{HugginsPitchScreen}{Boolean. Should \code{speechcollectr::HugginsPitchData()} for Huggins Pitch Headphone Screen be copied to 'www'?}
+\item{HugginsPitchScreen}{Boolean. Should \code{HugginsPitchData()} for Huggins Pitch Headphone Screen be copied to 'www'?}
 
-\item{AntiphaseScreen}{Boolean. Should \code{speechcollectr::AntiphaseData()} for Antiphase Headphone Screen be copied to 'www'?}
+\item{AntiphaseScreen}{Boolean. Should \code{AntiphaseData()} for Antiphase Headphone Screen be copied to 'www'?}
 }
 \value{
-Success messages will be printed in the console as each step towards creating the directory is completed.
+A www subdirectory in the current working directory. Success messages will be printed in the console as each step towards creating the directory is completed.
 }
 \description{
-Create the 'www' Directory for a Shiny App
+Many shiny apps for speech experiments require resources (like WAV files) in the www subdirectory. This command takes care of gathering datafiles and putting them in the appropriate directory for
 }
 \examples{
 

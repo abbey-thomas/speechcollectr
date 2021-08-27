@@ -21,13 +21,14 @@
 #'
 #' @examples
 #' ## First use www_create() to get the data for the type of headphone screen you want.
-#' ## NOTE: Do NOT put this command in your UI! Run it once before testing your app to create the www folder.
+#' ## NOTE: Do NOT put this command in your UI!
+#' # Run it once before testing your app to create the www folder.
 #' www_create(HugginsPitchScreen = TRUE)
 #'
 #' # Now build the app.
-#' if (interactive) {
+#' if (interactive()) {
 #'  ui <- fluidPage(
-#'         headphoneTestUI(id = "headphone_test", type = "huggins")
+#'         headphoneTestUI(id = "headphone_test", type = "huggins"),
 #'         textOutput("done")
 #'      )
 #'
@@ -37,15 +38,14 @@
 #'                                          n_trials = 6, threshold = 4, n_attempts = 2)
 #'            observe({
 #'              if (phones() == 1) {
-#'                  output$done <- renderText("Headphone test successfully completed!)
+#'                  output$done <- renderText("Headphone test successfully completed!")
 #'                  }
 #'               })
 #'   }
 #' shinyApp(ui = ui, server = server)
 #' }
 #' @importFrom magrittr %>%
-#' magrittr::`%>%`
-#'
+#' @importFrom rlang .data
 headphoneTestServer <- function(id = "headphone_test",
                                 type = c("huggins", "antiphase"),
                                 n_trials = 6, threshold,
@@ -82,15 +82,15 @@ headphoneTestServer <- function(id = "headphone_test",
         shinyjs::showElement("instr")
 
         if (type == "antiphase") {
-          files <<- data.frame(filename =
+          files <- data.frame(filename =
                                  list.files(path = "www/",
                                             pattern = "ap_\\d")) %>%
-            tidyr::extract(col = filename, into = "answer",
+            tidyr::extract(col = .data$filename, into = "answer",
                            regex = ".+?(_\\d)\\.wav", remove = FALSE) %>%
-            dplyr::mutate(answer = paste0("answer", as.character(answer))) %>%
-            dplyr::mutate(order = sample(nrow(.))) %>%
-            dplyr::filter(order < (n_trials + 1)) %>%
-            dplyr::arrange(order)
+            dplyr::mutate(answer = paste0("answer", as.character(.data$answer))) %>%
+            dplyr::mutate(order = sample(nrow(.data))) %>%
+            dplyr::filter(.data$order < (n_trials + 1)) %>%
+            dplyr::arrange(.data$order)
 
           shinyjs::delay(2500, shinyjs::enable("ready"))
         }
@@ -99,43 +99,44 @@ headphoneTestServer <- function(id = "headphone_test",
       shiny::observeEvent(input$test, {
         shinyjs::disable("test")
 
-        files <<- data.frame(filename =
+        files <- data.frame(filename =
                                list.files(path = "www/",
                                           pattern = "hp_\\d")) %>%
-          tidyr::extract(col = filename, into = "answer",
+          tidyr::extract(col = .data$filename, into = "answer",
                          regex = ".+?(_\\d)\\.wav", remove = FALSE) %>%
-          dplyr::mutate(answer = paste0("answer", as.character(answer))) %>%
-          dplyr::mutate(order = sample(nrow(.))) %>%
-          dplyr::filter(order < (n_trials + 1)) %>%
-          dplyr::arrange(order)
+          dplyr::mutate(answer = paste0("answer",
+                                        as.character(.data$answer))) %>%
+          dplyr::mutate(order = sample(nrow(.data))) %>%
+          dplyr::filter(.data$order < (n_trials + 1)) %>%
+          dplyr::arrange(.data$order)
 
         shinyjs::delay(5000, shinyjs::enable("test"))
         shinyjs::delay(5500, shinyjs::enable("ready"))
       })
 
-      observeEvent(input$ready, {
-        hide("instr")
-        showElement("progress")
-        showElement("screen")
+      shiny::observeEvent(input$ready, {
+        shinyjs::hide("instr")
+        shinyjs::showElement("progress")
+        shinyjs::showElement("screen")
       })
 
-      observeEvent(input$screen_play, {
-        disable("screen_play")
-        insertUI("#screen_play",
+      shiny::observeEvent(input$screen_play, {
+        shinyjs::disable("screen_play")
+        shiny::insertUI("#screen_play",
                  where = "afterEnd",
-                 ui = tags$audio(src = files$filename[trial() + 1],
+                 ui = htmltools::tags$audio(src = files$filename[trial() + 1],
                                  type = "audio/wav",
                                  autoplay = NA, controls = NA,
                                  style="display:none;"))
-        delay(4100, enable("choices"))
+        shinyjs::delay(4100, shinyjs::enable("choices"))
       })
 
-      observeEvent(input$choices, {
-        enable("submit")
+      shiny::observeEvent(input$choices, {
+        shinyjs::enable("submit")
       })
 
-      observeEvent(input$submit, {
-        disable("submit")
+      shiny::observeEvent(input$submit, {
+        shinyjs::disable("submit")
         if (input$choices != as.character(files$answer[trial() + 1])) {
           mistakes(mistakes() + 1)
         }
@@ -153,12 +154,12 @@ headphoneTestServer <- function(id = "headphone_test",
             mistakes(0)
             attempt(attempt() + 1)
 
-            hide("screen")
-            showElement("adjust")
+            shinyjs::hide("screen")
+            shinyjs::showElement("adjust")
 
           } else {
-            hide("screen")
-            shinyalert(type = "error",
+            shinyjs::hide("screen")
+            shinyalert::shinyalert(type = "error",
                        text = if (fail_msg == "default") {"Unfortunately you did not pass the headphone screen. You have used all available attempts. Fully functioning headphones are required for this experiment. Thank you for your time!"
                        } else {as.character(fail_msg)},
                        confirmButtonText = "Try Again",
@@ -168,11 +169,11 @@ headphoneTestServer <- function(id = "headphone_test",
         if (trial() < n_trials-1) {
           trial(trial() + 1)
           shinyWidgets::updateProgressBar(session = session,
-                                          id = ns("progress"),
+                                          id = session$ns("progress"),
                                           value = trial(), total = n_trials,
                                           range_value = c(1:n_trials))
 
-          shinyWidgets::updateRadioGroupButtons(session, ns("choices"),
+          shinyWidgets::updateRadioGroupButtons(session, session$ns("choices"),
                                                 label = if (type == "huggins") {"Select the sound containing the hidden tone..."
                                                 } else {"Select the quietest sound..."},
                                                 choices = list("Sound 1" = "answer1",

@@ -26,5 +26,53 @@ An audio file with the ID \code{audioId} will be added to the list of input valu
 Load Audio and Create a Play Button to Start Playback
 }
 \examples{
+# First use www_create() to get a wav file in the correct directory.
+www_create(volumeCalibration = TRUE)
 
+## Only run examples in interactive R sessions
+if (interactive()) {
+ui <- fluidPage(
+  "Play a sound: ",
+   playBttn(inputId = "play", src = "cal_noise.wav",
+        audioId = "cal_noise"),
+   disabled(pauseBttn(inputId = "pause", audioId = "cal_noise"))
+ )
+
+# disable the play button and enable the pause button after play button is clicked.
+server <- function(input, output, session) {
+ observeEvent(input$play, {
+   disable("play")
+   enable("pause")
+ })
+}
+shinyApp(ui = ui, server = server)
+}
+
+## Use inline = TRUE to display the button on the same line as the preceding UI element.
+if (interactive()) {
+ui <- fluidPage(
+  "Play a sound: ",
+   playBttn(inputId = "play", src = "cal_noise.wav",
+        audioId = "cal_noise", inline = TRUE),
+   pauseBttn(inputId = "pause", audioId = "cal_noise", inline = TRUE)
+ )
+
+server <- function(input, output, session) {}
+
+shinyApp(ui = ui, server = server)
+}
+
+## Use parameter 'label =' to add a text label to the button.
+## Use icon = NULL to remove the icon.
+if (interactive()) {
+ui <- fluidPage(
+   playBttn(inputId = "play", label = "Play noise", src = "cal_noise.wav",
+        audioId = "cal_noise", inline = TRUE, icon = NULL),
+   pauseBttn(inputId = "pause", audioId = "cal_noise", inline = TRUE)
+ )
+
+server <- function(input, output, session) {}
+
+shinyApp(ui = ui, server = server)
+}
 }

@@ -16,12 +16,13 @@
 #' Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
 #'
 #' @examples
-#' #' ## First use www_create() to get the data for the type of headphone screen you want.
-#' ## NOTE: Do NOT put this command in your UI! Run it once before testing your app to create the www folder.
+#' ## First use www_create() to get the data for the type of headphone screen you want.
+#' ## NOTE: Do NOT put this command in your UI!
+#' ## Run it once before testing your app to create the www folder.
 #' www_create(HugginsPitchScreen = TRUE)
 #'
 #' # Now build the app.
-#' if (interactive) {
+#' if (interactive()) {
 #'  ui <- fluidPage(
 #'         headphoneTestUI(id = "headphone_test", type = "huggins")
 #'      )
@@ -36,7 +37,7 @@ headphoneTestUI <- function(id = "headphone_test",
                             type = c("huggins", "antiphase"),
                             n_trials = 6) {
 
-  ns <- NS(id)
+  ns <- shiny::NS(id)
 
   if (type != "huggins" & type != "antiphase") stop("'type' must be equal to either 'huggins' or 'antiphase'.")
 
@@ -86,7 +87,7 @@ headphoneTestUI <- function(id = "headphone_test",
 
     shinyjs::hidden(htmltools::tags$table(id = ns("screen"), style = "border: 1px solid #c5c5c5;",
                                           htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Headphones Check"),
-                                                             htmltools::tags$td(style = "padding: 5px; border: 1px solid #c5c5c5;", div(progressBar(id = ns("progress"),
+                                                             htmltools::tags$td(style = "padding: 5px; border: 1px solid #c5c5c5;", htmltools::tags$div(shinyWidgets::progressBar(id = ns("progress"),
                                                                                                                                                     value = 0, total = n_trials,
                                                                                                                                                     range_value = c(1:n_trials))))),
                                           htmltools::tags$tr(htmltools::tags$th(colspan = 2, style = "padding: 15px; text-align: center;","Remember, you can only play each recording once. Please listen carefully.")),

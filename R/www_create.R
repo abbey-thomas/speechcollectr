@@ -51,13 +51,13 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
   }
 
   if (isTRUE(volumeCalibration)) {
-    vol_cal <- data("cal_noise")
-    writeWave(vol_cal, "www/cal_noise.wave")
+    vol_cal <- cal_noise
+    tuneR::writeWave(vol_cal, "www/cal_noise.wave")
     cat("Success: Volume calibration noise WAV added to 'www' as 'cal_noise.wav'.")
   }
 
   if (isTRUE(HugginsPitchScreen)) {
-    hp_data <- data("HugginsPitchData")
+    hp_data <- HugginsPitchData
     for (i in 1:14) {
       tuneR::writeWave(hp_data[[i]], filename = paste0("www/", names(hp_data[i])))
     }
@@ -65,7 +65,8 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
   }
 
   if (isTRUE(AntiphaseScreen)) {
-    hp_data <- data("AntiphaseData")
+    ap_data <- AntiphaseData
+
     for (i in 1:7) {
       tuneR::writeWave(ap_data[[i]], filename = paste0("www/", names(ap_data[i])))
     }
