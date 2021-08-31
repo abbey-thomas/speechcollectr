@@ -16,17 +16,10 @@
 #' @family Audio recording module
 #' @seealso Must be used with \code{\link{recorderServer}}. Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 #' @examples
-#' if (interactive()) {
-#' ui <- shiny::fluidPage(
-#'   recorderUI("record")
-#' )
-#' server <- function(input, output, session) {
-#'   recorderServer(id = "record", filename = "sample.wav")
-#' }
-#' shiny::shinyApp(ui = ui, server = server)
-#' }
+#'
 #'
 #' @importFrom grDevices col2rgb
+#' @importFrom gplots col2hex
 #'
 recorderUI <- function(id = "recorder",
                        startText = "RECORD",
@@ -59,29 +52,32 @@ recorderUI <- function(id = "recorder",
     stop("Error: stopTextCol argument requires a valid color name or hexadecimal code.")
   }
 
-  shiny::addResourcePath("js", system.file("js", package = "speechcollectr"))
-  shiny::addResourcePath("WAR", system.file("js", "WAR", package = "speechcollectr"))
+  js_dep <- function() {
+    htmltools::htmlDependency(
+      name = "recorder",
+      version = '0.0.0.9',
+      package = "speechcollectr",
+      src = "js",
+      script = c("recorder.js"))
+  }
 
   ui <- shiny::tagList(
+    htmltools::tags$head(
+      js_dep()
+    ),
     shinyjs::useShinyjs(),
-    shiny::includeScript(file.path("WAR", "WebAudioRecorder.min.js")),
-    shinyjs::extendShinyjs(
-      script = file.path("js", "extendjs_recorder.js"),
-      functions = c("WebAudioRecorder"),
 
-      shiny::actionButton(ns("start"), label = startText,
-                          style = paste0("color: ", col2rgb(startTextCol),
+    shiny::actionButton(ns("start"), label = startText,
+                        style = paste0("color: ", col2hex(startTextCol),
+                                       "; background-color: ",
+                                       col2hex(startFillCol)),
+                        inline = startInline),
+
+    shinyjs::disabled(
+      shiny::actionButton(ns("stop"), label = stopText,
+                          style = paste0("color: ", col2hex(stopTextCol),
                                          "; background-color: ",
-                                         col2rgb(startFillCol)),
-                          inline = startInline),
-
-      shinyjs::disabled(
-        shiny::actionButton(ns("stop"), label = stopText,
-                            style = paste0("color: ", col2rgb(stopTextCol),
-                                           "; background-color: ",
-                                           col2rgb(stopFillCol)),
-                            inline = stopInline))
-
-    )
+                                         col2hex(stopFillCol)),
+                          inline = stopInline))
   )
 }

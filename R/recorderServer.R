@@ -4,49 +4,35 @@
 #' @param id The input ID associated with the recorder module. Must be the same as the id of `recorderUI()`.
 #' @param folder Character. Where to store the audio file. Defaults to the path returned by `getwd()`
 #' @param filename Required. Character. The name of the file to be recorded. Do not specify a directory here. Instead, do that with the `folder` argument.
-#' @param type Defaults to "wav". The current version of `speechcollectr` only supports wav file recording.
-#' @param numChannels Integer. Must be 1 or 2. Should the sample be recorded with 1 channel (mono) or 2 channels (stereo)? Defaults to 1 (ideal for most speech recordings).
-#' @param sampleRate Integer. How many samples per second should be recorded in the audio file? Defaults to 44100 (ideal for most speech recordings). NOTE: In some cases, the default of the user's browser might override the value given here.
 #'
-#' @return Saves an audio file with the specified `filename` in a directory specified by `folder`.
+#' @return Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified `filename` in a directory specified by `folder`.
 #' @family Audio recording module
 #' @seealso Must be used with \code{\link{recorderUI}}.
-
 #' @export
-#'
 #' @examples
-#' #' if (interactive()) {
-#' ui <- shiny::fluidPage(
-#'   recorderUI("record")
-#' )
-#' server <- function(input, output, session) {
-#'   recorderServer(id = "record", filename = "sample.wav")
-#' }
-#' shiny::shinyApp(ui = ui, server = server)
-#' }
 #'
 recorderServer <- function(id = "recorder",
-                           folder = ".", filename,
-                           type = "wav", numChannels = 1,
-                           sampleRate = 44100) {
+                           folder = ".", filename) {
 
   if (length(filename) == 0) stop("You must enter a filename for the recorded sound!")
   if (folder == "."){folder <- getwd()}
   shiny::moduleServer(
     id = id,
 
-    function(input, output, session) {
-      shiny::observe(
-        shinyjs::js$webAudioRecorder(type = type,
-                                     numChannels = numChannels,
-                                     sampleRate = sampleRate)
-      )
+    function(input, output, session, mod_id = id) {
+      ns <- session$ns
+      shiny::observe({
+        params <- list(start = ns("start"),
+                       stop = ns("stop"),
+                       output = paste0(mod_id, "-audio"))
+
+        session$sendCustomMessage("recordAudio",
+                                  params)
+      })
 
       shiny::observeEvent(input$start, {
-        shiny::observeEvent(input$ready, {
-          shinyjs::disable("start")
-          shinyjs::delay(500, shinyjs::enable("stop"))
-        })
+        shinyjs::disable("start")
+        shinyjs::delay(500, shinyjs::enable("stop"))
 
         shiny::observeEvent(input$audio,
                      {

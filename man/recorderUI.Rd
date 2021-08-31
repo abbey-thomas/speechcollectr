@@ -29,7 +29,7 @@ recorderUI(
 
 \item{stopTextCol}{A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to "black".}
 
-\item{stopFillCol}{A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to Defaults to the "red" hex code from Paul Tol's colorblind-safe \emph{bright} qualitative color scheme..}
+\item{stopFillCol}{A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to Defaults to the "red" hex code from Paul Tol's colorblind-safe \emph{bright} qualitative color scheme.}
 
 \item{startInline}{Boolean. Should the 'start recording' button be on the same line as the preceding UI element?}
 
@@ -43,8 +43,12 @@ The user-interface side of the Shiny module to record user audio in Speech Produ
 }
 \examples{
 
+
 }
 \seealso{
 Must be used with \code{\link{recorderServer}}. Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
+
+Other Audio recording module: 
+\code{\link{recorderServer}()}
 }
 \concept{Audio recording module}
