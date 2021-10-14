@@ -10,7 +10,19 @@
 #' @seealso Must be used with \code{\link{recorderUI}}.
 #' @export
 #' @examples
+#' if (interactive()) {
+#' ui <- shiny::fluidPage(
+#'   recorderUI(id = "record")
+#' )
 #'
+#' server <- function(input, output, session) {
+#'  recorderServer(id = "record", filename = "sample.wav")
+#' }
+#' shiny::shinyApp(ui = ui, server = server)
+#' }
+#'
+# At the end of this process which button should be enabled?
+# How can users add other functions to the buttons in the module?
 recorderServer <- function(id = "recorder",
                            folder = ".", filename) {
 

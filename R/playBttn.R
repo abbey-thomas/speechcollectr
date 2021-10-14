@@ -61,7 +61,18 @@
 #' shinyApp(ui = ui, server = server)
 #' }
 playBttn <- function(inputId, src, audioId, label = "",
-                     inline = FALSE, icon = "play") {
+                     inline = FALSE, icon = "play",
+                     fill = "#228833", textCol = "white") {
+  if (!is.null(fill) & tryCatch(is.matrix(col2rgb(fill)),
+                                    error = function(e) FALSE) == FALSE) {
+    stop("Error: fill argument must be a valid color name or hexadecimal code.")
+  }
+
+  if (!is.null(textCol) & tryCatch(is.matrix(col2rgb(textCol)),
+                                       error = function(e) FALSE) == FALSE) {
+    stop("Error: textCol argument must be a valid color name or hexadecimal code.")
+  }
+
   jsCode <- htmltools::HTML(
     "playAudio = function(audioId) {
       document.getElementById(audioId).play();
@@ -79,6 +90,9 @@ playBttn <- function(inputId, src, audioId, label = "",
                         label = label,
                         icon = shiny::icon(icon),
                         inline = inline,
+                        style = paste0("color: ", col2hex(textCol),
+                                       "; background-color: ",
+                                       col2hex(fill)),
                         onclick = paste0("playAudio('", audioId, "')")
     )
   )

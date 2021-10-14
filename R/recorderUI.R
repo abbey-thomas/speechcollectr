@@ -16,7 +16,16 @@
 #' @family Audio recording module
 #' @seealso Must be used with \code{\link{recorderServer}}. Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 #' @examples
+#'if (interactive()) {
+#' ui <- shiny::fluidPage(
+#'   recorderUI(id = "record")
+#' )
 #'
+#' server <- function(input, output, session) {
+#'  recorderServer(id = "record", filename = "sample.wav")
+#' }
+#' shiny::shinyApp(ui = ui, server = server)
+#' }
 #'
 #' @importFrom grDevices col2rgb
 #' @importFrom gplots col2hex
