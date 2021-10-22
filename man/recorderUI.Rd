@@ -42,7 +42,16 @@ A user interface containing buttons to control recording of participant audio.
 The user-interface side of the Shiny module to record user audio in Speech Production experiments. A participant chooses when to begin recording and when to stop by clicking the buttons created in this module. Requires the server-side function \code{\link{recorderServer}}.
 }
 \examples{
+if (interactive()) {
+ui <- shiny::fluidPage(
+  recorderUI(id = "record")
+)
 
+server <- function(input, output, session) {
+ recorderServer(id = "record", filename = "sample.wav")
+}
+shiny::shinyApp(ui = ui, server = server)
+}
 
 }
 \seealso{

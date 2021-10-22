@@ -4,7 +4,16 @@
 \alias{playBttn}
 \title{Load Audio and Create a Play Button to Start Playback}
 \usage{
-playBttn(inputId, src, audioId, label = "", inline = FALSE, icon = "play")
+playBttn(
+  inputId,
+  src,
+  audioId,
+  label = "",
+  inline = FALSE,
+  icon = "play",
+  fill = "#228833",
+  textCol = "white"
+)
 }
 \arguments{
 \item{inputId}{The input ID of the play button.}

@@ -20,6 +20,16 @@ Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified
 The server function for recording user audio enables the 'stop' button after the user begins recording and checks to make sure the user has given the website permission to record audio in their browser. Requires the UI \code{\link{recorderUI}}.
 }
 \examples{
+if (interactive()) {
+ui <- shiny::fluidPage(
+  recorderUI(id = "record")
+)
+
+server <- function(input, output, session) {
+ recorderServer(id = "record", filename = "sample.wav")
+}
+shiny::shinyApp(ui = ui, server = server)
+}
 
 }
 \seealso{
