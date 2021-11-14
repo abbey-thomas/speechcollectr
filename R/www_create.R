@@ -52,14 +52,14 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
 
   if (isTRUE(volumeCalibration)) {
     vol_cal <- cal_noise
-    tuneR::writeWave(vol_cal, "www/cal_noise.wave")
+    tuneR::writeWave(vol_cal, "www/cal_noise.wav")
     cat("Success: Volume calibration noise WAV added to 'www' as 'cal_noise.wav'.")
   }
 
   if (isTRUE(HugginsPitchScreen)) {
     hp_data <- HugginsPitchData
     for (i in 1:14) {
-      tuneR::writeWave(hp_data[[i]], filename = paste0("www/", names(hp_data[i]), ".wav"))
+      tuneR::writeWave(hp_data[[i]], filename = paste0("www/", names(hp_data)[i], ".wav"))
     }
     cat("Success: Huggins-Pitch Headphone Screen data added to 'www'! All Huggins Pitch files (12) are prefixed with 'hp_'.")
   }
@@ -68,7 +68,7 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
     ap_data <- AntiphaseData
 
     for (i in 1:7) {
-      tuneR::writeWave(ap_data[[i]], filename = paste0("www/", names(ap_data[i]), ".wav"))
+      tuneR::writeWave(ap_data[[i]], filename = paste0("www/", names(ap_data)[i], ".wav"))
     }
     cat("Success: Antiphase Headphone Screen data added to 'www'! All antiphase screen files (6) are prefixed with 'ap_'.")
   }
