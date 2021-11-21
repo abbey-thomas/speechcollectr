@@ -161,12 +161,7 @@ surveyPrep <- function(questionFile = NULL,
                                                               choiceValues = vals,
                                                               selected = character())
                          }
-                         if (notListedLab %in% opts) {
-                           input2 <- shiny::uiOutput(outputId = paste0(qsl[[i]]$id, "_ui"))
-                           return(list(input, input2))
-                         } else {
-                           return(input)
-                         }
+                          return(input)
                        }),
                        shiny::actionButton("close", "CLOSE")
          )
@@ -185,9 +180,9 @@ surveyPrep <- function(questionFile = NULL,
            }
          })
 
-         observeEvent(input[[paste0(qsl[[i]]$id, "_nl")]], {
+         shiny::observeEvent(input[[paste0(qsl[[i]]$id, "_nl")]], {
            tmp <- input[[paste0(qsl[[i]]$id, "_nl")]]
-           updateSelectInput(session, paste0(qsl[[i]]$id),
+           shiny::updateSelectInput(session, paste0(qsl[[i]]$id),
                              choices = tmp,
                              selected = tmp)
          })
