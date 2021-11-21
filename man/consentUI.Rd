@@ -21,15 +21,31 @@ Shiny UI function for displaying a participant consent form
 }
 \examples{
 if (interactive()) {
-ui <- shiny::fluidPage(
-  consentUI(id = "cons")
-)
+  ui <- shiny::fluidPage(
+    shiny::actionButton("ok", "OK"),
+    consentUI(id = "cons"),
+    shiny::actionButton("done", "DONE"),
+    textOutput("result")
+  )
+  server <- function(input, output, session) {
+    consent <- consentServer(id = "cons",
+                             trigger = shiny::reactive(input$ok),
+                             delayResponse = 3000,
+                             disagreeLab = "Decline",
+                             cons2rec = TRUE)
 
-server <- function(input, output, session) {
- consentServer(id = "cons")
+    shiny::observeEvent(input$ok, {
+      shinyjs::hide("ok")
+    })
+
+    # Show the output value. In principle you'd probably want a command that tests whether the output of the consentServer is > 0.
+    shiny::observeEvent(input$done, {
+      output$result <- shiny::renderText({consent()})
+    })
+ }
+  shiny::shinyApp(ui = ui, server = server)
 }
-shiny::shinyApp(ui = ui, server = server)
-}
+
 
 }
 \seealso{
