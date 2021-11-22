@@ -55,7 +55,7 @@ surveyServer <- function(id = "survey",
   if (!file.exists(questionFile)|!grepl("csv$", questionFile))
     stop("Argument 'questionFile' must be a valid file path (relative to the current directory) to an existing CSV file.")
   if (!grepl("csv$", outFile) & !grepl("rds$", outFile))
-    stop("Argument 'outfile' must be of the format '.csv' or '.rds'.")
+    stop("Argument 'outFile' must be of the format '.csv' or '.rds'.")
   if (result != "clear" & result != "hide")
     stop("Argument result must be either 'clear' or 'hide'")
 
