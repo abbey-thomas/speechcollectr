@@ -35,8 +35,8 @@ evalWav <- function(wave,
   markers <- findSpeech(wave)
 
   snr <- getSNR(wave,
-                begin_s = markers$begin_s,
-                end_s = markers$end_s)
+                begin = markers$begin_s,
+                end = markers$end_s)
 
   clipped <- clipCheck(wave, return = "logical")
 

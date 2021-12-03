@@ -61,7 +61,7 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
     for (i in 1:14) {
       tuneR::writeWave(hp_data[[i]], filename = paste0("www/", names(hp_data)[i], ".wav"))
     }
-    cat("Success: Huggins-Pitch Headphone Screen data added to 'www'! All Huggins Pitch files (12) are prefixed with 'hp_'.")
+    cat("Success: Huggins-Pitch Headphone Screen data added to 'www'! All Huggins Pitch files (14) are prefixed with 'hp_'.")
   }
 
   if (isTRUE(AntiphaseScreen)) {
@@ -70,7 +70,7 @@ www_create <- function(from = NULL, is_dir = FALSE, path = ".",
     for (i in 1:7) {
       tuneR::writeWave(ap_data[[i]], filename = paste0("www/", names(ap_data)[i], ".wav"))
     }
-    cat("Success: Antiphase Headphone Screen data added to 'www'! All antiphase screen files (6) are prefixed with 'ap_'.")
+    cat("Success: Antiphase Headphone Screen data added to 'www'! All antiphase screen files (8) are prefixed with 'ap_'.")
   }
 
 }
