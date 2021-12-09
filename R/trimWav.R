@@ -10,6 +10,10 @@
 #' @return A wav file (or tuneR::Wave object if outfile=NULL) trimmed from the original object denoted by argument `wave`.
 #'
 #' @examples
+#' data("samp_wav")
+#' head(samp_wav@left)
+#' trimmed <- trimWav(samp_wav)
+#' head(trimmed@left)
 trimWav <- function(wave, outfile = NULL,
                     begin = NULL,
                     end = NULL,

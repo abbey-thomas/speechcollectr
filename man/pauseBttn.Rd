@@ -24,8 +24,8 @@ On the server side of a shiny app, this function returns an integer of class "sh
 Add an action button to a \code{shiny} user interface with a built-in function of pausing the audio currently playing.
 }
 \examples{
-# First use www_create() to get a wav file in the correct directory.
-www_create(volumeCalibration = TRUE)
+# First use wwwPrep() to get a wav file in the correct directory.
+wwwPrep(volumeCalibration = TRUE)
 
 ## Only run examples in interactive R sessions
 if (interactive()) {

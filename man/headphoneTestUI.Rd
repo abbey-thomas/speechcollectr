@@ -24,10 +24,10 @@ Creates the user interface for a headphone screen. Must be used with \code{headp
 Create the user interface for a headphone screen using Huggins pitch or Antiphase phenomena.
 }
 \examples{
-## First use www_create() to get the data for the type of headphone screen you want.
+## First use wwwPrep() to get the data for the type of headphone screen you want.
 ## NOTE: Do NOT put this command in your UI!
 ## Run it once before testing your app to create the www folder.
-www_create(HugginsPitchScreen = TRUE)
+wwwPrep(HugginsPitchScreen = TRUE)
 
 # Now build the app.
 if (interactive()) {
@@ -47,7 +47,7 @@ Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & 
 Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
 }
 \seealso{
-\code{\link{www_create}}, \code{\link{headphoneTestUI}}
+\code{\link{wwwPrep}}, \code{\link{headphoneTestUI}}
 
 Other headphone screen module: 
 \code{\link{headphoneTestServer}()}

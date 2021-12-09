@@ -1,25 +1,24 @@
 #' Matching Game Server Function
 #'
-#' @param id
-#' @param counter
-#' @param triggerInit
-#' @param triggerReturn
-#' @param result
-#' @param n2find
-#' @param n_items
-#' @param n_cols
-#' @param n_rows
-#' @param items
-#' @param lab_type
-#' @param randomTarget
-#' @param randomGrid
-#' @param size
-#' @param color
-#' @param fill
+#' @param id The input ID associated with the matching game module. Must match the ID of `matchUI()`.
+#' @param counter The reactive value where we should store the number of matches the player has found so far.
+#' @param triggerInit The reactive value that triggers the initial appearance of the matching game. May be an `input$...` value from outside the module wrapped in `reactive()`.
+#' @param triggerReturn The reactive value or conditional statement that triggers the reappearance of the matching game UI. May be an `input$...` value from outside the module wrapped in `reactive()`.
+#' @param result A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".
+#' @param n2find Integer. How many items must the participant find in total?
+#' @param n_items Integer. How many items should be displayed? Should be evenly divisible by `n_cols`
+#' @param n_cols Integer. How many columns should the grid have?
+#' @param items Character. A list of items (either Font Awesome icons) or words to use as labels for the buttons. Default select a random sample of length `n_items` from a list of 100 free Font Awesome icons. If not using "default", vector must be the same length as `n_items`.
+#' @param lab_type Are the items text labels or icons? Must be either "text" or "icon"
+#' @param randomTarget Boolean. Should the targets be selected from the list randomly (`TRUE`) or in a particular order (`FALSE`)?
+#' @param randomGrid Boolean. Should the grid of items be randomized for each participant?
+#' @param size An integer between 1 and 3 indicating the size of the matching game buttons (larger = bigger)
+#' @param color A single hex code or vector of hex codes indicating the color of the icons or text. Default is black.
+#' @param fill A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).
 #'
-#' @return
-#' @export
-#'
+#' @return A list with two items: (1) score = the number of matches the participant has found so far, and (2) i_df = a data.frame containing the list of items used in the present game and their order.
+#' @seealso Must be used with \code{\link{matchUI}}.
+#' @references Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 #' @examples
 #' library(shiny)
 #' library(shinyjs)
@@ -65,7 +64,6 @@ matchServer <- function(id = "game",
                         n2find,
                         n_items = 24,
                         n_cols = 4,
-                        n_rows = 6,
                         items = "default",
                         lab_type = c("icon", "text"),
                         randomTarget = TRUE,
@@ -76,12 +74,23 @@ matchServer <- function(id = "game",
 
   if (items == "default") {
     items <- sample(dest_icons, n_items)
+  } else {
+    if (length(items) != n_items) stop("The number of labels in items must match n_items.")
   }
 
   if (n_cols > 12) {
     n_cols <- 12
-    n_rows <- n_items/n_cols
   }
+
+  if (n_items%%n_cols != 0) {
+    divs <- seq_len(n_items)
+    divs <- divs[n_items %% divs == 0]
+    divs <- divs[divs <= 12]
+    rems <- which.min(abs(divs-n_cols))
+    n_cols <- divs[rems]
+  }
+
+  n_rows <- n_items/n_cols
 
   if ((n_cols*size)>12) {
     size <- 12/n_cols
@@ -137,17 +146,17 @@ matchServer <- function(id = "game",
             if (lab_type == "icon") {
               actionButton(inputId = ns("target"),
                            label = character(0),
-                           icon = shiny::icon(paste0(targs$items[counter()])),
+                           icon = shiny::icon(paste0(targs$items[as.numeric(counter())])),
                            style = paste0("background-color:",
-                                          targs$fills[counter()], "; color:",
-                                          targs$cols[counter()],
+                                          targs$fills[as.numeric(counter())], "; color:",
+                                          targs$cols[as.numeric(counter())],
                                           "; font-size:", size, "00%"))
             } else if (lab_type == "text") {
               actionButton(inputId = ns(target),
-                           label = paste0(targs$items[counter()]),
+                           label = paste0(targs$items[as.numeric(counter())]),
                            style = paste0("background-color:",
-                                          targs$fills[counter()], "; color:",
-                                          targs$cols[counter()],
+                                          targs$fills[as.numeric(counter())], "; color:",
+                                          targs$cols[as.numeric(counter())],
                                           "; font-size:", size, "00%;"))
             }
           )
@@ -192,13 +201,21 @@ matchServer <- function(id = "game",
                                                          label = character(0),
                                                          icon = shiny::icon("question-circle")))
 
-          if (rvs$clicked == targs$items[counter()]) {
-            rvs$score <- rvs$score + 1
-            shinyWidgets::updateProgressBar(session = session,
-                                            id = "score",
-                                            value = rvs$score,
-                                            total = n2find,
-                                            status = "success")
+          if (rvs$clicked == targs$items[as.numeric(counter())]) {
+            if (rvs$score < n2find) {
+              rvs$score <- rvs$score + 1
+              shinyWidgets::updateProgressBar(session = session,
+                                              id = "score",
+                                              value = rvs$score,
+                                              total = n2find,
+                                              status = "success")
+            } else {
+              shinyalert::shinyalert(
+                title = "Congratulations!",
+                text = "You found all the matches!",
+                type = success)
+            }
+
             if (result == "hide") {
               shinyjs::delay(1500,
                              shinyjs::hide("matchdiv"))

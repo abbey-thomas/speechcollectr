@@ -23,14 +23,6 @@
 #' }
 "demographics"
 
-#' Icons for building the match game interface
-#'
-#' A character vector containing the names of 100 Font Awesome (version 5) free icons, which can be used in the items argument of \code{\link{matchServer}}.
-#'
-#' @format A character vector with length=100.
-#' @source \url{https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free}
-"dest_icons"
-
 #' Sample audio recording
 #'
 #' A recording of a single interrogative utterance by a male British English speaker. From the Librivox recording of \emph{The Wisdom of Father Brown} by G.K. Chesterton.

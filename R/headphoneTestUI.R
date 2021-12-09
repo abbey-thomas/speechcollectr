@@ -10,16 +10,16 @@
 #' @export
 #'
 #' @family headphone screen module
-#' @seealso \code{\link{www_create}}, \code{\link{headphoneTestUI}}
+#' @seealso \code{\link{wwwPrep}}, \code{\link{headphoneTestUI}}
 #' @references
 #' Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & Chait, M. 2020. An online headphone screening test based on dichotic pitch.\emph{Behavior Research Methods} 53, 1551-1562 (2021).
 #' Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
 #'
 #' @examples
-#' ## First use www_create() to get the data for the type of headphone screen you want.
+#' ## First use wwwPrep() to get the data for the type of headphone screen you want.
 #' ## NOTE: Do NOT put this command in your UI!
 #' ## Run it once before testing your app to create the www folder.
-#' www_create(HugginsPitchScreen = TRUE)
+#' wwwPrep(HugginsPitchScreen = TRUE)
 #'
 #' # Now build the app.
 #' if (interactive()) {
@@ -41,28 +41,28 @@ headphoneTestUI <- function(id = "headphone_test",
 
   if (type != "huggins" & type != "antiphase") stop("'type' must be equal to either 'huggins' or 'antiphase'.")
 
-  if (!dir.exists("www")) stop("You must create a 'www' subdirectory with the necessary sound files. Use function www_create() before running your ShinyApp for the first time.")
+  if (!dir.exists("www")) stop("You must create a 'www' subdirectory with the necessary sound files. Use function wwwPrep() before running your ShinyApp for the first time.")
   if (type == "huggins") {
-    if (!file.exists("www/hp_practice.wav")) stop("Use www_create(HugginsPitchScreen = TRUE) before running your ShinyApp to get the sound files needed for this headphone screen.")
+    if (!file.exists("www/hp_practice.wav")) stop("Use wwwPrep(HugginsPitchScreen = TRUE) before running your ShinyApp to get the sound files needed for this headphone screen.")
   }
 
-  if (!file.exists("www/cal_noise.wav")) stop("Calibration noise file does not exist. Use www_create() to download the sound files before running the headphone screen. Run '?www_create()' for more information.")
+  if (!file.exists("www/cal_noise.wav")) stop("Calibration noise file does not exist. Use wwwPrep() to download the sound files before running the headphone screen. Run '?wwwPrep()' for more information.")
 
   shiny::tagList(
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
-    htmltools::tags$table(id = ns("adjust"), style = "border: 1px solid #c5c5c5;",
-                          htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Adjust your Sound Volume...")),
-                          htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; text-align: center;","Please put on your headphones.")),
-                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;","If you do not have headphones, you may use earbuds.")),
-                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;","Click 'PLAY' below to listen to a sample of white noise. Adjust your volume to a comfortable level.")),
-                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px; text-align: center;",
-                                                                playBttn(inputId = ns("adjust_play"),
-                                                                         src = "cal_noise.wav", audioId = "volume_test",
-                                                                         label = "PLAY", icon = NULL),
-                                                                shinyjs::disabled(pauseBttn(inputId = ns("adjust_pause"), audioId = "volume_test", inline = TRUE, label = "PAUSE", icon = NULL)))),
-                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px; border: 1px solid #c5c5c5; text-align: right;",
-                                                                shinyjs::disabled(pauseBttn(inputId = ns("adjust_done"), audioId = "volume_test", label = "I have finished adjusting the volume.", icon = NULL))))),
+    shinyjs::hidden(htmltools::tags$table(id = ns("adjust"), style = "border: 1px solid #c5c5c5;",
+                                          htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Adjust your Sound Volume...")),
+                                          htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; text-align: center;","Please put on your headphones.")),
+                                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;","If you do not have headphones, you may use earbuds.")),
+                                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px;","Click 'PLAY' below to listen to a sample of white noise. Adjust your volume to a comfortable level.")),
+                                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px; text-align: center;",
+                                                                                playBttn(inputId = ns("adjust_play"),
+                                                                                         src = "cal_noise.wav", audioId = "volume_test",
+                                                                                         label = "PLAY", icon = NULL),
+                                                                                shinyjs::disabled(pauseBttn(inputId = ns("adjust_pause"), audioId = "volume_test", inline = TRUE, label = "PAUSE", icon = NULL)))),
+                                          htmltools::tags$tr(htmltools::tags$td(style = "padding: 15px; border: 1px solid #c5c5c5; text-align: right;",
+                                                                                shinyjs::disabled(pauseBttn(inputId = ns("adjust_done"), audioId = "volume_test", label = "I have finished adjusting the volume.", icon = NULL)))))),
 
     shinyjs::hidden(htmltools::tags$table(id = ns("instr"), style = "border: 1px solid #c5c5c5;",
                                           htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Headphones Check")),
@@ -88,8 +88,8 @@ headphoneTestUI <- function(id = "headphone_test",
     shinyjs::hidden(htmltools::tags$table(id = ns("screen"), style = "border: 1px solid #c5c5c5;",
                                           htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Headphones Check"),
                                                              htmltools::tags$td(style = "padding: 5px; border: 1px solid #c5c5c5;", htmltools::tags$div(shinyWidgets::progressBar(id = ns("progress"),
-                                                                                                                                                    value = 0, total = n_trials,
-                                                                                                                                                    range_value = c(1:n_trials))))),
+                                                                                                                                                                                  value = 0, total = n_trials,
+                                                                                                                                                                                  range_value = c(1:n_trials))))),
                                           htmltools::tags$tr(htmltools::tags$th(colspan = 2, style = "padding: 15px; text-align: center;","Remember, you can only play each recording once. Please listen carefully.")),
                                           htmltools::tags$tr(htmltools::tags$td(colspan = 2, style = "padding: 15px; text-align: center;",
                                                                                 if (type == "huggins") {"Which sound contains the hidden tone? Is it Sound 1, Sound 2, or Sound 3?"}

@@ -6,6 +6,7 @@
 \usage{
 headphoneTestServer(
   id = "headphone_test",
+  trigger,
   type = c("huggins", "antiphase"),
   n_trials = 6,
   threshold,
@@ -17,6 +18,8 @@ headphoneTestServer(
 }
 \arguments{
 \item{id}{The Id of this module. Must match the Id of \code{headphoneTestUI()}. Defaults to "headphone_test".}
+
+\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
 
 \item{type}{Whether to use the Huggins Pitch headphone screen (see Milne et al., 2020) or the Antiphase headphone screen (Woods et al., 2017). Must be one of "huggins" or "antiphase" and must match the value given in \code{headphoneTestUI()}.}
 
@@ -39,10 +42,10 @@ A reactive value, status, that has a value of 0 (failed/did not complete headpho
 The server portion of the Headphone Test module. Make your headphoneTestUI() do things!
 }
 \examples{
-## First use www_create() to get the data for the type of headphone screen you want.
+## First use wwwPrep() to get the data for the type of headphone screen you want.
 ## NOTE: Do NOT put this command in your UI!
 # Run it once before testing your app to create the www folder.
-www_create(HugginsPitchScreen = TRUE)
+wwwPrep(HugginsPitchScreen = TRUE)
 
 # Now build the app.
 if (interactive()) {
@@ -69,7 +72,7 @@ Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & 
 Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
 }
 \seealso{
-\code{\link{www_create}}, \code{\link{headphoneTestUI}}
+\code{\link{wwwPrep}}, \code{\link{headphoneTestUI}}
 
 Other headphone screen module: 
 \code{\link{headphoneTestUI}()}
