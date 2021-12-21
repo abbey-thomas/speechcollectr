@@ -38,7 +38,7 @@ evalWav <- function(wave,
                 begin = markers$begin_s,
                 end = markers$end_s)
 
-  clipped <- clipCheck(wave, return = "logical")
+  clipped <- clipCheck(wave, return = "proportion")
 
 
   if (!is.null(utteranceTG)) {
