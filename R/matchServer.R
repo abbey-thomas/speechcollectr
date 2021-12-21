@@ -5,6 +5,7 @@
 #' @param triggerInit The reactive value that triggers the initial appearance of the matching game. May be an `input$...` value from outside the module wrapped in `reactive()`.
 #' @param triggerReturn The reactive value or conditional statement that triggers the reappearance of the matching game UI. May be an `input$...` value from outside the module wrapped in `reactive()`.
 #' @param result A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".
+#' @param time_df
 #' @param n2find Integer. How many items must the participant find in total?
 #' @param n_items Integer. How many items should be displayed? Should be evenly divisible by `n_cols`
 #' @param n_cols Integer. How many columns should the grid have?
@@ -55,7 +56,9 @@
 #' }
 #'
 #' shinyApp(ui = ui, server = server)
-#'
+#' @importFrom timeR start
+#' @importFrom timeR stop
+#' @importFrom timeR getEvent
 matchServer <- function(id = "game",
                         counter,
                         triggerInit,
@@ -128,14 +131,21 @@ matchServer <- function(id = "game",
 
   ord <- sort(rep(c(1:n_cols), n_rows))
   i_list <- split(g_df, ord)
+  rt <- timeR::createTimer(verbose = FALSE, precision = "ms")
 
   shiny::moduleServer(
     id = id,
     server <- function(input, output, session) {
       ns <- session$ns
       rvs <- shiny::reactiveValues(score = 0, clicked = NA)
+      times <- shiny::reactiveVal(value = data.frame(event = character(),
+                                                    start = character(),
+                                                    end = character(),
+                                                    timeElapsed = numeric(),
+                                                    comment = character()))
       shiny::observeEvent(triggerInit(), {
         shinyjs::showElement("matchdiv")
+        rt$start(paste0("trial", (rvs$score+1)))
       })
 
       shiny::observe({
@@ -202,6 +212,9 @@ matchServer <- function(id = "game",
                                                          icon = shiny::icon("question-circle")))
 
           if (rvs$clicked == targs$items[as.numeric(counter())]) {
+            rt$stop(paste0("trial", (rvs$score+1)))
+            times(bind_rows(times(), rt$getEvent(paste0("trial", (rvs$score+1)))))
+
             if (rvs$score < n2find) {
               rvs$score <- rvs$score + 1
               shinyWidgets::updateProgressBar(session = session,
@@ -232,7 +245,8 @@ matchServer <- function(id = "game",
         })
       })
 
-    observe({
+    observeEvent(triggerReturn(), {
+      rt$start(paste0("trial", (rvs$score+1)))
       if (result == "hide") {
         shinyjs::toggleElement(id = "matchdiv",
                                condition = triggerReturn())
@@ -244,7 +258,8 @@ matchServer <- function(id = "game",
 
     return(list(
       n_found = shiny::reactive(rvs$score),
-      i_df = i_df
+      i_df = i_df,
+      time_df = shiny::reactive(times())
     ))
     }
   )

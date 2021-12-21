@@ -31,14 +31,16 @@
 #' @importFrom gplots col2hex
 #'
 recordUI <- function(id = "recorder",
-                       startText = "RECORD",
-                       startTextCol = "white",
-                       startFillCol = "#228833",
-                       stopText = "STOP",
-                       stopTextCol = "black",
-                       stopFillCol = "#EE6677",
-                       startInline = FALSE,
-                       stopInline = TRUE) {
+                     writtenStim = FALSE,
+                     startText = "RECORD",
+                     startTextCol = "white",
+                     startFillCol = "#228833",
+                     stopText = "STOP",
+                     stopTextCol = "black",
+                     stopFillCol = "#EE6677",
+                     startInline = FALSE,
+                     stopInline = TRUE,
+                     align = "center") {
   ns <- shiny::NS(id)
 
   if (tryCatch(is.matrix(col2rgb(startFillCol)),
@@ -77,17 +79,27 @@ recordUI <- function(id = "recorder",
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
 
-    shiny::actionButton(ns("start"), label = startText,
-                        style = paste0("color: ", col2hex(startTextCol),
-                                       "; background-color: ",
-                                       col2hex(startFillCol)),
-                        inline = startInline),
+    shinyjs::hidden(
+      shiny::tags$div(id = ns("rec"), style = paste0("text-align:", align,";"),
+                      if (isTRUE(writtenStim)) {
+                        shinyjs::hidden(shiny::tags$div(id = ns("stim_div"),
+                                                        style = paste0("text-align:", align,";"),
+                                                        shiny::tags$h3(shiny::textOutput(ns("stim")))))
+                      },
 
-    shinyjs::disabled(
-      shiny::actionButton(ns("stop"), label = stopText,
-                          style = paste0("color: ", col2hex(stopTextCol),
-                                         "; background-color: ",
-                                         col2hex(stopFillCol)),
-                          inline = stopInline))
+                      shiny::actionButton(ns("start"), label = startText,
+                                          style = paste0("color: ", col2hex(startTextCol),
+                                                         "; background-color: ",
+                                                         col2hex(startFillCol)),
+                                          inline = startInline),
+
+                      shinyjs::disabled(
+                        shiny::actionButton(ns("stop"), label = stopText,
+                                            style = paste0("color: ", col2hex(stopTextCol),
+                                                           "; background-color: ",
+                                                           col2hex(stopFillCol)),
+                                            inline = stopInline)),
+                      shiny::tags$shiny::tags$br(),
+                      shinyjs::hidden(shiny::uiOutput(outputId = ns("submission")))))
   )
 }

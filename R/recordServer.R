@@ -4,7 +4,7 @@
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordUI()`.
 #' @param folder Character. Where to store the audio file. Defaults to the path returned by `getwd()`
 #' @param filename Required. Character. The name of the file to be recorded. Do not specify a directory here. Instead, do that with the `folder` argument.
-#' @param eval Boolean. Should we evaluate the recording for clipping and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.
+#' @param eval Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.
 #' @param tries Integer. If eval=TRUE, how many tries should the user get to improve their SNR and reduce clipping?
 #' @param onFail If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of `tries` and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).
 #' @param snr_best Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.
@@ -29,11 +29,17 @@
 # At the end of this process which button should be enabled?
 # How can users add other functions to the buttons in the module?
 recordServer <- function(id = "recorder",
-                           folder = ".", filename,
-                           eval = FALSE,
-                           tries = 2,
-                           onFail = "continue",
-                         snr_best = 15, snr_good = 5) {
+                         trigger, result = "hide",
+                         folder = ".", filename,
+                         writtenStim = NULL,
+                         writtenDelay = 500,
+                         submitButtonText = "SUBMIT RECORDING",
+                         eval = FALSE,
+                         tries = 2,
+                         onFail = "continue",
+                         min_sf = 44100,
+                         snr_best = 15, snr_good = 5,
+                         max_clip = 0.01) {
 
   if (length(filename) == 0) stop("You must enter a filename for the recorded sound!")
   if (folder == "."){folder <- getwd()}
@@ -42,12 +48,19 @@ recordServer <- function(id = "recorder",
 
     function(input, output, session, mod_id = id) {
       ns <- session$ns
-      feedback <- shiny::reactiveValues(try = 1,
+      feedback <- shiny::reactiveValues(try = 0,
                                         tips = NA,
-                                        score = NA)
+                                        score = 0,
+                                        eval_try = 1,
+                                        result = 0)
+      shiny::observeEvent(trigger(), {
+        shinyjs::showElement("rec")
+      })
+
       shiny::observe({
         params <- list(start = ns("start"),
                        stop = ns("stop"),
+                       ready = paste0(mod_id, "-ready"),
                        output = paste0(mod_id, "-audio"))
 
         session$sendCustomMessage("recordAudio",
@@ -56,7 +69,15 @@ recordServer <- function(id = "recorder",
 
       shiny::observeEvent(input$start, {
         shinyjs::disable("start")
-        shinyjs::delay(500, shinyjs::enable("stop"))
+
+        if (shiny::isTruthy(input$ready)) {
+          shinyjs::delay(500, shinyjs::enable("stop"))
+          if (!is.null(writtenStim)) {
+            output$stim <- shiny::renderText(as.character(writtenStim))
+            shinyjs::delay(as.numeric(writtenDelay),
+                           shinyjs::showElement("stim_div"))
+          }
+        }
 
         shiny::observeEvent(input$audio,
                      {
@@ -76,78 +97,128 @@ recordServer <- function(id = "recorder",
 
       shiny::observeEvent(input$stop, {
         shinyjs::disable("stop")
-        shinyjs::delay(2000, shinyjs::enable("start"))
-        if (isTRUE(evalWav)) {
-          wave <- tuneR::readWave(filename = file.path(folder, filename))
-          eval <- evalWav(wave)
-          feedback <- list()
-          if (eval$snr >= snr_best) {
-            snr_score <- 2
-            snr_tip <- character(0)
-          } else if (eval$snr >= snr_good) {
-            snr_score <- 1
-            snr_tip <- c("<li>Sounds pretty good! Double-check your environment to make sure it's as quiet as possible.</li>")
-          } else {
-            snr_score <- 0
-            snr_tip <- c("<li>Your environment is a bit on the noisy side. Double-check to make sure you've eliminated as much background noise as possible.</li><li>Try moving a little closer to your microphone</li>")
-          }
+        feedback$try <- feedback$try + 1
+        shinyjs::showElement("submission")
 
-          if (eval$clipped == FALSE) {
-            clip_score <- 2
-            clip_tip <- character(0)
-          } else {
-            clip_score <- 0
-            clip_tip <- c("<li>Whoa! That recording was a bit loud. Try moving back from your microphone a little.</li>")
+        output$submission <- shiny::renderUI({
+          if (isTRUE(playback)) {
+            playBttn(inputId = ns("replay"),
+                     label = "Listen to your recording.",
+                     src = file.path(folder, filename),
+                     audioId = "recording",
+                     fill = "white", text = "black")
           }
+          shiny::tags$br()
+          shiny::actionButton(ns("submit"), label = submitButtonText)
+        })
 
-          if (feedback$try < tries) {
-            if (sum(snr_score, clip_score) == 4){
-              feedback$tips <- c("<h4>Sounds good!</h4>")
-            } else {
-              feedback$tips <- paste0("<h5>Tips:</h5><ul", snr_tip, clip_tip, "</ul>")
-            }
-            feedback$score <- snr_score + clip_score + 1
-            if (feedback$score >= 3) {
-              shinyalert::shinyalert(
-                type = "success",
-                title = "Success!",
-                text = paste0(results$tips),
-                html = TRUE,
-                timer = 4000)
-            } else {
-              shinyalert::shinyalert(
-                type = "warning",
-                title = "Hmm...",
-                text = paste0(results$tips, "<h5>Click the button below to try again and help us complete the calibration of our system to your environment.</h5>"),
-                confirmButtonText = "Try Again",
-                html = TRUE,
-                timer = 4000)
-            }
-           feedback$try <- feedback$try + 1
-          } else {
-            if (onFail == "continue") {
-              feedback$score <- 5
-              feedback$tips <- c("<h6>Sounds good!</h6>")
-              shinyalert::shinyalert(
-                type = "success",
-                title = "Success!",
-                text = paste0(results$tips),
-                html = TRUE,
-                timer = 4000)
-            } else {
-              feedback$score <- snr_score + clip_score + 1
-              feedback$tips <- c("<h6>Unfortunately, you do not seem to have the right equipment for this task. Thank you for your interest in the study!")
-              shinyalert::shinyalert(
-                type = "error",
-                title = "Error:",
-                text = paste0(results$tips),
-                html = TRUE,
-                timer = 4000)
-            }
-          }
-
+        if (feedback$try < tries) {
+          shinyjs::delay(500, shinyjs::enable("start"))
+        } else {
+          shinyalert::shinyalert(type = "info",
+            text = "You have used all available attempts for this recording. Submit your most recent recording by clicking 'SUBMIT RECORDING' below.",
+            confirmButtonText = "SUBMIT RECORDING",
+            inputId = ns("submit2"),
+            closeOnEsc = FALSE
+          )
         }
         })
+
+      shiny::observeEvent(input$submit|input$submit2, {
+        shinyjs::hide("submission")
+        shinyjs::hide("stim_div")
+        shinyjs::hide("rec")
+        feedback$result <- 1
+
+        if (isTRUE(eval)) {
+          wave <- tuneR::readWave(filename = file.path(folder, filename))
+          eval <- evalWav(wave)
+
+          if (eval$samp.rate < min_sf) {
+            shinyalert::shinyalert(
+              type = "error",
+              title = "Error:",
+              text = "Your browser does not support high-quality audio recording. Please try a different device or browser.",
+              confirmButtonText = "Exit Experiment")
+            feedback$result <- 0
+          } else {
+            if (eval$snr >= snr_best) {
+              snr_tip <- character(0)
+              snr_score <- 2
+            } else if (eval$snr >= snr_good) {
+              snr_score <- 1
+              snr_tip <- c("<li>Sounds good! Double-check your environment to make sure it's as quiet as possible.</li>")
+            } else {
+              snr_score <- 0
+              snr_tip <- c("<li>Your environment is quite noisy. Double-check to make sure you've eliminated as much background noise as possible.</li><li>Try moving a little closer to your microphone</li>")
+            }
+
+            if (eval$clipped <= max_clip) {
+              clip_tip <- character(0)
+              clip_score <- 2
+            } else {
+              clip_score <- 0
+              clip_tip <- c("<li>Whoa! That recording was loud. Try moving back from your microphone a little.</li>")
+            }
+
+            if (feedback$eval_try < 3) {
+              if (sum(snr_score, clip_score) == 4){
+                feedback$tips <- c("<h4>Sounds good!</h4>")
+              } else {
+                feedback$tips <- paste0("<h5>Tips:</h5><ul", snr_tip, clip_tip, "</ul>")
+              }
+              feedback$score <- snr_score + clip_score
+
+              if (feedback$score >= 3) {
+                shinyalert::shinyalert(
+                  type = "success",
+                  title = "Success!",
+                  text = paste0(feedback$tips),
+                  confirmButtonText = "Confirm Submission",
+                  html = TRUE)
+              } else {
+                shinyalert::shinyalert(
+                  type = "warning",
+                  title = "Hmm...",
+                  text = paste0(feedback$tips, "<h5>Click the button below to try again and help us complete the calibration of our system to your environment.</h5>"),
+                  confirmButtonText = "Try Again",
+                  html = TRUE,
+                  inputId = ns("alert"),
+                  closeOnEsc = FALSE)
+                feedback$eval_try <- feedback$eval_try + 1
+                feedback$try <- 0
+                feedback$result <- 0
+              }
+            } else {
+              if (onFail == "continue") {
+                feedback$tips <- c("<h6>Sounds good!</h6>")
+                shinyalert::shinyalert(
+                  type = "success",
+                  title = "Success!",
+                  text = paste0(feedback$tips),
+                  confirmButtonText = "Confirm Submission",
+                  html = TRUE)
+              } else {
+                feedback$tips <- c("<h6>Unfortunately, you do not seem to have the right equipment for this task. Thank you for your interest in the study! You may close this browser window.")
+                shinyalert::shinyalert(
+                  type = "error",
+                  title = "Error:",
+                  text = paste0(feedback$tips),
+                  confirmButtonText = "Exit Experiment",
+                  html = TRUE)
+                feedback$result <- 0
+              }
+            }
+          }
+        }
+      })
+
+      shiny::observeEvent(input$alert, {
+        shinyjs::showElement("stim_div")
+        shinyjs::showElement("rec")
+      })
+
+      return(shiny::reactive(feedback$result))
     }
   )
 }
