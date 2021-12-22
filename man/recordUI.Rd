@@ -6,6 +6,7 @@
 \usage{
 recordUI(
   id = "recorder",
+  writtenStim = FALSE,
   startText = "RECORD",
   startTextCol = "white",
   startFillCol = "#228833",
@@ -13,11 +14,14 @@ recordUI(
   stopTextCol = "black",
   stopFillCol = "#EE6677",
   startInline = FALSE,
-  stopInline = TRUE
+  stopInline = TRUE,
+  align = "center"
 )
 }
 \arguments{
 \item{id}{The input ID associated with the record module. Must be the same as the id of \code{recordServer()}.}
+
+\item{writtenStim}{Boolean. Do you have a written stimulus that you want your participant to read?}
 
 \item{startText}{Character. The text label for the "start recording" button. Defaults to "RECORD".}
 
@@ -34,6 +38,8 @@ recordUI(
 \item{startInline}{Boolean. Should the 'start recording' button be on the same line as the preceding UI element?}
 
 \item{stopInline}{Boolean. Should the 'stop recording' button be placed on the same line as the 'start recording' button?}
+
+\item{align}{One of 'left', 'center', or 'right'. Should the elements in this UI be left-, center-, or right-aligned?}
 }
 \value{
 A user interface containing buttons to control recording of participant audio.

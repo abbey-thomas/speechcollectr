@@ -6,7 +6,7 @@
 \usage{
 clipCheck(
   wave,
-  return = c("df", "logical"),
+  return = c("df", "logical", "proportion"),
   threshold = 32112.64,
   max_clipped = 0.01
 )
@@ -14,7 +14,7 @@ clipCheck(
 \arguments{
 \item{wave}{Required. Either a \code{tuneR::Wave} object or a valid file path to an existing wav file.}
 
-\item{return}{Either "df" or "logical". Should the function return a dataframe containing a list of clipped frames or just a logical value indicating whether more samples than the amount indicated by \code{max_clipped} were clipped?}
+\item{return}{Either "df", "logical", or "proportion". Should the function return a dataframe containing a list of clipped frames, a logical value indicating whether more samples than the amount indicated by \code{max_clipped} were clipped, or the amount of samples clipped as a proportion of the signal?}
 
 \item{threshold}{The amplitude threshold above which samples should be considered clipped. Defaults to 32112.64 (maximum for 16-bit PCM).}
 

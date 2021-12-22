@@ -2,6 +2,7 @@
 #'
 #' @description The user-interface side of the Shiny module to record user audio in Speech Production experiments. A participant chooses when to begin recording and when to stop by clicking the buttons created in this module. Requires the server-side function \code{\link{recordServer}}.
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordServer()`.
+#' @param writtenStim Boolean. Do you have a written stimulus that you want your participant to read?
 #' @param startText Character. The text label for the "start recording" button. Defaults to "RECORD".
 #' @param startTextCol A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to "white".
 #' @param startFillCol A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to the "green" hex code from Paul Tol's colorblind-safe \emph{bright} qualitative color scheme.
@@ -10,6 +11,7 @@
 #' @param stopFillCol A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to Defaults to the "red" hex code from Paul Tol's colorblind-safe \emph{bright} qualitative color scheme.
 #' @param startInline Boolean. Should the 'start recording' button be on the same line as the preceding UI element?
 #' @param stopInline Boolean. Should the 'stop recording' button be placed on the same line as the 'start recording' button?
+#' @param align One of 'left', 'center', or 'right'. Should the elements in this UI be left-, center-, or right-aligned?
 #'
 #' @return A user interface containing buttons to control recording of participant audio.
 #' @export
@@ -99,7 +101,7 @@ recordUI <- function(id = "recorder",
                                                            "; background-color: ",
                                                            col2hex(stopFillCol)),
                                             inline = stopInline)),
-                      shiny::tags$shiny::tags$br(),
+                      shiny::tags$br(),
                       shinyjs::hidden(shiny::uiOutput(outputId = ns("submission")))))
   )
 }

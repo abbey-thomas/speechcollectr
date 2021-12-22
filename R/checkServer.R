@@ -1,7 +1,60 @@
+#' Check that participants meet inclusion criteria, or get information about their current environment
+#'
+#' @description Present participants with a set of TRUE/FALSE questions one at a time. These are commonly used to check that participants meet inclusion criteria or get information about their current environment. It is recommended that experimenters confirm that participants meet qualifications before doing any data collection.
+#'
+#' @param id The module ID. Must be the same as the ID of `checkUI`.
+#' @param trigger A reactive value indicating the event that should trigger the appearance of the consent form. May be an `input$...` value from outside the module wrapped in `reactive()`.
+#' @param questionFile A .csv file containing ALL and ONLY the following columns: \emph{id, priority, label, error}. See Details below for more information.
+#' @param outFile An optional file name for the (optional) return file where the participant's T/F answers will be saved.
+#' @param returnVals A list of input IDs from the column "id" in `questionFile` specifying the answers you want the function to output.
+#'
+#' @details The questionFile argument is the source for the questions that should be displayed to the participant as statements or questions to which they must answer TRUE or FALSE. We have packaged some generic sets of questions with speechcollectr. You may access them using `data("qualifications")` or `data("environment")`. Any question file must contain ONLY the following columns:
+#' \itemize{
+#' \item{"id:"}{Gives a unique input ID for each question. Values MUST be unique for each row and follow the same rules as other Shiny input IDs (no spaces).}
+#' \item{"label:"}{Contains the labels (i.e., the questions or statements) that will be displayed to participants.}
+#' \item{"priority:"}{All items in the `check` module require an answer, but this column specifies whether the question on each row requires an answer of TRUE. There are two accepted options (required and optional), denoted by the following values (values separated by pipe (|) are treated as equivalent): 'required'|'req'|'r' and 'optional'|'opt'|'o'.}
+#' \item{"error:"} {This column is required if ANY value in `priority` is equal to "required". This is the error message the participant will see when they answer FALSE to a question that requires an answer of TRUE. }
+#' }
+#' @return Answers that the participant gave to the questions whose input IDs are listed in the argument `returnVals`.
+#'
+#' @examples
+#' # First get some sample questions for your participant.
+#' data("qualifications")
+#' write.csv(qualifications, "qualifications.csv", row.names = FALSE)
+#'
+#' # Now ask the questions!
+#' if (interactive()) {
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       fluidRow(
+#'         column(width = 8, offset = 2,
+#'                actionButton("btn", "Click me"),
+#'                checkUI(id = "example", title = "Speech Experiment",
+#'                        type = "participant"),
+#'                textOutput("confirmation"))
+#'       )
+#'
+#'     ),
+#'     server = function(input, output, session) {
+#'       answer <- checkServer(id = "example",
+#'                             trigger = reactive(input$btn),
+#'                             questionFile = "qualifications.csv",
+#'                             outFile = NULL,
+#'                             returnVals = c("eighteen"))
+#'       observeEvent(input$btn, {
+#'         shinyjs::hide("btn")
+#'       })
+#'       observe({
+#'         if (isTruthy(answer$eighteen))
+#'           output$confirmation <- renderText("This participant is an adult.")
+#'       })
+#'     }
+#'   )
+#' }
 checkServer <- function(id = "check",
                         trigger,
                         questionFile,
-                        outFile,
+                        outFile = NULL,
                         returnVals) {
   if (!file.exists(questionFile)|!grepl("csv$", questionFile))
     stop("Argument 'questionFile' must be a valid file path (relative to the current directory) to an existing CSV file.")

@@ -1,6 +1,90 @@
+#' Actions for likert scale tasks
+#'
+#' @param id The id of the module. Must be the same as the ID of `rateUI()`.
+#' @param trigger A reactive value indicating the event that should trigger the appearance of the consent form. May be an `input$...` value from outside the module wrapped in `reactive()`.
+#' @param wait Integer. How long should we wait to display the scale(s) after the trigger event occurs? In milliseconds.
+#' @param n_scales Integer. The number of scales to be displayed on the page.
+#' @param answer_all If `n_scales` > 1, does the participant need to give a response on each scale or only one of them?
+#' @param answers A list with length `n_scales`. The answer choices for each scale should be a character vector. If `n_scales` > 1 and the options are different for each scale, the character vectors should be wrapped in a list.
+#' @param instructions Instructions that will appear at the top of the page.
+#' @param pretext Character. The text that will appear above the likert scale.
+#' @param scale_labs Character. The individual label that will appear above each scale if `n_scales` > 1.
+#' @param posttext Character. The text that will appear below the likert scale.
+#' @param direction Either "horizontal" or "vertical". Describes the position of the scale options relative to each other.
+#'
+#' @return Returns a reactive vector of the answers selected from each scale when the participant clicks submit.
+#'
+#' @examples
+#' if (interactive()){
+#'   library(shiny)
+#'   library(shinyjs)
+#'   ui <- fluidPage(
+#'     actionButton("btn", "Click me"),
+#'     rateUI(id = "example"),
+#'     textOutput("confirmation")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$btn, {
+#'       hideElement("btn")
+#'     })
+#'     rating <- rateServer(id = "example",
+#'                          trigger = reactive(input$btn),
+#'                          instructions = "What do you think?",
+#'                          answers = c("Strongly disagree", "Disagree",
+#'                                      "Neutral", "Agree", "Strongly agree"),
+#'                          pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
+#'     observe({
+#'       if (isTruthy(rating())) {
+#'         output$confirmation <- renderText({
+#'           paste0("You selected ", rating(),".")})
+#'       }
+#'     })
+#'   }
+#'   shinyApp(ui = ui, server = server)
+#' }
+#'
+#' # An example with 2 scales....
+#' if (interactive()){
+#'   library(shiny)
+#'   library(shinyjs)
+#'   ui <- fluidPage(
+#'     actionButton("btn", "Click me"),
+#'     rateUI(id = "example"),
+#'     textOutput("confirmation")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$btn, {
+#'       hideElement("btn")
+#'     })
+#'     rating <- rateServer(id = "example",
+#'                          trigger = reactive(input$btn),
+#'                          instructions = "Finish the sentence:",
+#'                          answers = list(c("Sound completely the same",
+#'                                           "Sound similar, but not totally alike",
+#'                                           "Sound pretty different",
+#'                                           "Sound totally different"),
+#'                                         c("Are produced in the exact same way",
+#'                                           "Are produced similarly",
+#'                                           "Are produced pretty distinctly",
+#'                                           "Are produced in totally distinct ways")),
+#'                          pretext = "The vowels 'aw' and 'ah'...",
+#'                          n_scales = 2,
+#'                          answer_all = TRUE,
+#'                          direction = "vertical",
+#'                          scale_labs = c("perception", "production"))
+#'     observe({
+#'       if (isTruthy(rating())) {
+#'         output$confirmation <- renderText({
+#'           paste0("You selected ", rating(),".")})
+#'       }
+#'     })
+#'   }
+#'   shinyApp(ui = ui, server = server)
+#' }
 rateServer <- function(id = "rate",
                        trigger,
-                       result = "hide",
                        wait = 1000,
                        n_scales = 1,
                        answer_all = FALSE,
@@ -10,12 +94,6 @@ rateServer <- function(id = "rate",
                        scale_labs = NULL,
                        posttext = "",
                        direction = "horizontal") {
-  #if (grepl("\\.wav$",stimulus)){
-   # stimType <- "wav"
-  #} else {
-   # stimType <- "txt"
-  #}
-
   if (n_scales > 1) {
     if (!is.list(answers)|length(answers) != n_scales)
       stop("Argument 'answers' must be a list the same length as 'n_scales', containing a vector of choices for each scale.")

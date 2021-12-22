@@ -5,7 +5,6 @@
 #' @param triggerInit The reactive value that triggers the initial appearance of the matching game. May be an `input$...` value from outside the module wrapped in `reactive()`.
 #' @param triggerReturn The reactive value or conditional statement that triggers the reappearance of the matching game UI. May be an `input$...` value from outside the module wrapped in `reactive()`.
 #' @param result A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".
-#' @param time_df
 #' @param n2find Integer. How many items must the participant find in total?
 #' @param n_items Integer. How many items should be displayed? Should be evenly divisible by `n_cols`
 #' @param n_cols Integer. How many columns should the grid have?
@@ -17,7 +16,7 @@
 #' @param color A single hex code or vector of hex codes indicating the color of the icons or text. Default is black.
 #' @param fill A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).
 #'
-#' @return A list with two items: (1) score = the number of matches the participant has found so far, and (2) i_df = a data.frame containing the list of items used in the present game and their order.
+#' @return A list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
 #' @seealso Must be used with \code{\link{matchUI}}.
 #' @references Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 #' @examples

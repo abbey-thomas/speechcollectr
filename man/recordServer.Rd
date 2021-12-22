@@ -6,31 +6,47 @@
 \usage{
 recordServer(
   id = "recorder",
+  trigger,
   folder = ".",
   filename,
+  writtenStim = NULL,
+  writtenDelay = 500,
+  submitButtonText = "SUBMIT RECORDING",
   eval = FALSE,
   tries = 2,
   onFail = "continue",
+  min_sf = 44100,
   snr_best = 15,
-  snr_good = 5
+  snr_good = 5,
+  max_clip = 0.01
 )
 }
 \arguments{
 \item{id}{The input ID associated with the record module. Must be the same as the id of \code{recordUI()}.}
 
+\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+
 \item{folder}{Character. Where to store the audio file. Defaults to the path returned by \code{getwd()}}
 
 \item{filename}{Required. Character. The name of the file to be recorded. Do not specify a directory here. Instead, do that with the \code{folder} argument.}
 
-\item{eval}{Boolean. Should we evaluate the recording for clipping and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.}
+\item{writtenStim}{A character vector that you want a participant to read while recording.}
 
-\item{tries}{Integer. If eval=TRUE, how many tries should the user get to improve their SNR and reduce clipping?}
+\item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
+
+\item{eval}{Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.}
+
+\item{tries}{Integer. How many tries should the user get to record?}
 
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
+
+\item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
 
 \item{snr_best}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.}
 
 \item{snr_good}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than \code{snr_best}. Defaults to 5.}
+
+\item{max_clip}{Numeric. What proportion of the frames can be clipped and the recording still be acceptable? Defaults to .01.}
 }
 \value{
 Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified \code{filename} in a directory specified by \code{folder}. If eval==TRUE, returns a pop-up telling the user how to improve their recording quality if it is not sufficient.
