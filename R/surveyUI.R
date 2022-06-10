@@ -91,9 +91,9 @@ surveyUI <- function(id = "survey",
                             vals <- gsub("[^[:alnum:]]", "", opts)
                           }
 
-                          if (qsl[[i]]$type != "t") {
-                            opts <- c("", opts)
-                          }
+                          #if (qsl[[i]]$type != "t") {
+                           # opts <- c("", opts)
+                          #}
 
                           if (qsl[[i]]$type == "t") {
                             input <- shiny::textInput(inputId = ns(qsl[[i]]$id),
