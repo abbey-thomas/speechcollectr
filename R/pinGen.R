@@ -7,7 +7,7 @@
 #'
 #' @return A reactive or non-reactive unique ID number, with the number of digits specified by `digits`, appended to the list denoted by `file`. `file` is overwritten to include the new unique ID each time the function is called.
 #' @note If you create this value inside `observeEvent()` (not recommended, see example below), be sure to inizialize the value in your Shiny server outside of the observer.
-#'
+#' @export
 #' @examples
 #' library(shiny)
 #' library(shinyjs)

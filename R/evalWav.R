@@ -7,7 +7,7 @@
 #' @param plotOsc If not `NULL` (the default), a character vector that will server as the title of the wave form plot (recommended = the name of the object in `wave`).
 #'
 #' @return A list with 7 elements: the markers for the beginning and end of the utterance in samples, the sample rate of the original file, the SNR (dB), a logical value indicating whether 1% of samples in the original wave file were clipped, a tuneR::Wave object for the trimmed file (if `trimmed != NULL`), the text of the Praat TextGrid (if `utteranceTG != NULL`), and the plot of the wave form beginning and end markers (if `plot != NULL`).
-#'
+#' @export
 #' @examples
 #' data("samp_wav")
 #' eval <- evalWav(samp_wav, plotOsc = "samp_wav")

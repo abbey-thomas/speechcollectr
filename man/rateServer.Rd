@@ -21,15 +21,15 @@ rateServer(
 \arguments{
 \item{id}{The id of the module. Must be the same as the ID of \code{rateUI()}.}
 
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+\item{trigger}{A reactive value indicating the event that should trigger the appearance of the instructions and (optionally) the play button for the audio stimulus. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
 
-\item{wait}{Integer. How long should we wait to display the scale(s) after the trigger event occurs? In milliseconds.}
+\item{wait}{Integer. How long should we wait to display the scale(s) after the trigger event occurs? If this value will describe the delay between when the participant clicks "play" and when the scale appears. In milliseconds.}
 
 \item{n_scales}{Integer. The number of scales to be displayed on the page.}
 
 \item{answer_all}{If \code{n_scales} > 1, does the participant need to give a response on each scale or only one of them?}
 
-\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector. If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
+\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector in this list. If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
 
 \item{instructions}{Instructions that will appear at the top of the page.}
 
@@ -40,6 +40,24 @@ rateServer(
 \item{posttext}{Character. The text that will appear below the likert scale.}
 
 \item{direction}{Either "horizontal" or "vertical". Describes the position of the scale options relative to each other.}
+
+\item{type}{One of "slider" or "button". What type of scale do you want to display? See \strong{Details} for more information}
+
+\item{range}{If \code{type} is "slider", what are the minimum and maximum values of your scale? Defaults to c(0,100).}
+
+\item{unit}{If \code{type} is slider,}
+
+\item{increment}{If \code{type} is slider,}
+
+\item{display_nums}{If \code{type} is slider,}
+
+\item{answer_pos}{If \code{type} is slider,}
+
+\item{sound}{If not NULL (the default), the name of WAV file to rate with the scale.}
+
+\item{n_plays}{Integer. If sound is not NULL, how many times can the participant play the audio? Defaults to 5.}
+
+\item{play_lab}{Character. The label for the play button if sound is not NULL. Defaults to "PLAY SOUND".}
 }
 \value{
 Returns a reactive vector of the answers selected from each scale when the participant clicks submit.

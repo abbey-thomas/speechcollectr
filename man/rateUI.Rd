@@ -7,6 +7,7 @@
 rateUI(
   id = "rate",
   align = "center",
+  n_scales = 1,
   scaleFillCol = "white",
   scaleTextCol = "black",
   submitText = "SUBMIT",

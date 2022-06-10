@@ -6,7 +6,7 @@
 #' @param max_clipped The proportion of samples we can allow to be clipped and still return `FALSE` if return value is logical. Defaults to 0.01 (i.e. 1% of samples).
 #'
 #' @return A data.frame containing a list of clipped samples or a logical value indicating whether more samples than the amount indicated by `max_clipped` were clipped
-#'
+#' @export
 #' @examples
 #' data("samp_wav")
 #' fs <- findSpeech(samp_wav)

@@ -7,6 +7,7 @@
 #'
 #' @return A minimal user interface for the matching game that includes a title, instructions, and a progress bar.
 #' @seealso Must be used with \code{\link{matchServer}}.
+#' @export
 #' @examples
 #' library(shiny)
 #' library(shinyjs)

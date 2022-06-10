@@ -8,7 +8,7 @@
 #' @param rank_col The name of the column in `rankFile` where the past players' ranks are stored. Defaults to "rank".
 #'
 #' @return A list with 2 values: (1) rank = the current players rank (integer) and (2) out_of = the total number of players so far.
-#'
+#' @export
 #' @examples
 #' # Erase the out file, "sample_rank.rds" after you run this example,
 #' # ...so you won't get the error of multiple "players" with the same ID next time you run the example!

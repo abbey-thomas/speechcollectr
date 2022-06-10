@@ -22,7 +22,7 @@
 #' @param direction Either "horizontal" or "vertical". Describes the position of the scale options relative to each other.
 #'
 #' @return Returns a reactive vector of the answers selected from each scale when the participant clicks submit.
-#'
+#' @export
 #' @examples
 #' if (interactive()){
 #'   library(shiny)

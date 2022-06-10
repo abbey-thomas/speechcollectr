@@ -8,7 +8,7 @@
 #'
 #' @return A list with 2 numeric values: begin_s = the sample in the original recording that marks the start of the speech signal; and end_s = the sample in the original recording that marks the end of the speech signal.
 #' @details If you find the function is excluded too much speech, try lowering the minAmp value or increasing the begin and end padding values. If the function is including too much leading and trailing noise, try increasing the minAmp value or decreasing the begin and end pad values.
-#'
+#' @export
 #' @examples
 #' data("samp_wav")
 #' fs <- findSpeech(samp_wav)

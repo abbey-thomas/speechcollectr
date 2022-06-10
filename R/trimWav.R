@@ -8,7 +8,7 @@
 #' @param endPad Integer. How many milliseconds of silence (zeros) should we add to the end of the detected speech signal?
 #'
 #' @return A wav file (or tuneR::Wave object if outfile=NULL) trimmed from the original object denoted by argument `wave`.
-#'
+#' @export
 #' @examples
 #' data("samp_wav")
 #' head(samp_wav@left)

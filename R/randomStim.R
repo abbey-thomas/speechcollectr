@@ -19,7 +19,7 @@
 #'   \item{outFile}{This argument is useful when you need to use the same random order across all participants, or, if the argument is supplied with a dynamic value, when you wish to save a copy of the order used for each participant. The latter is useful if participants pause the experiment and resume in a different Shiny session (after, for example, internet failure).}
 #' }
 #'
-#'
+#' @export
 #' @examples
 #' library(shiny)
 #' library(dplyr)

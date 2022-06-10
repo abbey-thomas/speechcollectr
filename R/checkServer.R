@@ -16,7 +16,7 @@
 #' \item{"error:"} {This column is required if ANY value in `priority` is equal to "required". This is the error message the participant will see when they answer FALSE to a question that requires an answer of TRUE. }
 #' }
 #' @return Answers that the participant gave to the questions whose input IDs are listed in the argument `returnVals`.
-#'
+#' @export
 #' @examples
 #' # First get some sample questions for your participant.
 #' data("qualifications")

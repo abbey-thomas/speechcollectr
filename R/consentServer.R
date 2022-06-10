@@ -14,6 +14,7 @@
 #'
 #' @return A reactive value of type `integer` indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
 #' @seealso Must be used with \code{\link{consentUI}}. If `cons2rec = TRUE`, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
+#' @export
 #' @family Consent form module
 #' @examples
 #' if (interactive()) {

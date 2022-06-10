@@ -17,6 +17,7 @@
 #' @param fill A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).
 #'
 #' @return A list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
+#' @export
 #' @seealso Must be used with \code{\link{matchUI}}.
 #' @references Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 #' @examples

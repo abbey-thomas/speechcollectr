@@ -7,7 +7,7 @@
 #' @param align One of 'left', 'center', or 'right'. Should the elements in this UI be left-, center-, or right-aligned?
 #'
 #' @return User interface elements for TRUE/FALSE questions, displayed one at a time.
-#'
+#' @export
 #' @examples
 #'  # First get some sample questions for your participant.
 #' data("qualifications")

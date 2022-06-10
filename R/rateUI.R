@@ -9,7 +9,7 @@
 #' @param submitTextCol A valid hexidecimal code or color name for the submit button text.
 #'
 #' @return A shiny UI for likert scale tasks.
-#'
+#' @export
 #' @examples
 #' if (interactive()){
 #'   library(shiny)
