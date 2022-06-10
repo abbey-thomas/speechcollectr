@@ -9,7 +9,7 @@
 #' @param submitLab The label that should be displayed on the button participants will click to submit the form.
 #'
 #' @return A Shiny user interface with the questions specified in the `questionFile` CSV file.
-#'
+#' @export
 #' @details In a Shiny App, this should always be used with \code{\link{surveyServer}}. Before creating the app, be sure to format your `questionFile` according to the instructions in \code{\link{surveyPrep}}.
 #'
 #' @examples

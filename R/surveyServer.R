@@ -11,7 +11,7 @@
 #' @return A CSV or RDS file containing the values input by the participant, and/or a list of reactive values specified by `returnVals`.
 #' @note This function returns a file every time the submit button is clicked. Therefore, the `outFile` argument should be unique for each run of the function. We recommend pasting a unique ID number (perhaps from a reactive value) to a prefix to save a separate file for each participant. Though this creates many small files, these files can easily be processed in bulk during analysis, which is less risky than opening and appending to existing files when multiple users visit the app simultaneously!
 #' @seealso \code{\link{surveyUI}}, \code{\link{surveyPrep}}
-#'
+#' @export
 #' @examples
 #' library(shiny)
 #' data("demographics")
