@@ -56,6 +56,7 @@ var blob = null;
                         function (e) {
                             console.error(e);
                         });
+            Shiny.setInputValue(params.ready, true);            
         });
 
         stop.addEventListener('click', function () {
