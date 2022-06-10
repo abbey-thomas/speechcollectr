@@ -57,7 +57,6 @@
 #' shinyApp(ui = ui, server = server)
 #' @importFrom timeR start
 #' @importFrom timeR stop
-#' @importFrom timeR getEvent
 matchServer <- function(id = "game",
                         counter,
                         triggerInit,
