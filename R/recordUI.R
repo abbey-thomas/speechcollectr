@@ -65,21 +65,25 @@ recordUI <- function(id = "recorder",
     stop("Error: stopTextCol argument requires a valid color name or hexadecimal code.")
   }
 
-  js_dep <- function() {
+  html_dependency_war <- function(){
     htmltools::htmlDependency(
-      name = "recorder",
-      version = '0.0.0.9',
-      package = "speechcollectr",
+      name = "WebAudioRecorder",
+      version = "0.0.0.9",
       src = "js",
-      script = c("recorder.js"))
+      script = c("recorder_ext.js",
+                 "WAR/WebAudioRecorderWav.min.js",
+                 "WAR/WebAudioRecorder.min.js"),
+      all_files = TRUE
+    )
   }
 
-  ui <- shiny::tagList(js_dep(),
-    #htmltools::tags$head(
-     #
-    #),
+  ui <- shiny::tagList(
+    shiny::tags$head(
+      html_dependency_rec(),
+    ),
     shinyjs::useShinyjs(),
-
+    extendShinyjs(script = "js/recorder_ext.js",
+                  functions = "webAudioRecorder"),
     shinyjs::hidden(
       shiny::tags$div(id = ns("rec"), style = paste0("text-align:", align,";"),
                       if (isTRUE(writtenStim)) {

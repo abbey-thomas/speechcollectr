@@ -66,13 +66,10 @@ recordServer <- function(id = "recorder",
       })
 
       shiny::observe({
-        params <- list(start = ns("start"),
-                       stop = ns("stop"),
-                       ready = paste0(mod_id, "-ready"),
-                       output = paste0(mod_id, "-audio"))
-
-        session$sendCustomMessage("recordAudio",
-                                  params)
+        shiny::observe(
+          js$webAudioRecorder(ets ="wav",
+                              mod_id = paste0(id))
+        )
       })
 
       shiny::observeEvent(input$start, {
@@ -132,7 +129,7 @@ recordServer <- function(id = "recorder",
         }
         })
 
-      shiny::observeEvent(input$submit, {
+      shiny::observeEvent(input$submit|input$submit2, {
         shinyjs::hide("submission")
         shinyjs::hide("stim_div")
         shinyjs::hide("rec")
