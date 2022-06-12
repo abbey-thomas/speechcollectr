@@ -82,7 +82,7 @@ recordUI <- function(id = "recorder",
       html_dependency_rec(),
     ),
     shinyjs::useShinyjs(),
-    extendShinyjs(script = "js/recorder_ext.js",
+    shinyjs::extendShinyjs(script = "js/recorder_ext.js",
                   functions = "webAudioRecorder"),
     shinyjs::hidden(
       shiny::tags$div(id = ns("rec"), style = paste0("text-align:", align,";"),
