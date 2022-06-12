@@ -165,7 +165,7 @@ shinyjs.webAudioRecorder = function(params)
 
     recorder = new WebAudioRecorder(input,
                                     {
-                                      workerDir: 'js/WAR/', // must end with slash
+                                      workerDir: 'WAR/', // must end with slash
                                       encoding: encodingType,
                                       numChannels: 1
 
