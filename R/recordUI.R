@@ -236,11 +236,11 @@ function stopRecording()
       all_files = TRUE
     )
   }
+  shiny::addResourcePath("WAR", "WAR")
 
   ui <- shiny::tagList(
-    shiny::tags$head(
-      html_dependency_war(),
-    ),
+
+    shiny::includeScript("WAR/WebAudioRecorder.min.js"),
     shinyjs::useShinyjs(),
     shinyjs::extendShinyjs(text = txt,
                   functions = "webAudioRecorder"),
