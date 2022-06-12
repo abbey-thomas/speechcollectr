@@ -68,6 +68,7 @@ recordUI <- function(id = "recorder",
   html_dependency_war <- function(){
     htmltools::htmlDependency(
       name = "WebAudioRecorder",
+      package = "speechcollectr",
       version = "0.0.0.9",
       src = "js",
       script = c("recorder_ext.js",
@@ -105,6 +106,6 @@ recordUI <- function(id = "recorder",
                                                            col2hex(stopFillCol)),
                                             inline = stopInline)),
                       shiny::tags$br(),
-                      shinyjs::hidden(shiny::uiOutput(outputId = ns("submission")))))
+                      shiny::uiOutput(outputId = ns("submission"))))
   )
 }
