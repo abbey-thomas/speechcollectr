@@ -132,7 +132,7 @@ recordServer <- function(id = "recorder",
         }
         })
 
-      shiny::observeEvent(input$submit|input$submit2, {
+      shiny::observeEvent(input$submit, {
         shinyjs::hide("submission")
         shinyjs::hide("stim_div")
         shinyjs::hide("rec")
