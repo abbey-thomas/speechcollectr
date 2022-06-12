@@ -65,7 +65,6 @@ checkUI <- function(id = "check",
   }
 
   ui <- shiny::tagList(
-    shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
     shinyjs::hidden(
       shiny::tags$div(id = ns("ck_div"),

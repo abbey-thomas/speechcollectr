@@ -52,7 +52,6 @@ matchUI <- function(id = "game",
   ns <- shiny::NS(id)
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
     shinyjs::hidden(shiny::tags$div(id = ns("matchdiv"), style = "text-align:center;",
                                     shiny::tags$h1(id = ns("title"), paste0(title)),
                                     shiny::tags$br(),

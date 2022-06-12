@@ -58,7 +58,6 @@ consentUI <- function(id = "consent",
 
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
     shinyjs::hidden(htmltools::tags$h1(id = ns("title"), title)),
     shinyjs::hidden(htmltools::tags$span(id = ns("text"),
                          if(!is.null(filename)) {

@@ -7,6 +7,8 @@
 #' @param filename Required. Character. The name of the file to be recorded. Do not specify a directory here. Instead, do that with the `folder` argument.
 #' @param writtenStim A character vector that you want a participant to read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
+#' @param submitButtonText Character. Text label that will appear on the button the participant will use to submit the recording.
+#' @param playback Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to `FALSE`.
 #' @param eval Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.
 #' @param tries Integer. How many tries should the user get to record?
 #' @param onFail If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of `tries` and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).
@@ -39,6 +41,7 @@ recordServer <- function(id = "recorder",
                          writtenStim = NULL,
                          writtenDelay = 500,
                          submitButtonText = "SUBMIT RECORDING",
+                         playback = FALSE,
                          eval = FALSE,
                          tries = 2,
                          onFail = "continue",

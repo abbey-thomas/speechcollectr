@@ -78,7 +78,6 @@ recordUI <- function(id = "recorder",
     htmltools::tags$head(
       js_dep()
     ),
-    shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
 
     shinyjs::hidden(
