@@ -79,7 +79,7 @@ recordUI <- function(id = "recorder",
 
   ui <- shiny::tagList(
     shiny::tags$head(
-      html_dependency_rec(),
+      html_dependency_war(),
     ),
     shinyjs::useShinyjs(),
     shinyjs::extendShinyjs(script = "js/recorder_ext.js",
