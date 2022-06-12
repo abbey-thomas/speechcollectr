@@ -74,10 +74,10 @@ recordUI <- function(id = "recorder",
       script = c("recorder.js"))
   }
 
-  ui <- shiny::tagList(
-    htmltools::tags$head(
-      js_dep()
-    ),
+  ui <- shiny::tagList(js_dep(),
+    #htmltools::tags$head(
+     #
+    #),
     shinyjs::useShinyjs(),
 
     shinyjs::hidden(
