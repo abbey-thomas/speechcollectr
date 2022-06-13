@@ -11,14 +11,9 @@ recordServer(
   filename,
   writtenStim = NULL,
   writtenDelay = 500,
-  submitButtonText = "SUBMIT RECORDING",
-  eval = FALSE,
+  playback = FALSE,
   tries = 2,
-  onFail = "continue",
-  min_sf = 44100,
-  snr_best = 15,
-  snr_good = 5,
-  max_clip = 0.01
+  onFail = "continue"
 )
 }
 \arguments{
@@ -34,19 +29,13 @@ recordServer(
 
 \item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
 
-\item{eval}{Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.}
+\item{playback}{Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to \code{FALSE}.}
 
 \item{tries}{Integer. How many tries should the user get to record?}
 
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 
-\item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
-
-\item{snr_best}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.}
-
-\item{snr_good}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than \code{snr_best}. Defaults to 5.}
-
-\item{max_clip}{Numeric. What proportion of the frames can be clipped and the recording still be acceptable? Defaults to .01.}
+\item{eval}{Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.}
 }
 \value{
 Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified \code{filename} in a directory specified by \code{folder}. If eval==TRUE, returns a pop-up telling the user how to improve their recording quality if it is not sufficient.
