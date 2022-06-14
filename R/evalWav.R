@@ -17,11 +17,6 @@ evalWav <- function(wave,
                     transcription = NULL,
                     trim = NULL,
                     plotOsc = NULL) {
-  if (isTRUE(shiny)) {
-    if (onFail != "continue" & onFail != "stop")
-      stop("If shiny=TRUE, onFail must be 'continue' or 'stop.'")
-  }
-
   #if (!is.null(utteranceTG) & !grepl("\\.TextGrid$", utteranceTG))
     #stop("You must give a valid filepath ending in .TextGrid for argument 'filenameTG'.")
 
