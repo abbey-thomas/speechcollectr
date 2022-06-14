@@ -32,7 +32,7 @@ getSNR <- function(wave,
   if (length(n1) >= length(n2)) {
     n <- wave@left[0:begin+1]
   } else {
-    n <- wave@left[end-1:length(wave@left)]
+    n <- wave@left[(end-1):length(wave@left)]
   }
 
   rms_n <- seewave::rms(n)
