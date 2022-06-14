@@ -62,7 +62,8 @@ evalWavServer <- function(wave,
 
   feedback <- shiny::reactiveValues(score = 0,
                                     eval_try = counter,
-                                    tips = NA)
+                                    tips = NA,
+                                    result = NA)
 
   shiny::observeEvent(trigger(), {
     shiny::req(counter)
@@ -146,6 +147,7 @@ evalWavServer <- function(wave,
         }
       }
     }
-    return(feedback$result)
   })
+
+  return(shiny::reactive(feedback$result))
 }
