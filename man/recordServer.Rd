@@ -34,8 +34,6 @@ recordServer(
 \item{tries}{Integer. How many tries should the user get to record?}
 
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
-
-\item{eval}{Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.}
 }
 \value{
 Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified \code{filename} in a directory specified by \code{folder}. If eval==TRUE, returns a pop-up telling the user how to improve their recording quality if it is not sufficient.

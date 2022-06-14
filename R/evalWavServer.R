@@ -2,6 +2,7 @@
 #'
 #' @param wave Required. Either a `tuneR::Wave` object or a valid file path to an existing wav file.
 #' @param counter Required. A reactive value that tells this function how many tries a participant has had so far.
+#' @param trigger A reactive value indicating the event that should trigger the appearance of the consent form. May be an `input$...` value from outside the module wrapped in `reactive()`.
 #' @param min_sf What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.
 #' @param snr_best Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.
 #' @param snr_good Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than `snr_best`. Defaults to 5.
@@ -16,24 +17,28 @@
 #' if (interactive()) {
 #' ui <- shiny::fluidPage(
 #'   shiny::actionButton("go", "GO"),
-#'   recordUI(id = "record")
+#'   recordUI(id = "record"),
+#'   shiny::actionButton("submit", "SUBMIT")
 #' )
 #'
 #' server <- function(input, output, session) {
 #'  rvs <- shiny::reactiveValues(n=0)
 #'
-#'  rvs$rec <- recordServer(id = "record",
-#'                          trigger = reactive(input$go),
+#'  shiny::observeEvent(input$go, {
+#'    rvs$rec <- recordServer(id = "record",
+#'                          trigger = shiny::reactive(input$go),
 #'                          filename = "sample.wav")
-#'  observe({
+#'  })
+#'
+#'  shiny::observeEvent(input$submit, {
 #'    shiny::req(rvs$rec)
 #'    rvs$result <- evalWavServer(wave = "sample.wav",
+#'                                trigger = shiny::reactive(input$submit),
 #'                                counter = rvs$n)
 #'  })
 #'
-#'  observe({
+#'  shiny::observe({
 #'    shiny::req(rvs$result)
-#'    shinyjs::delay(500, {rvs$result <- NULL})
 #'    shinyjs::delay(500, {rvs$rec <- NULL})
 #'  })
 #' }
@@ -42,6 +47,7 @@
 #'
 evalWavServer <- function(wave,
                           counter,
+                          trigger,
                           min_sf = 44100,
                           snr_best = 15, snr_good = 5,
                           max_clip = 0.01,
@@ -54,7 +60,7 @@ evalWavServer <- function(wave,
 
   eval <- evalWav(wave)
 
-  shiny::observe({
+  shiny::observeEvent(trigger(), {
     shiny::req(counter)
 
     feedback <- shiny::reactiveValues(score = 0,

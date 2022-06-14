@@ -8,7 +8,6 @@
 #' @param writtenStim A character vector that you want a participant to read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
 #' @param playback Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to `FALSE`.
-#' @param eval Boolean. Should we evaluate the recording for sample rate, clipping, and SNR, and give the user tips on how to improve if the recording quality is poor? Defaults to FALSE.
 #' @param tries Integer. How many tries should the user get to record?
 #' @param onFail If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of `tries` and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).
 #'
