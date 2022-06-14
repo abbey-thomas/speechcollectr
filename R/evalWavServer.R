@@ -146,7 +146,6 @@ evalWavServer <- function(wave,
         }
       }
     }
+    return(feedback$result)
   })
-
-  return(shiny::reactive(feedback$result))
 }
