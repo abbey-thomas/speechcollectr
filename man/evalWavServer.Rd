@@ -7,7 +7,6 @@
 evalWavServer(
   wave,
   counter,
-  trigger,
   min_sf = 44100,
   snr_best = 15,
   snr_good = 5,
@@ -20,8 +19,6 @@ evalWavServer(
 \item{wave}{Required. Either a \code{tuneR::Wave} object or a valid file path to an existing wav file.}
 
 \item{counter}{Required. A reactive value that tells this function how many tries a participant has had so far.}
-
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
 
 \item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
 

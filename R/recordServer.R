@@ -8,7 +8,6 @@
 #' @param writtenStim A character vector that you want a participant to read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
 #' @param playback Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to `FALSE`.
-#' @param tries Integer. How many tries should the user get to record?
 #' @param onFail If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of `tries` and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).
 #'
 #' @return Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified `filename` in a directory specified by `folder`. If eval==TRUE, returns a pop-up telling the user how to improve their recording quality if it is not sufficient.
@@ -34,9 +33,7 @@ recordServer <- function(id = "recorder",
                          folder = ".", filename,
                          writtenStim = NULL,
                          writtenDelay = 500,
-                         playback = FALSE,
-                         tries = 2,
-                         onFail = "continue") {
+                         playback = FALSE) {
 
   if (length(filename) == 0) stop("You must enter a filename for the recorded sound!")
   if (folder == "."){folder <- getwd()}
@@ -45,8 +42,7 @@ recordServer <- function(id = "recorder",
 
     function(input, output, session, mod_id = id) {
       ns <- session$ns
-      feedback <- shiny::reactiveValues(try = 0,
-                                        result = 0)
+      feedback <- shiny::reactiveValues(result = 0)
       shiny::observeEvent(trigger(), {
         shinyjs::showElement("rec")
       })
@@ -89,7 +85,6 @@ recordServer <- function(id = "recorder",
       shiny::observeEvent(input$stop, {
         shinyjs::disable("stop")
         shinyjs::hide("stim_div")
-        feedback$try <- feedback$try + 1
 
         if (isTRUE(playback)) {
           output$submission <- shiny::renderUI({
@@ -104,16 +99,7 @@ recordServer <- function(id = "recorder",
           })
         }
 
-        if (feedback$try < tries) {
-          shinyjs::delay(500, shinyjs::enable("start"))
-        } else {
-          shinyalert::shinyalert(type = "info",
-            text = "You have used all available attempts for this recording. Submit your most recent recording by clicking 'SUBMIT RECORDING' below.",
-            confirmButtonText = "OKAY",
-            inputId = ns("submit2"),
-            closeOnEsc = FALSE
-          )
-        }
+        shinyjs::delay(500, shinyjs::enable("start"))
         })
 
       return(shiny::reactive(feedback$result))

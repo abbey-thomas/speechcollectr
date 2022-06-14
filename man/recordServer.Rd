@@ -11,9 +11,7 @@ recordServer(
   filename,
   writtenStim = NULL,
   writtenDelay = 500,
-  playback = FALSE,
-  tries = 2,
-  onFail = "continue"
+  playback = FALSE
 )
 }
 \arguments{
@@ -30,8 +28,6 @@ recordServer(
 \item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
 
 \item{playback}{Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to \code{FALSE}.}
-
-\item{tries}{Integer. How many tries should the user get to record?}
 
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 }
