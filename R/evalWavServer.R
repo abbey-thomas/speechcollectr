@@ -60,12 +60,12 @@ evalWavServer <- function(wave,
 
   eval <- evalWav(wave)
 
+  feedback <- shiny::reactiveValues(score = 0,
+                                    eval_try = counter,
+                                    tips = NA)
+
   shiny::observeEvent(trigger(), {
     shiny::req(counter)
-
-    feedback <- shiny::reactiveValues(score = 0,
-                                      eval_try = counter,
-                                      tips = NA)
 
     if (eval$samp.rate < min_sf) {
       shinyalert::shinyalert(
