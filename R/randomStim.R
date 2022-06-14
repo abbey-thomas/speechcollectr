@@ -178,7 +178,7 @@ randomStim <- function(dataFile,
                                             c(grps$block),
                                             grps$b_count)),
                       ord = unlist(sapply(grps$b_count, function(i){
-                        sample(c(1:grps$b_count[i]), grps$b_count[i])
+                        sample(c(1:i), i)
                       })))
   }
 
