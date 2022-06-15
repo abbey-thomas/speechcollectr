@@ -20,6 +20,7 @@
 #' }
 #'
 #' @export
+#' @importFrom dplyr n
 #' @examples
 #' library(shiny)
 #' library(dplyr)
@@ -136,7 +137,7 @@ randomStim <- function(dataFile,
   if (!is.null(blockCol)) {
     grps <- df_init %>%
       dplyr::group_by(.data[[blockCol]]) %>%
-      dplyr::mutate(b_count = n()) %>%
+      dplyr::mutate(b_count = dplyr::n()) %>%
       dplyr::select(.data[[blockCol]], b_count) %>%
       unique()
     if (n_practice > 0) {

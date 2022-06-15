@@ -71,7 +71,6 @@ surveyUI <- function(id = "survey",
   qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
     shinyjs::hidden(htmltools::tags$div(id = ns("survey_div"),
                         htmltools::tags$h1(id = ns("title"), title),
                         htmltools::tags$h3(id = ns("subtitle"), subtitle),

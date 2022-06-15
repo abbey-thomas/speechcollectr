@@ -7,6 +7,7 @@
 recordServer(
   id = "recorder",
   trigger,
+  result = "disable",
   folder = ".",
   filename,
   writtenStim = NULL,

@@ -14,6 +14,7 @@
 #' @family Audio recording module
 #' @seealso Must be used with \code{\link{recordUI}}.
 #' @export
+#'
 #' @examples
 #' if (interactive()) {
 #' ui <- shiny::fluidPage(
@@ -30,6 +31,7 @@
 # How can users add other functions to the buttons in the module?
 recordServer <- function(id = "recorder",
                          trigger,
+                         result = "disable",
                          folder = ".", filename,
                          writtenStim = NULL,
                          writtenDelay = 500,
@@ -83,8 +85,13 @@ recordServer <- function(id = "recorder",
       })
 
       shiny::observeEvent(input$stop, {
-        shinyjs::disable("stop")
-        shinyjs::hide("stim_div")
+        if (result == "disable") {
+          shinyjs::disable("stop")
+          shinyjs::disable("start")
+          shinyjs::hide("stim_div")
+        } else {
+          shinyjs::hide("rec")
+        }
 
         if (isTRUE(playback)) {
           output$submission <- shiny::renderUI({
