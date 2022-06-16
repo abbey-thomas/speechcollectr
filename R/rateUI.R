@@ -91,16 +91,17 @@ rateUI <- function(id = "rate",
 
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
-    if (type == "button") {
-      lapply(1:n_scales, function(i) {
-        shiny::tags$style(shiny::HTML(paste0(".btn-likert", i,"{background-color:",
-                                             col2hex(scaleFillCol[i]), "; color:", col2hex(scaleTextCol[i]),
-                                             "; border-color:", col2hex(scaleTextCol[i]),
-                                             "; white-space:normal; font-size:20px}")))
-      })
-    } else {
-      shinyWidgets::setSliderColor(scaleFillCol, 1:n_scales)
-    },
+    lapply(1:n_scales, function(i) {
+      shiny::tags$style(shiny::HTML(paste0(".btn-likert", i,"{background-color:",
+                                           col2hex(scaleFillCol[i]), "; color:", col2hex(scaleTextCol[i]),
+                                           "; border-color:", col2hex(scaleTextCol[i]),
+                                           "; white-space:normal; font-size:20px}")))
+    }),
+    #if (type == "button") {
+     #
+    #} else {
+     # shinyWidgets::setSliderColor(scaleFillCol, 1:n_scales)
+    #},
     shinyjs::hidden(
       shiny::tags$div(id = ns("rate_div"),
                       style = paste0("text-align:", align,";"),
