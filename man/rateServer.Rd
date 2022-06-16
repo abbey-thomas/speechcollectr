@@ -40,24 +40,6 @@ rateServer(
 \item{posttext}{Character. The text that will appear below the likert scale.}
 
 \item{direction}{Either "horizontal" or "vertical". Describes the position of the scale options relative to each other.}
-
-\item{type}{One of "slider" or "button". What type of scale do you want to display? See \strong{Details} for more information}
-
-\item{range}{If \code{type} is "slider", what are the minimum and maximum values of your scale? Defaults to c(0,100).}
-
-\item{unit}{If \code{type} is slider,}
-
-\item{increment}{If \code{type} is slider,}
-
-\item{display_nums}{If \code{type} is slider,}
-
-\item{answer_pos}{If \code{type} is slider,}
-
-\item{sound}{If not NULL (the default), the name of WAV file to rate with the scale.}
-
-\item{n_plays}{Integer. If sound is not NULL, how many times can the participant play the audio? Defaults to 5.}
-
-\item{play_lab}{Character. The label for the play button if sound is not NULL. Defaults to "PLAY SOUND".}
 }
 \value{
 Returns a reactive vector of the answers selected from each scale when the participant clicks submit.
