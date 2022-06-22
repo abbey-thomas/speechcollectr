@@ -108,7 +108,7 @@ evalWavServer <- function(wave,
           text = paste0(tips, "<h5>Click the button below to try again and help us complete the calibration of our system to your environment.</h5>"),
           confirmButtonText = "Try Again",
           html = TRUE,
-          inputId = ns("alert"),
+          inputId = "alert",
           closeOnEsc = FALSE)
         counter <- counter + 1
         feedback <- 0
