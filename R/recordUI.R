@@ -190,7 +190,7 @@ function stopRecording()
   shiny::addResourcePath("WAR", system.file("WAR", package = "speechcollectr"))
 
   ui <- shiny::tags$span(
-    shiny::tags$head(shiny::includeScript("WAR/WebAudioRecorder.min.js"),
+    shiny::tags$head(shiny::includeScript(file.path("WAR", "WebAudioRecorder.min.js")),
                      shinyjs::useShinyjs(),
                      shinyjs::extendShinyjs(text = txt,
                                             functions = "webAudioRecorder")),
