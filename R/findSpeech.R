@@ -36,7 +36,7 @@ findSpeech <- function(wave,
     markers$begin_s <- NA
   } else {
     env500 <- env_df %>% dplyr::filter(env >= minAmp) %>%
-      dplyr::mutate(to_next = lead(sample)-sample,
+      dplyr::mutate(to_next = dplyr::lead(sample)-sample,
                     to_next = ifelse(is.na(to_next), 1, to_next),
                     count = ifelse(to_next < maxPause, 1, 0),
                     grp = data.table::rleid(count)) %>% dplyr::group_by(grp) %>%
