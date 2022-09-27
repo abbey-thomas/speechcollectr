@@ -2,7 +2,6 @@
 #'
 #' @description The user-interface side of the Shiny module to record user audio in Speech Production experiments. A participant chooses when to begin recording and when to stop by clicking the buttons created in this module. Requires the server-side function \code{\link{recordServer}}.
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordServer()`.
-#' @param writtenStim Boolean. Do you have a written stimulus that you want your participant to read?
 #' @param startText Character. The text label for the "start recording" button. Defaults to "RECORD".
 #' @param startTextCol A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to "white".
 #' @param startFillCol A valid color name in R or a hexidecimal color code denoting the color of the start button text. Defaults to the "green" hex code from Paul Tol's colorblind-safe \emph{bright} qualitative color scheme.
@@ -63,7 +62,7 @@
 #'
 #'     # But let's say we don't want them to have more than 3 attempts to record the file
 #'     # We can do this by attaching an event to the "stop" button of the recorder,
-#'     # which is saved in the apps input list as "{id of record*()}-stop"
+#'     # which is saved in the apps input list as "(id)-stop"
 #'     observeEvent(input[["rec-stop"]], {
 #'       if (recording()$n == 3) {
 #'         hide("rec")
@@ -256,11 +255,9 @@ recordUI <- function(id = "record",
                      shinyjs::extendShinyjs(text = txt,
                                             functions = "webAudioRecorder")),
     shinyjs::hidden(shiny::tags$div(id = paste0(id), style = paste0("text-align:", align,";"),
-                                    if (isTRUE(writtenStim)) {
-                                      shinyjs::hidden(shiny::tags$div(id = paste0(id, "-stimDiv"),
-                                                                      style = paste0("text-align:", align,";"),
-                                                                      shiny::tags$h3(shiny::textOutput(paste0(id, "-stim")))))
-                                    },
+                                    shinyjs::hidden(shiny::tags$div(id = paste0(id, "-stimDiv"),
+                                                                    style = paste0("text-align:", align,";"),
+                                                                    shiny::tags$h3(shiny::textOutput(paste0(id, "-stim"))))),
 
                                     shiny::actionButton(paste0(id, "-start"), label = startText,
                                                         style = paste0("color: ", gplots::col2hex(startTextCol),

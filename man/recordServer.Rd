@@ -32,6 +32,61 @@ The server function for recording user audio enables the 'stop' button after the
 \note{
 The "start" and "stop" buttons from this module can be accessed in the server code with the "id" of the module as follows: \code{input[["id-start"]]} or \code{input[["id-stop"]]}
 }
+\examples{
+if (interactive()) {
+  library(shiny)
+  library(shinyjs)
+  ui <- fluidPage(
+    actionButton("begin", "BEGIN"),
+    recordUI(id ="rec")
+  )
+
+  # Using the default "NULL" trigger argument, the record server function will save
+  # a new file every time the participant clicks start,
+  # with a new name generated each time a participant clicks start.
+  server <- function(input, output, session) {
+    recording <- recordServer(id ="rec",
+                          outPrefix = paste0("www/rec_samp"))
+
+    # You'll need to make the recording interface visible though!
+    # Which can be accomplished with shinyjs::showElement()
+    observeEvent(input$begin, {
+      showElement("rec")
+    })
+  }
+ shinyApp(ui = ui, server = server)
+}
+
+# Alternatively an explicit trigger argument can be set as shown below
+if (interactive()) {
+  library(shiny)
+  library(shinyjs)
+
+  ui <- fluidPage(
+    actionButton("begin", "BEGIN"),
+    recordUI(id ="rec")
+  )
+
+  # Now a new filename will be used if and only if the participant clicks "begin"
+  # Otherwise, the same file will be over-written
+  # This is useful if we want to give a participant multiple attempts at recording...
+  server <- function(input, output, session) {
+    recording <- recordServer(id ="rec",
+                          trigger = reactive(input$begin),
+                          outPrefix = paste0("www/rec_samp"))
+
+    # But let's say we don't want them to have more than 3 attempts to record the file
+    # We can do this by attaching an event to the "stop" button of the recorder,
+    # which is saved in the apps input list as "(id)-stop"
+    observeEvent(input[["rec-stop"]], {
+      if (recording()$n == 3) {
+        hide("rec")
+      }
+    })
+  }
+ shinyApp(ui = ui, server = server)
+}
+}
 \seealso{
 Must be used with \code{\link{recordUI}}.
 

@@ -58,7 +58,7 @@
 #'
 #'     # But let's say we don't want them to have more than 3 attempts to record the file
 #'     # We can do this by attaching an event to the "stop" button of the recorder,
-#'     # which is saved in the apps input list as "{id of record*()}-stop"
+#'     # which is saved in the apps input list as "(id)-stop"
 #'     observeEvent(input[["rec-stop"]], {
 #'       if (recording()$n == 3) {
 #'         hide("rec")
@@ -143,7 +143,7 @@ recordServer <- function(id = "record",
     shiny::observeEvent(session$input[[paste0(id, record_rvs$n, "-ready")]], {
       shinyjs::delay(500, shinyjs::enable(paste0(id, "-stop")))
       if (!is.null(writtenStim)) {
-        session$output$stim <- shiny::renderText(as.character(writtenStim))
+        session$output[[paste0(id, "-stim")]] <- shiny::renderText({as.character(writtenStim)})
         shinyjs::delay(as.numeric(writtenDelay),
                        shinyjs::showElement(paste0(id, "-stimDiv")))
       }
