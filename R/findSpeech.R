@@ -31,6 +31,7 @@ findSpeech <- function(wave,
 
   env_min <- env_df %>% dplyr::filter(env >= minAmp)
 
+  markers <- list()
   if (nrow(env_min) < (wave@samp.rate/1000)) {
     markers$end_s <- NA
     markers$begin_s <- NA
@@ -44,7 +45,6 @@ findSpeech <- function(wave,
                     len = sum(to_next)) %>% dplyr::ungroup() %>%
       dplyr::filter(len == max(len))
 
-    markers <- list()
     markers$end_s <- if (max(env500$sample)+endPad < max(env_df$sample)) {max(env500$sample) + endPad} else {max(env500$sample)}
     markers$begin_s <- if (min(env500$sample) > beginPad) {min(env500$sample) - beginPad} else {min(env500$sample)}
   }

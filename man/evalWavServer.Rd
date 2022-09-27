@@ -33,7 +33,7 @@ evalWavServer(
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 }
 \value{
-One of three character values: "pass"=recording of sufficient quality; "warn"=recording of insufficient quality, but the participant has had fewer attempts than the number of \code{tries}; or "fail"=the recording is of insufficient quality and the participant has used all available attempts.
+One of three reactive values: "pass"=recording of sufficient quality; "warn"=recording of insufficient quality, but the participant has had fewer attempts than the number of \code{tries}; or "fail"=the recording is of insufficient quality and the participant has used all available attempts.
 }
 \description{
 Give feedback to participants on recording quality
@@ -51,10 +51,10 @@ if (interactive()) {
 
   server <- function(input, output, session) {
     recording <- recordServer(id ="rec",
-                          trigger = reactive(input$begin),
-                          outPrefix = paste0("www/rec_samp"))
+                              trigger = reactive(input$begin),
+                              outPrefix = paste0("www/rec_samp"))
 
-    observeEvent(input$beginm {
+    observeEvent(input$begin, {
       disable("begin")
     })
 
@@ -68,26 +68,28 @@ if (interactive()) {
       result <- evalWavServer(wave = recording()$file,
                               tries = 2,
                               counter = recording()$n)
+      observeEvent(result(), {
+        # If the recording is not good enough, but the participant has had fewer 2 attempts
+        # the recording interface will remain visible,
+        # and the participant can overwrite the file with by creating a new recording.
+        # Otherwise...
+        if (result() != "warn") {
+          hide("rec")
+        }
 
-      # If the recording is not good enough, but the participant has had fewer 2 attempts
-      # the recording interface will remain visible,
-      # and the participant can overwrite the file with by creating a new recording.
-      # Otherwise...
-      if (result != "warn") {
-        hide("rec")
-      }
+        # If the recording is of sufficient quality,
+        # let the participant record a new file.
+        if (result() == "pass") {
+          enable("begin")
+        }
 
-      # If the recording is of sufficient quality,
-      # let the participant record a new file.
-      if (result == "pass") {
-        enable("begin")
-      }
-
-      # If all attempts have been used (result == "fail")
-      # and the recording is still insufficient,
-      # then keep everything hidden/disabled.
-
+        # If all attempts have been used (result == "fail")
+        # and the recording is still insufficient,
+        # then keep everything hidden/disabled.
+      })
     })
   }
+
+  shinyApp(ui = ui, server = server)
 }
 }

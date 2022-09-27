@@ -6,7 +6,6 @@
 \usage{
 recordUI(
   id = "record",
-  writtenStim = FALSE,
   startText = "RECORD",
   startTextCol = "white",
   startFillCol = "#228833",
