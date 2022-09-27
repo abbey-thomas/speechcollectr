@@ -5,6 +5,7 @@
 #' @param filename The name of the file containing the consent form text. This must be an HTML file stored in the app's `www` directory. If no filename is given, a generic consent text is used.
 #'
 #' @return A user interface that displays a custom consent form from a separate file, buttons for the participant to consent or decline, and (optionally) an opportunity for the participant to explicitly agree to audio recording.
+#' @note Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace `id` with the `id` you supplied for the module): `input[["id-agree"]]`.
 #' @export
 #' @seealso Must be used with \code{\link{consentServer}}. If `cons2rec = TRUE`, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
 #' @family Consent form module

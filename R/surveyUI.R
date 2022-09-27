@@ -14,115 +14,154 @@
 #'
 #' @examples
 #' library(shiny)
+#' library(shinyjs)
 #' data("demographics")
 #' write.csv(demographics, "demographics.csv", row.names = FALSE)
 #' # If you use your own survey file, run surveyPrep() first!
 #'
-#' ui <- fluidPage(
-#'   sidebarLayout(
-#'     sidebarPanel(width = 4,
-#'                  textOutput("age")),
-#'     mainPanel(width = 8,
-#'               actionButton("begin", "Begin"),
-#'               surveyUI(id = "survey",
-#'                        title = "Background Information Survey",
-#'                        questionFile = "demographics.csv",
-#'                        notListedLab = "Not listed:")
+#' # You can use IDs specified in `returnVals` to trigger events after the survey is submitted.
+#' if (interactive()) {
+#'   ui <- fluidPage(
+#'     useShinyjs(),
+#'     sidebarLayout(
+#'       sidebarPanel(width = 4,
+#'                    textOutput("age")),
+#'       mainPanel(width = 8,
+#'                 actionButton("begin", "Begin"),
+#'                 surveyUI(id = "survey",
+#'                          title = "Background Information Survey",
+#'                          questionFile = "demographics.csv",
+#'                          notListedLab = "Not listed:")
+#'       )
 #'     )
 #'   )
-#' )
-#' server <- function(input, output, session) {
-#'   answers <- surveyServer(id = "survey",
-#'                questionFile = questionFile,
-#'                notListedLab = "Not listed:",
-#'                outFile = "sample.rds",
-#'                trigger = reactive(input$begin),
-#'                returnVals = c("age", "sex"),
-#'                result = "clear")
-#'   observeEvent(answers$age, {
-#'     output$age <- renderText({paste0("You are ", answers$age, " years old.")})
-#'   })
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$begin, {
+#'       hide("begin")
+#'       # Show the survey when "begin" is clicked.
+#'       answers <- surveyServer(id = "survey",
+#'                               questionFile = "demographics.csv",
+#'                               notListedLab = "Not listed:",
+#'                               outFile = "sample.rds",
+#'                               returnVals = c("age", "sex"),
+#'                               result = "clear")
+#'
+#'       # Once an answer for "age" is submitted, show the answer in the sidebar panel.
+#'       observeEvent(answers$age, {
+#'         output$age <- renderText({paste0("You are ", answers$age, " years old.")})
+#'       })
+#'     })
+#'   }
+#'   shinyApp(ui = ui, server = server)
 #' }
-#' shinyApp(ui = ui, server = server)
-surveyUI <- function(id = "survey",
-                     questionFile,
-                     title = "Survey",
-                     subtitle = "Please answer the questions below. Questions marked with * are required.",
-                     notListedLab = NULL,
-                     requiredLab = "*",
-                     submitLab = "SUBMIT") {
+#'
+#' # Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+#' if (interactive()) {
+#'   ui <- fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(width = 4,
+#'                    textOutput("age")),
+#'       mainPanel(width = 8,
+#'                 actionButton("begin", "Begin"),
+#'                 surveyUI(id = "survey",
+#'                          title = "Background Information Survey",
+#'                          questionFile = "demographics.csv",
+#'                          notListedLab = "Not listed:")
+#'       )
+#'     )
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$begin, {
+#'       answers <- surveyServer(id = "survey",
+#'                               questionFile = "demographics.csv",
+#'                               notListedLab = "Not listed:",
+#'                               outFile = "sample.rds",
+#'                               returnVals = c("age", "sex"),
+#'                               result = "hide")
+#'
+#'       observeEvent(input[["survey-submit"]], {
+#'         output$age <- renderText({paste0("You are ", answers$age, " years old.")})
+#'       })
+#'     })
+#'   }
+#'   shinyApp(ui = ui, server = server)
+#' }
+surveyUI <- function (id = "survey",
+                      questionFile,
+                      title = "Survey",
+                      subtitle = "Please answer the questions below. Questions marked with * are required.",
+                      notListedLab = NULL,
+                      requiredLab = "*",
+                      submitLab = "SUBMIT")
+{
   ns <- shiny::NS(id)
-
   qs <- read.csv(file = questionFile) %>%
-    dplyr::mutate(priority = ifelse(priority == "required"|priority == "req", "r",
-                                    ifelse(priority == "optional"|priority == "opt", "o",
+    dplyr::mutate(priority = ifelse(priority ==
+                                      "required" | priority == "req", "r",
+                                    ifelse(priority == "optional" | priority == "opt", "o",
                                            as.character(priority)))) %>%
-    dplyr::mutate(type = ifelse(type == "textInput"|type == "text", "t",
-                                ifelse(type == "selectInput"|type == "select", "s",
-                                       ifelse(type == "numericInput"|type == "numeric", "n",
-                                              ifelse(type == "radioButtons"|type == "radio", "r",
-                                                     ifelse(type == "checkboxGroupInput"|type == "checkbox", "c",
+    dplyr::mutate(type = ifelse(type == "textInput" | type == "text", "t",
+                                ifelse(type == "selectInput" | type == "select", "s",
+                                       ifelse(type == "numericInput" | type == "numeric", "n",
+                                              ifelse(type == "radioButtons" |  type == "radio", "r",
+                                                     ifelse(type == "checkboxGroupInput" |  type == "checkbox", "c",
                                                             as.character(type))))))) %>%
     dplyr::mutate(across(everything(), .fns = as.character)) %>%
     dplyr::mutate(label = ifelse(priority == "r" & !is.null(requiredLab),
-                                 paste0(label, " <span style=color:#CC3311>", requiredLab, "</span>"),
-                                 as.character(label)))
-
+                                 paste0(label, " <span style=color:#CC3311>", requiredLab,
+                                        "</span>"), as.character(label)))
   qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
-  ui <- shiny::tagList(
-    shinyjs::useShinyjs(),
-    shinyjs::hidden(htmltools::tags$div(id = ns("survey_div"),
-                        htmltools::tags$h1(id = ns("title"), title),
-                        htmltools::tags$h3(id = ns("subtitle"), subtitle),
-                        htmltools::tags$br(),
-                        lapply(seq_along(qsl), function(i) {
-                          if (qsl[[i]]$type != "t") {
-                            opts <- gsub(", ", ",", qsl[[i]]$options)
-                            opts <- c(unlist(strsplit(opts, ",")))
-                          }
+  ui <- shiny::tagList(shinyjs::useShinyjs(),
+                       shinyjs::hidden(
+                         htmltools::tags$div(id = ns("survey_div"),
+                                             htmltools::tags$h1(id = ns("title"), title),
+                                             htmltools::tags$h3(id = ns("subtitle"),  subtitle),
+                                             htmltools::tags$br(), lapply(seq_along(qsl), function(i) {
+                                               if (qsl[[i]]$type != "t") {
+                                                 opts <- gsub(", ", ",", qsl[[i]]$options)
+                                                 opts <- c(unlist(strsplit(opts, ",")))
+                                               }
+                                               if (qsl[[i]]$type == "n") {
+                                                 opts <- as.numeric(opts)
+                                                 opts <- c(opts[1]:opts[2])
+                                               }
+                                               if (qsl[[i]]$type == "r") {
+                                                 vals <- gsub("[^[:alnum:]]", "", opts)
+                                               }
 
-                          if (qsl[[i]]$type == "n") {
-                            opts <- as.numeric(opts)
-                            opts <- c(opts[1]:opts[2])
-                          }
+                                               if (qsl[[i]]$type != "t" & qsl[[i]]$type != "r") {
+                                                 opts <- c("", opts)
+                                               }
 
-                          if (qsl[[i]]$type == "r") {
-                            vals <- gsub("[^[:alnum:]]", "", opts)
-                          }
-
-                          #if (qsl[[i]]$type != "t") {
-                           # opts <- c("", opts)
-                          #}
-
-                          if (qsl[[i]]$type == "t") {
-                            input <- shiny::textInput(inputId = ns(qsl[[i]]$id),
-                                                      label = HTML(qsl[[i]]$label),
-                                                      width = '100%')
-                          } else if (qsl[[i]]$type == "s"|qsl[[i]]$type == "n") {
-                            input <- shiny::selectInput(inputId = ns(qsl[[i]]$id),
-                                                        label = HTML(qsl[[i]]$label),
-                                                        choices = opts,
-                                                        selected = character())
-                          } else if (qsl[[i]]$type == "r") {
-                            input <- shiny::radioButtons(inputId = ns(qsl[[i]]$id),
-                                                         label = HTML(qsl[[i]]$label),
-                                                         width = '100%',
-                                                         choiceNames = opts,
-                                                         choiceValues = vals,
-                                                         selected = character())
-                          } else {
-                            input <- shiny::checkboxGroupInput(inputId = ns(qsl[[i]]$id),
-                                                               label = HTML(qsl[[i]]$label),
-                                                               width = '100%',
-                                                               choiceNames = opts,
-                                                               choiceValues = vals,
-                                                               selected = character())
-                          }
-
-                          return(input)
-                        }),
-                        shinyjs::disabled(shiny::actionButton(ns("submit"), submitLab)),
-                        htmltools::tags$hr()))
-  )
+                                               if (qsl[[i]]$type == "t") {
+                                                 input <- shiny::textInput(inputId = ns(qsl[[i]]$id),
+                                                                           label = HTML(qsl[[i]]$label),
+                                                                           width = "100%")
+                                               } else if (qsl[[i]]$type == "s" | qsl[[i]]$type ==  "n") {
+                                                 input <- shiny::selectInput(inputId = ns(qsl[[i]]$id),
+                                                                             label = HTML(qsl[[i]]$label),
+                                                                             choices = opts,
+                                                                             selected = character())
+                                               } else if (qsl[[i]]$type == "r") {
+                                                 input <- shiny::radioButtons(inputId = ns(qsl[[i]]$id),
+                                                                              label = HTML(qsl[[i]]$label),
+                                                                              width = "100%",
+                                                                              choiceNames = opts,
+                                                                              choiceValues = vals,
+                                                                              selected = character())
+                                               } else {
+                                                 input <- shiny::checkboxGroupInput(inputId = ns(qsl[[i]]$id),
+                                                                                    label = HTML(qsl[[i]]$label),
+                                                                                    width = "100%",
+                                                                                    choiceNames = opts,
+                                                                                    choiceValues = vals,
+                                                                                    selected = character())
+                                               }
+                                               return(input)
+                                             }),
+                                             shinyjs::disabled(shiny::actionButton(ns("submit"), submitLab)),
+                                             htmltools::tags$hr())))
   return(ui)
 }

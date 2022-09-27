@@ -29,43 +29,50 @@ evalWav <- function(wave,
 
   markers <- findSpeech(wave)
 
-  snr <- getSNR(wave,
-                begin = markers$begin_s,
-                end = markers$end_s)
-
-  clipped <- clipCheck(wave, return = "proportion")
-
-
-  if (!is.null(utteranceTG)) {
-    tg <- uttTG(wave, begin = markers$begin_s,
-                          end = markers$end_s,
-                          outfile = utteranceTG)
-  } else {
+  if (is.na(markers$begin_s)) {
+    snr <- NA
+    clipped <- NA
     tg <- NULL
-  }
-
-  if (!is.null(trim)) {
-    trimmed <- trimWav(wave, begin = markers$begin_s,
-                          end = markers$end_s,
-                          outfile = trim)
-  } else {
-    trimmed <- NULL
-  }
-
-  if (!is.null(plotOsc)) {
-    df <- data.frame(amplitude = as.numeric(wave@left),
-                     time = (1:length(wave@left))/wave@samp.rate)
-    t1 <- round((markers$begin_s/wave@samp.rate), digits = 3)
-    t2 <- round((markers$end_s/wave@samp.rate), digits = 3)
-    subtitle <- paste0("Beginning = ", t1, "s. End = ", t2, "s.")
-    title <- paste0(plotOsc)
-    plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = amplitude)) +
-      ggplot2::geom_path() + ggplot2::geom_vline(ggplot2::aes(xintercept = t1),
-                               color = "green") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = t2), color = "red") +
-      ggplot2::labs(title = title, subtitle = subtitle)
-  } else {
     plot <- NULL
+  } else {
+    snr <- getSNR(wave,
+                  begin = markers$begin_s,
+                  end = markers$end_s)
+
+    clipped <- clipCheck(wave, return = "proportion")
+
+
+    if (!is.null(utteranceTG)) {
+      tg <- uttTG(wave, begin = markers$begin_s,
+                  end = markers$end_s,
+                  outfile = utteranceTG)
+    } else {
+      tg <- NULL
+    }
+
+    if (!is.null(trim)) {
+      trimmed <- trimWav(wave, begin = markers$begin_s,
+                         end = markers$end_s,
+                         outfile = trim)
+    } else {
+      trimmed <- NULL
+    }
+
+    if (!is.null(plotOsc)) {
+      df <- data.frame(amplitude = as.numeric(wave@left),
+                       time = (1:length(wave@left))/wave@samp.rate)
+      t1 <- round((markers$begin_s/wave@samp.rate), digits = 3)
+      t2 <- round((markers$end_s/wave@samp.rate), digits = 3)
+      subtitle <- paste0("Beginning = ", t1, "s. End = ", t2, "s.")
+      title <- paste0(plotOsc)
+      plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = amplitude)) +
+        ggplot2::geom_path() + ggplot2::geom_vline(ggplot2::aes(xintercept = t1),
+                                                   color = "green") +
+        ggplot2::geom_vline(ggplot2::aes(xintercept = t2), color = "red") +
+        ggplot2::labs(title = title, subtitle = subtitle)
+    } else {
+      plot <- NULL
+    }
   }
 
   return(list(

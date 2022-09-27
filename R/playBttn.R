@@ -6,6 +6,8 @@
 #' @param label An optional text label to add to the button. Defaults to blank. NOTE: If icon is `NULL`, this variable should be given a value explicitly.
 #' @param inline Boolean. If FALSE (the default), the oause button will be on its own line in the UI (i.e., wrapped in a `div` tag). If TRUE, the button will be on a line with the preceeding shiny UI object (i.e., wrapped in a `span` tag).
 #' @param icon An optional `shiny::icon()` to add to the button. Defaults to the font-awesome "play" icon. NOTE: If no text label is present, icon cannot be null.
+#' @param fill Background color for the play button. Must be a valid color name or hexidecimal code.
+#' @param textCol Text or icon color for the label on the play button.
 #'
 #' @return An audio file with the ID `audioId` will be added to the list of input values. On the server side of a shiny app, this function returns an integer of class "shinyActionButtonValue", which means it can be used in all the ways an ordinary shiny action button can (e.g., you can add functions to be called when the button is pressed with `shiny::observeEvent()` and `shiny::eventReactive`).
 #' @export
@@ -60,9 +62,14 @@
 #'
 #' shinyApp(ui = ui, server = server)
 #' }
-playBttn <- function(inputId, src, audioId, label = "",
-                     inline = FALSE, icon = "play",
-                     fill = "#228833", textCol = "white") {
+playBttn <- function(inputId,
+                     src,
+                     audioId,
+                     label = "",
+                     inline = FALSE,
+                     icon = "play",
+                     fill = "#228833",
+                     textCol = "white") {
   if (!is.null(fill) & tryCatch(is.matrix(col2rgb(fill)),
                                     error = function(e) FALSE) == FALSE) {
     stop("Error: fill argument must be a valid color name or hexadecimal code.")
@@ -71,6 +78,10 @@ playBttn <- function(inputId, src, audioId, label = "",
   if (!is.null(textCol) & tryCatch(is.matrix(col2rgb(textCol)),
                                        error = function(e) FALSE) == FALSE) {
     stop("Error: textCol argument must be a valid color name or hexadecimal code.")
+  }
+
+  if (grepl("^www/", src)) {
+    src <- sub("^www/", "",src)
   }
 
   jsCode <- htmltools::HTML(

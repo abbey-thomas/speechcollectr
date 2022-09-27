@@ -29,18 +29,25 @@ findSpeech <- function(wave,
                        env = seewave::env(wave, plot = FALSE),
                        sample = 1:length(wave@left))
 
-  env500 <- env_df %>% dplyr::filter(env >= minAmp) %>%
-    dplyr::mutate(to_next = lead(sample)-sample,
-                  to_next = ifelse(is.na(to_next), 1, to_next),
-                  count = ifelse(to_next < maxPause, 1, 0),
-                  grp = data.table::rleid(count)) %>% dplyr::group_by(grp) %>%
-    dplyr::mutate(to_next = ifelse(count == 0, 0, to_next),
-                  len = sum(to_next)) %>% dplyr::ungroup() %>%
-    dplyr::filter(len == max(len))
+  env_min <- env_df %>% dplyr::filter(env >= minAmp)
 
-  markers <- list()
-  markers$end_s <- if (max(env500$sample)+endPad < max(env_df$sample)) {max(env500$sample) + endPad} else {max(env500$sample)}
-  markers$begin_s <- if (min(env500$sample) > beginPad) {min(env500$sample) - beginPad} else {min(env500$sample)}
+  if (nrow(env_min) < (wave@samp.rate/1000)) {
+    markers$end_s <- NA
+    markers$begin_s <- NA
+  } else {
+    env500 <- env_df %>% dplyr::filter(env >= minAmp) %>%
+      dplyr::mutate(to_next = lead(sample)-sample,
+                    to_next = ifelse(is.na(to_next), 1, to_next),
+                    count = ifelse(to_next < maxPause, 1, 0),
+                    grp = data.table::rleid(count)) %>% dplyr::group_by(grp) %>%
+      dplyr::mutate(to_next = ifelse(count == 0, 0, to_next),
+                    len = sum(to_next)) %>% dplyr::ungroup() %>%
+      dplyr::filter(len == max(len))
+
+    markers <- list()
+    markers$end_s <- if (max(env500$sample)+endPad < max(env_df$sample)) {max(env500$sample) + endPad} else {max(env500$sample)}
+    markers$begin_s <- if (min(env500$sample) > beginPad) {min(env500$sample) - beginPad} else {min(env500$sample)}
+  }
 
   return(markers)
 }

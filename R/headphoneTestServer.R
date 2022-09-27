@@ -17,8 +17,8 @@
 #' @seealso \code{\link{wwwPrep}}, \code{\link{headphoneTestUI}}
 #' @export
 #' @references
-#' Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & Chait, M. 2020. An online headphone screening test based on dichotic pitch.\emph{Behavior Research Methods} 53, 1551-1562 (2021).
-#' Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
+#' Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & Chait, M. 2021. An online headphone screening test based on dichotic pitch.\emph{Behavior Research Methods 53}, 1551-1562.\cr
+#' Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics 79}, 2064-2072.
 #'
 #' @examples
 #' ## First use wwwPrep() to get the data for the type of headphone screen you want.
