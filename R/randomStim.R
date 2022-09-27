@@ -104,35 +104,16 @@ randomStim <- function(dataFile,
                        n_blocks = NULL,
                        blocksSameOrd = FALSE,
                        outFile = NULL) {
-  if (!is.data.frame(dataFile)){
-    if (!grepl("csv$", dataFile) & !grepl("rds$", dataFile))
-      stop("Argument 'dataFile' must be an object of class data.frame, or a path to an existing 'csv' or 'rds' file.")
-    if (!file.exists(dataFile))
-      stop(paste0("The file '", dataFile, "' does not exist"))
-  }
-  if (!is.null(outFile) & !grepl("csv$", outFile) & !grepl("rds$", outFile))
-    stop("Argument 'outFile' must be of the format '.csv' or '.rds'.")
-  if (is.null(blockCol) & !is.integer(n_practice))
-    stop("Argument 'n_practice' must be a positive integer representing the number of practice trials.")
-  if (is.null(blockCol) & !is.integer(n_perBlock))
-    stop("Argument 'n_perBlock' must be a positive integer representing the number of trials per block.")
-  if (is.null(blockCol) & !is.integer(n_blocks))
-    stop("Argument 'n_blocks' must be a positive integer representing the number of blocks in the experiment.")
-  if (is.null(blockCol) & is.null(n_perBlock) & is.null(n_blocks))
-    stop("You must specify either a column of `dataFile` as a key for which stimuli belong to which blocks, or numbers of stimuli and blocks using the `n_perBlock` and `n_blocks` arguments.")
 
   if (!is.data.frame(dataFile)) {
     if (grepl("csv$", dataFile)) {
       df_init <- read.csv(dataFile)
     } else if (grepl("rds$", dataFile)){
       df_init <- readRDS(dataFile)
-      }
+    }
   } else {
     df_init <- dataFile
   }
-
-  if (!is.null(blockCol) & !blockCol %in% colnames(df_init))
-    stop("Argument `blockCol` must be equal to the name of a column in the input datafile.")
 
   if (!is.null(blockCol)) {
     grps <- df_init %>%
@@ -166,21 +147,24 @@ randomStim <- function(dataFile,
 
   if (isTRUE(blocksSameOrd)) {
     #if (length(n_perBlock) > 1 | !is.integer((n_blocks*n_perBlock)/(nrow(df_init)-n_practice)))
-      #stop("To use the same order across blocks, the number of experimental trials must be the same across blocks and the same as or an integer multiple of the total number of rows in `dataFile` minus `n_practice`.")
+    #stop("To use the same order across blocks, the number of experimental trials must be the same across blocks and the same as or an integer multiple of the total number of rows in `dataFile` minus `n_practice`.")
     ord_df <- data.frame(block = unlist(mapply(rep,
                                                c(grps$block),
                                                grps$b_count)),
                          ord = c(seq.int(length.out = n_practice),
                                  rep(sample(c(1:n_perBlock),
                                             size = n_perBlock),
-                                     times = n_blocks)))
+                                     times = n_blocks))) %>%
+      tidyr::pivot_longer(cols = tidyr::contains("block"),
+                          values_to = "block") %>%
+      dplyr::select(block, ord) %>% dplyr::arrange(block)
   } else {
-    ord_df <- data.frame(block = unlist(mapply(rep,
-                                            c(grps$block),
-                                            grps$b_count)),
-                      ord = unlist(sapply(grps$b_count, function(i){
-                        sample(c(1:i), i)
-                      })))
+    ord_df <- data.frame(block = c(mapply(rep,
+                                          c(grps$block),
+                                          grps$b_count)),
+                         ord = c(sapply(grps$b_count, function(i){
+                           sample(c(1:i), i)
+                         })))
   }
 
   if (nrow(df_init) < (n_practice + (n_perBlock*n_blocks))) {

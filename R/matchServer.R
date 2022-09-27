@@ -205,7 +205,7 @@ matchServer <- function(id = "game",
 
           if (rvs$clicked == targs$items[as.numeric(rvs$counter)]) {
             rt$stop(paste0("trial", (rvs$score+1)))
-            times(bind_rows(times(), rt$getEvent(paste0("trial", (rvs$score+1)))))
+            times(dplyr::bind_rows(times(), rt$getEvent(paste0("trial", (rvs$score+1)))))
 
             if (rvs$score < n2find) {
               rvs$score <- rvs$score + 1
