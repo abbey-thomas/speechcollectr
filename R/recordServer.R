@@ -77,8 +77,7 @@ recordServer <- function(id = "record",
 
   shiny::observe({
     shiny::req(record_rvs$n)
-    js$webAudioRecorder(ets ="wav",
-                        recId = paste0(id, record_rvs$n),
+    js$webAudioRecorder(recId = paste0(id, record_rvs$n),
                         startId = paste0(id, "-file"),
                         stopId = paste0(id, "-stop"))
   })
