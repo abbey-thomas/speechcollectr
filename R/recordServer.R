@@ -35,6 +35,7 @@
 #'       showElement("rec")
 #'     })
 #'   }
+#'  shinyApp(ui = ui, server = server)
 #' }
 #'
 #' # Alternatively an explicit trigger argument can be set as shown below
@@ -64,6 +65,7 @@
 #'       }
 #'     })
 #'   }
+#'  shinyApp(ui = ui, server = server)
 #' }
 recordServer <- function(id = "record",
                          trigger = NULL,

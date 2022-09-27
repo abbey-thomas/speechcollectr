@@ -40,6 +40,7 @@
 #'       showElement("rec")
 #'     })
 #'   }
+#'  shinyApp(ui = ui, server = server)
 #' }
 #'
 #' # Alternatively an explicit trigger argument can be set as shown below
@@ -69,6 +70,7 @@
 #'       }
 #'     })
 #'   }
+#' shinyApp(ui = ui, server = server)
 #' }
 #'
 #' @importFrom grDevices col2rgb
@@ -185,7 +187,7 @@ function stopRecording()
 
 }"
 
-  shiny::addResourcePath("WAR", "WAR")
+  shiny::addResourcePath("WAR", system.file("WAR", package = "speechcollectr"))
 
   ui <- shiny::tags$span(
     shiny::tags$head(shiny::includeScript("WAR/WebAudioRecorder.min.js"),
