@@ -19,6 +19,9 @@ A user interface that displays a custom consent form from a separate file, butto
 \description{
 Shiny UI function for displaying a participant consent form
 }
+\note{
+Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace \code{id} with the \code{id} you supplied for the module): \code{input[["id-agree"]]}.
+}
 \examples{
 if (interactive()) {
   ui <- shiny::fluidPage(

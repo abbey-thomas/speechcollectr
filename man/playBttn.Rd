@@ -27,6 +27,10 @@ playBttn(
 \item{inline}{Boolean. If FALSE (the default), the oause button will be on its own line in the UI (i.e., wrapped in a \code{div} tag). If TRUE, the button will be on a line with the preceeding shiny UI object (i.e., wrapped in a \code{span} tag).}
 
 \item{icon}{An optional \code{shiny::icon()} to add to the button. Defaults to the font-awesome "play" icon. NOTE: If no text label is present, icon cannot be null.}
+
+\item{fill}{Background color for the play button. Must be a valid color name or hexidecimal code.}
+
+\item{textCol}{Text or icon color for the label on the play button.}
 }
 \value{
 An audio file with the ID \code{audioId} will be added to the list of input values. On the server side of a shiny app, this function returns an integer of class "shinyActionButtonValue", which means it can be used in all the ways an ordinary shiny action button can (e.g., you can add functions to be called when the button is pressed with \code{shiny::observeEvent()} and \code{shiny::eventReactive}).

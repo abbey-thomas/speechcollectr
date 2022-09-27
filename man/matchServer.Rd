@@ -6,7 +6,6 @@
 \usage{
 matchServer(
   id = "game",
-  counter,
   triggerInit,
   triggerReturn,
   result = c("hide", "disable"),
@@ -25,11 +24,9 @@ matchServer(
 \arguments{
 \item{id}{The input ID associated with the matching game module. Must match the ID of \code{matchUI()}.}
 
-\item{counter}{The reactive value where we should store the number of matches the player has found so far.}
+\item{triggerInit}{The reactive expression that triggers the initial appearance of the matching game. Must be created with or wrapped in \code{reactive()}.}
 
-\item{triggerInit}{The reactive value that triggers the initial appearance of the matching game. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
-
-\item{triggerReturn}{The reactive value or conditional statement that triggers the reappearance of the matching game UI. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+\item{triggerReturn}{The reactive expression that triggers the reappearance of the matching game UI. Must be created with or wrapped in \code{reactive()}.}
 
 \item{result}{A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".}
 
@@ -54,7 +51,7 @@ matchServer(
 \item{fill}{A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).}
 }
 \value{
-A list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
+A reactive list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
 }
 \description{
 Matching Game Server Function
@@ -63,41 +60,37 @@ Matching Game Server Function
 library(shiny)
 library(shinyjs)
 
+# For the sake of a short example, we'll only require 3 matches.
 ui <- fluidPage(
   fluidRow(
     column(width = 8, offset = 2,
            actionButton("start", "Start"),
            hidden(actionButton("again", "Play Again")),
-           matchUI(n2find = 24)
+           matchUI(n2find = 3)
            )
   )
 )
 
 server <- function(input, output, session) {
-  counter <- reactiveValues(n = 1)
   matches <- matchServer(triggerInit = reactive(input$start),
               triggerReturn = reactive(input$again),
-              counter = reactive(counter$n),
-              n2find = 24,
+              n2find = 3,
               randomGrid = TRUE,
               lab_type = "icon",
               result = "hide")
 
   observe({
-    if (matches$n_found() > 0) {
+    if (matches()$n_found > 0) {
       showElement("again")
     }
-  })
-
-  observeEvent(input$again, {
-    counter$n <- counter$n + 1
   })
 }
 
 shinyApp(ui = ui, server = server)
+
 }
 \references{
-Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
+Paul Tol's colorblind-friendly palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
 }
 \seealso{
 Must be used with \code{\link{matchUI}}.

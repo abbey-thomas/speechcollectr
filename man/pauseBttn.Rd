@@ -13,7 +13,7 @@ pauseBttn(inputId, audioId, label = "", inline = FALSE, icon = "pause")
 
 \item{label}{An optional text label to add to the button. Defaults to blank. NOTE: If icon is \code{NULL}, this variable should be given a value explicitly.}
 
-\item{inline}{Boolean. If FALSE (the default), the oause button will be on its own line in the UI (i.e., wrapped in a \code{div} tag). If TRUE, the button will be on a line with the preceeding shiny UI object (i.e., wrapped in a \code{span} tag).}
+\item{inline}{Boolean. If FALSE (the default), the pause button will be on its own line in the UI (i.e., wrapped in a \code{div} tag). If TRUE, the button will be on a line with the preceeding shiny UI object (i.e., wrapped in a \code{span} tag).}
 
 \item{icon}{An optional \code{shiny::icon()} to add to the button. Defaults to the font-awesome "pause" icon. NOTE: If no text label is present, icon cannot be null.}
 }

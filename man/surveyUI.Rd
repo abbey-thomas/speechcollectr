@@ -40,34 +40,78 @@ In a Shiny App, this should always be used with \code{\link{surveyServer}}. Befo
 }
 \examples{
 library(shiny)
+library(shinyjs)
 data("demographics")
 write.csv(demographics, "demographics.csv", row.names = FALSE)
 # If you use your own survey file, run surveyPrep() first!
 
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(width = 4,
-                 textOutput("age")),
-    mainPanel(width = 8,
-              actionButton("begin", "Begin"),
-              surveyUI(id = "survey",
-                       title = "Background Information Survey",
-                       questionFile = "demographics.csv",
-                       notListedLab = "Not listed:")
+# You can use IDs specified in `returnVals` to trigger events after the survey is submitted.
+if (interactive()) {
+  ui <- fluidPage(
+    useShinyjs(),
+    sidebarLayout(
+      sidebarPanel(width = 4,
+                   textOutput("age")),
+      mainPanel(width = 8,
+                actionButton("begin", "Begin"),
+                surveyUI(id = "survey",
+                         title = "Background Information Survey",
+                         questionFile = "demographics.csv",
+                         notListedLab = "Not listed:")
+      )
     )
   )
-)
-server <- function(input, output, session) {
-  answers <- surveyServer(id = "survey",
-               questionFile = questionFile,
-               notListedLab = "Not listed:",
-               outFile = "sample.rds",
-               trigger = reactive(input$begin),
-               returnVals = c("age", "sex"),
-               result = "clear")
-  observeEvent(answers$age, {
-    output$age <- renderText({paste0("You are ", answers$age, " years old.")})
-  })
+
+  server <- function(input, output, session) {
+    observeEvent(input$begin, {
+      hide("begin")
+      # Show the survey when "begin" is clicked.
+      answers <- surveyServer(id = "survey",
+                              questionFile = "demographics.csv",
+                              notListedLab = "Not listed:",
+                              outFile = "sample.rds",
+                              returnVals = c("age", "sex"),
+                              result = "clear")
+
+      # Once an answer for "age" is submitted, show the answer in the sidebar panel.
+      observeEvent(answers$age, {
+        output$age <- renderText({paste0("You are ", answers$age, " years old.")})
+      })
+    })
+  }
+  shinyApp(ui = ui, server = server)
 }
-shinyApp(ui = ui, server = server)
+
+# Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+if (interactive()) {
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(width = 4,
+                   textOutput("age")),
+      mainPanel(width = 8,
+                actionButton("begin", "Begin"),
+                surveyUI(id = "survey",
+                         title = "Background Information Survey",
+                         questionFile = "demographics.csv",
+                         notListedLab = "Not listed:")
+      )
+    )
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$begin, {
+      answers <- surveyServer(id = "survey",
+                              questionFile = "demographics.csv",
+                              notListedLab = "Not listed:",
+                              outFile = "sample.rds",
+                              returnVals = c("age", "sex"),
+                              result = "hide")
+
+      observeEvent(input[["survey-submit"]], {
+        output$age <- renderText({paste0("You are ", answers$age, " years old.")})
+      })
+    })
+  }
+  shinyApp(ui = ui, server = server)
+}
 }

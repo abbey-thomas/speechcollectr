@@ -6,7 +6,7 @@
 \usage{
 consentServer(
   id = "consent",
-  trigger,
+  trigger = NULL,
   result = c("disable", "hide"),
   delayResponse = 1,
   agreeLab = "Agree",
@@ -47,6 +47,9 @@ A reactive value of type \code{integer} indicating whether the participant has g
 }
 \description{
 Shiny Server function for documenting participant consent
+}
+\note{
+Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace \code{id} with the \code{id} you supplied for the module): \code{input[["id-agree"]]}.
 }
 \examples{
 if (interactive()) {

@@ -10,12 +10,11 @@ surveyServer(
   notListedLab = NULL,
   outFile = NULL,
   returnVals = NULL,
-  trigger,
   result = c("clear", "hide")
 )
 }
 \arguments{
-\item{id}{The module id. Must be the same as \code{\link{surveyUI}}.}
+\item{id}{The module id. Must be the same as in \code{\link{surveyUI}}.}
 
 \item{questionFile}{A valid file path to an existing CSV file, formatted according to the instructions in \code{\link{surveyPrep}}. Must be the same as the one used in \code{\link{surveyUI}}.}
 
@@ -25,51 +24,93 @@ surveyServer(
 
 \item{returnVals}{Vector of inputs to return as reactive values. Must be a subset of the input IDs from the id column of \code{questionFile}.}
 
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
-
-\item{result}{Action to perform when the particpant clicks the submit button. Must be one of 'clear' (to clear the form) or 'hide' (to hide all form UI elements).}
+\item{result}{Action to perform when the participant clicks the submit button. Must be one of 'clear' (to clear the form) or 'hide' (to hide all form UI elements).}
 }
 \value{
-A CSV or RDS file containing the values input by the participant, and/or a list of reactive values specified by \code{returnVals}.
+A CSV or RDS file containing the values input by the participant as well as a character vector indicating the name of the file returned (same as supplied in \code{outFile}, unless \code{outFile} already exists; see note below), and/or a list of reactive values specified by \code{returnVals}.
 }
 \description{
 Server function for the survey module
 }
 \note{
-This function returns a file every time the submit button is clicked. Therefore, the \code{outFile} argument should be unique for each run of the function. We recommend pasting a unique ID number (perhaps from a reactive value) to a prefix to save a separate file for each participant. Though this creates many small files, these files can easily be processed in bulk during analysis, which is less risky than opening and appending to existing files when multiple users visit the app simultaneously!
+This function returns a file every time the submit button is clicked. To avoid over-writing files, the function will check if the file specified in \code{outfile} exists. To use a custom naming scheme for individual files (e.g., to name all files from the same participant with the same prefix), we recommend pasting a unique ID number (from a reactive value) to a prefix to save a separate file for each participant. Though this function creates many small files, these files can easily be processed in bulk during analysis, which is less risky than opening and appending to existing files when multiple users visit the app simultaneously! Events can be attached to the submit button from the survey*() functions using the value of the \code{id} argument in the following manner: \code{input[["id-submit"]]}.
 }
 \examples{
 library(shiny)
+library(shinyjs)
 data("demographics")
 write.csv(demographics, "demographics.csv", row.names = FALSE)
 # If you use your own survey file, run surveyPrep() first!
 
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(width = 4,
-                 textOutput("age")),
-    mainPanel(width = 8,
-              actionButton("begin", "Begin"),
-              surveyUI(id = "survey",
-                       title = "Background Information Survey",
-                       questionFile = "demographics.csv",
-                       notListedLab = "Not listed:")
+# You can use IDs specified in `returnVals` to trigger events after the survey is submitted.
+if (interactive()) {
+  ui <- fluidPage(
+    useShinyjs(),
+    sidebarLayout(
+      sidebarPanel(width = 4,
+                   textOutput("answer")),
+      mainPanel(width = 8,
+                actionButton("begin", "Begin"),
+                surveyUI(id = "survey",
+                         title = "Background Information Survey",
+                         questionFile = "demographics.csv",
+                         notListedLab = "Not listed:")
+      )
     )
   )
-)
-server <- function(input, output, session) {
-  answers <- surveyServer(id = "survey",
-               questionFile = questionFile,
-               notListedLab = "Not listed:",
-               outFile = "sample.rds",
-               trigger = reactive(input$begin),
-               returnVals = c("age", "sex"),
-               result = "clear")
-  observeEvent(answers$age, {
-    output$age <- renderText({paste0("You are ", answers$age, " years old.")})
-  })
+
+  server <- function(input, output, session) {
+    observeEvent(input$begin, {
+      hide("begin")
+      # Show the survey when "begin" is clicked.
+      answers <- surveyServer(id = "survey",
+                              questionFile = "demographics.csv",
+                              notListedLab = "Not listed:",
+                              outFile = "sample.rds",
+                              returnVals = c("age", "sex"),
+                              result = "clear")
+
+      # Once an answer for "age" is submitted, show the answer in the sidebar panel.
+      observeEvent(answers$age, {
+        output$answer <- renderText({paste0("Your answers were saved as ", answers$filename,". You are ", answers$age, " years old.")})
+      })
+    })
+  }
+  shinyApp(ui = ui, server = server)
 }
-shinyApp(ui = ui, server = server)
+
+# Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+if (interactive()) {
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(width = 4,
+                   textOutput("age")),
+      mainPanel(width = 8,
+                actionButton("begin", "Begin"),
+                surveyUI(id = "survey",
+                         title = "Background Information Survey",
+                         questionFile = "demographics.csv",
+                         notListedLab = "Not listed:")
+      )
+    )
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$begin, {
+      answers <- surveyServer(id = "survey",
+                              questionFile = "demographics.csv",
+                              notListedLab = "Not listed:",
+                              outFile = "sample.rds",
+                              returnVals = c("age", "sex"),
+                              result = "hide")
+
+      observeEvent(input[["survey-submit"]], {
+        output$age <- renderText({paste0("You are ", answers$age, " years old.")})
+      })
+    })
+  }
+  shinyApp(ui = ui, server = server)
+}
 }
 \seealso{
 \code{\link{surveyUI}}, \code{\link{surveyPrep}}

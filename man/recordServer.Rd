@@ -5,51 +5,32 @@
 \title{Server function for Recording User Audio}
 \usage{
 recordServer(
-  id = "recorder",
-  trigger,
-  result = "disable",
-  folder = ".",
-  filename,
+  id = "record",
+  trigger = NULL,
+  outPrefix,
   writtenStim = NULL,
-  writtenDelay = 500,
-  playback = FALSE
+  writtenDelay = 500
 )
 }
 \arguments{
 \item{id}{The input ID associated with the record module. Must be the same as the id of \code{recordUI()}.}
 
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+\item{trigger}{A reactive expression (i.e., something wrapped in "shiny::reactive()") that will trigger the recording interface to appear and run. Default is "NULL", so the module will only run (and output a uniquely named file) each time the user clicks start. If using the default NULL trigger, you must call "shinyjs::showElement()" to make the recording interface appear!}
 
-\item{folder}{Character. Where to store the audio file. Defaults to the path returned by \code{getwd()}}
-
-\item{filename}{Required. Character. The name of the file to be recorded. Do not specify a directory here. Instead, do that with the \code{folder} argument.}
+\item{outPrefix}{Character. Where to store the audio file. A character string indicating the portion of the filepath that will be appended to the front of the automatically generated numeric file identifier (unique for each file) and ".wav" suffix. Can indicate any subdirectory of the present working directory.}
 
 \item{writtenStim}{A character vector that you want a participant to read while recording.}
 
 \item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
-
-\item{playback}{Boolean. Should the participant be allowed to listen to the recording before submitting? Defaults to \code{FALSE}.}
-
-\item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 }
 \value{
-Saves a single-channel, 16-bit, 44.1 kHz sample rate WAV file with the specified \code{filename} in a directory specified by \code{folder}. If eval==TRUE, returns a pop-up telling the user how to improve their recording quality if it is not sufficient.
+In the case of a NULL trigger, returns a reactive expression containing two values: (1) \code{n}: the number of files recorded and (2) \code{file}: a character vector with length \code{n}, where each element is the name of a recorded wav file. If \code{trigger} argument is not NULL, returns a reactive expression containing: (1) \code{n}: the number of attempts at recording the current file and (2) \code{file}: the filename where only the most recent attempt is saved (previous attempts have been overwritten). Also returns a 16 bit, 44.1 kHz wav file in a filename comprising \code{outPrefix} and a unique four digit number.
 }
 \description{
 The server function for recording user audio enables the 'stop' button after the user begins recording and checks to make sure the user has given the website permission to record audio in their browser. Requires the UI \code{\link{recordUI}}.
 }
-\examples{
-if (interactive()) {
-ui <- shiny::fluidPage(
-  recordUI(id = "record")
-)
-
-server <- function(input, output, session) {
- recordServer(id = "record", filename = "sample.wav")
-}
-shiny::shinyApp(ui = ui, server = server)
-}
-
+\note{
+The "start" and "stop" buttons from this module can be accessed in the server code with the "id" of the module as follows: \code{input[["id-start"]]} or \code{input[["id-stop"]]}
 }
 \seealso{
 Must be used with \code{\link{recordUI}}.

@@ -31,34 +31,29 @@ Matching Game User Interface
 library(shiny)
 library(shinyjs)
 
+# For the sake of a short example, we'll only require 3 matches.
 ui <- fluidPage(
   fluidRow(
     column(width = 8, offset = 2,
            actionButton("start", "Start"),
            hidden(actionButton("again", "Play Again")),
-           matchUI(n2find = 24)
+           matchUI(n2find = 3)
            )
   )
 )
 
 server <- function(input, output, session) {
-  counter <- reactiveValues(n = 1)
   matches <- matchServer(triggerInit = reactive(input$start),
               triggerReturn = reactive(input$again),
-              counter = reactive(counter$n),
-              n2find = 24,
+              n2find = 3,
               randomGrid = TRUE,
               lab_type = "icon",
               result = "hide")
 
   observe({
-    if (matches$n_found() > 0) {
+    if (matches()$n_found > 0) {
       showElement("again")
     }
-  })
-
-  observeEvent(input$again, {
-    counter$n <- counter$n + 1
   })
 }
 

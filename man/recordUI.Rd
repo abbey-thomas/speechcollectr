@@ -5,7 +5,7 @@
 \title{Create UI to Record User Audio}
 \usage{
 recordUI(
-  id = "recorder",
+  id = "record",
   writtenStim = FALSE,
   startText = "RECORD",
   startTextCol = "white",
@@ -42,23 +42,13 @@ recordUI(
 \item{align}{One of 'left', 'center', or 'right'. Should the elements in this UI be left-, center-, or right-aligned?}
 }
 \value{
-A user interface containing buttons to control recording of participant audio.
+A user interface (initially hidden; see examples below or \code{\link{recordServer}} for details on how to trigger the appearance of this interface) containing buttons to control recording of participant audio.
 }
 \description{
 The user-interface side of the Shiny module to record user audio in Speech Production experiments. A participant chooses when to begin recording and when to stop by clicking the buttons created in this module. Requires the server-side function \code{\link{recordServer}}.
 }
-\examples{
-if (interactive()) {
-ui <- shiny::fluidPage(
-  recordUI(id = "record")
-)
-
-server <- function(input, output, session) {
- recordServer(id = "record", filename = "sample.wav")
-}
-shiny::shinyApp(ui = ui, server = server)
-}
-
+\note{
+The "start" and "stop" buttons from this module can be accessed in the server code with the "id" of the module as follows: \code{input[["id-start"]]} or \code{input[["id-stop"]]}
 }
 \seealso{
 Must be used with \code{\link{recordServer}}. Paul Tol's colorblind-safe palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.

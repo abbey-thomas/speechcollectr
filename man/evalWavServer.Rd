@@ -18,7 +18,7 @@ evalWavServer(
 \arguments{
 \item{wave}{Required. Either a \code{tuneR::Wave} object or a valid file path to an existing wav file.}
 
-\item{counter}{Required. A reactive value that tells this function how many tries a participant has had so far.}
+\item{counter}{Required. A (usually reactive) value that tells this function how many tries a participant has had so far.}
 
 \item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
 
@@ -33,41 +33,61 @@ evalWavServer(
 \item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 }
 \value{
-A boolean value indicating success (=1) or failure (=0) to produce a quality recording.
+One of three character values: "pass"=recording of sufficient quality; "warn"=recording of insufficient quality, but the participant has had fewer attempts than the number of \code{tries}; or "fail"=the recording is of insufficient quality and the participant has used all available attempts.
 }
 \description{
 Give feedback to participants on recording quality
 }
 \examples{
 if (interactive()) {
-ui <- shiny::fluidPage(
-  shiny::actionButton("go", "GO"),
-  recordUI(id = "record"),
-  shiny::actionButton("submit", "SUBMIT")
-)
+  library(shiny)
+  library(shinyjs)
 
-server <- function(input, output, session) {
- rvs <- shiny::reactiveValues(n=0)
+  ui <- fluidPage(
+    actionButton("begin", "BEGIN"),
+    recordUI(id ="rec"),
+    disabled(actionButton("submit", "SUBMIT"))
+  )
 
- shiny::observeEvent(input$go, {
-   rvs$rec <- recordServer(id = "record",
-                         trigger = shiny::reactive(input$go),
-                         filename = "sample.wav")
- })
+  server <- function(input, output, session) {
+    recording <- recordServer(id ="rec",
+                          trigger = reactive(input$begin),
+                          outPrefix = paste0("www/rec_samp"))
 
- shiny::observeEvent(input$submit, {
-   shiny::req(rvs$rec)
-   rvs$result <- evalWavServer(wave = "sample.wav",
-                               trigger = shiny::reactive(input$submit),
-                               counter = rvs$n)
- })
+    observeEvent(input$beginm {
+      disable("begin")
+    })
 
- shiny::observe({
-   shiny::req(rvs$result)
-   shinyjs::delay(500, {rvs$rec <- NULL})
- })
+    observe({
+      req(recording()$file)
+      enable("submit")
+    })
+
+    observeEvent(input$submit, {
+      disable("submit")
+      result <- evalWavServer(wave = recording()$file,
+                              tries = 2,
+                              counter = recording()$n)
+
+      # If the recording is not good enough, but the participant has had fewer 2 attempts
+      # the recording interface will remain visible,
+      # and the participant can overwrite the file with by creating a new recording.
+      # Otherwise...
+      if (result != "warn") {
+        hide("rec")
+      }
+
+      # If the recording is of sufficient quality,
+      # let the participant record a new file.
+      if (result == "pass") {
+        enable("begin")
+      }
+
+      # If all attempts have been used (result == "fail")
+      # and the recording is still insufficient,
+      # then keep everything hidden/disabled.
+
+    })
+  }
 }
-shiny::shinyApp(ui = ui, server = server)
-}
-
 }
