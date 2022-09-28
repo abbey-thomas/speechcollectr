@@ -159,42 +159,49 @@ surveyServer <- function (id = "survey",
       if (!is.null(outFile)) {
         if (file.exists(outFile)) {
           basen <- gsub("\\.[[:alpha:]]{3}$", "", outFile)
-        } else {
-          newFile <- outFile
-        }
-        if (grepl("rds$", outFile)) {
-          for (i in 0:9999){
-            if (file.exists(paste0(basen, formatC(i, width = 4,
-                                           format = "d", flag = "0"),
-                                   ".rds"))) {
-              next
-            } else {
-              saveRDS(formInfo(), paste0(basen, formatC(i, width = 4,
-                                                        format = "d", flag = "0"),
-                                         ".rds"))
-              newFile <- paste0(basen, formatC(i, width = 4,
-                                               format = "d", flag = "0"),
-                                ".rds")
-              break
+
+          if (grepl("rds$", outFile)) {
+            for (i in 0:9999){
+              if (file.exists(paste0(basen, formatC(i, width = 4,
+                                                    format = "d", flag = "0"),
+                                     ".rds"))) {
+                next
+              } else {
+                saveRDS(formInfo(), paste0(basen, formatC(i, width = 4,
+                                                          format = "d", flag = "0"),
+                                           ".rds"))
+                newFile <- paste0(basen, formatC(i, width = 4,
+                                                 format = "d", flag = "0"),
+                                  ".rds")
+                break
+              }
+            }
+          } else if (grepl("csv$", outFile)) {
+            for (i in 0:9999){
+              if (file.exists(paste0(basen,
+                                     formatC(i, width = 4,
+                                             format = "d", flag = "0"),
+                                     ".csv"))) {
+                next
+              } else {
+                write.csv(formInfo(),
+                          paste0(basen, formatC(i, width = 4,
+                                                format = "d", flag = "0"),
+                                 ".csv"), row.names = FALSE)
+                newFile <- paste0(basen, formatC(i, width = 4,
+                                                 format = "d", flag = "0"),
+                                  ".csv")
+                break
+              }
             }
           }
-        } else if (grepl("csv$", outFile)) {
-          for (i in 0:9999){
-            if (file.exists(paste0(basen,
-                                   formatC(i, width = 4,
-                                           format = "d", flag = "0"),
-                                   ".csv"))) {
-              next
-            } else {
-              write.csv(formInfo(),
-                        paste0(basen, formatC(i, width = 4,
-                                              format = "d", flag = "0"),
-                               ".csv"), row.names = FALSE)
-              newFile <- paste0(basen, formatC(i, width = 4,
-                                               format = "d", flag = "0"),
-                                ".csv")
-              break
-            }
+        } else {
+          if (grepl("rds$", outFile)) {
+            saveRDS(formInfo(), paste0(outFile))
+            newFile <- outFile
+          } else {
+            write.csv(formInfo(), outFile, row.names = FALSE)
+            newFile <- outFile
           }
         }
       }
