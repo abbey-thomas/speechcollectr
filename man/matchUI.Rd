@@ -18,8 +18,6 @@ matchUI(
 \item{title}{Character. The title that will be displayed at the top of the UI. Defaults to "Find a Match!"}
 
 \item{instructions}{Character. The instructions that will be displayed above the grid of buttons. Defaults to general instructions for the matching game.}
-
-\item{n2find}{The number of items a participant must find. Must be the same as \code{n2find} in \code{matchServer()}}
 }
 \value{
 A minimal user interface for the matching game that includes a title, instructions, and a progress bar.

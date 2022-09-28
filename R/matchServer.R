@@ -3,6 +3,7 @@
 #' @param id The input ID associated with the matching game module. Must match the ID of `matchUI()`.
 #' @param triggerInit The reactive expression that triggers the initial appearance of the matching game. Must be created with or wrapped in `reactive()`.
 #' @param triggerReturn The reactive expression that triggers the reappearance of the matching game UI. Must be created with or wrapped in `reactive()`.
+#' @param startScore Integer. Default = 1. The participant's score when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive value, should be wrapped in `isolate()`.
 #' @param result A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".
 #' @param n2find Integer. How many items must the participant find in total?
 #' @param n_items Integer. How many items should be displayed? Should be evenly divisible by `n_cols`
@@ -52,19 +53,20 @@
 #' shinyApp(ui = ui, server = server)
 #'
 matchServer <- function(id = "game",
-                         triggerInit,
-                         triggerReturn,
-                         result = c("hide", "disable"),
-                         n2find,
-                         n_items = 24,
-                         n_cols = 4,
-                         items = "default",
-                         lab_type = c("icon", "text"),
-                         randomTarget = TRUE,
-                         randomGrid = FALSE,
-                         size = 2,
-                         color = "default",
-                         fill = "default") {
+                        triggerInit,
+                        triggerReturn,
+                        startVal = 1,
+                        result = c("hide", "disable"),
+                        n2find,
+                        n_items = 24,
+                        n_cols = 4,
+                        items = "default",
+                        lab_type = c("icon", "text"),
+                        randomTarget = TRUE,
+                        randomGrid = FALSE,
+                        size = 2,
+                        color = "default",
+                        fill = "default") {
 
   if (items == "default") {
     items <- sample(dest_icons, n_items)
@@ -128,7 +130,9 @@ matchServer <- function(id = "game",
     id = id,
     server <- function(input, output, session) {
       ns <- session$ns
-      rvs <- shiny::reactiveValues(score = 0, clicked = NA, counter = 1)
+      rvs <- shiny::reactiveValues(score = as.numeric(startVal)-1,
+                                   clicked = NA,
+                                   counter = as.numeric(startVal))
       times <- shiny::reactiveVal(value = data.frame(event = character(),
                                                      start = character(),
                                                      end = character(),
@@ -137,7 +141,16 @@ matchServer <- function(id = "game",
 
       shiny::observeEvent(triggerInit(), {
         shinyjs::showElement("matchdiv")
-        rt$start(paste0("trial", (rvs$score+1)))
+        rt$start(paste0("trial", (rvs$counter)))
+
+        output$score_ui <- shiny::renderUI({
+          shiny::tagList(
+            shiny::tags$hr(),
+            shinyWidgets::progressBar(id = ns("score"),
+                                      value = rvs$score,
+                                      total = n2find)
+          )
+        })
       })
 
       shiny::observe({

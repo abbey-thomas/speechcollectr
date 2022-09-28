@@ -8,6 +8,7 @@ matchServer(
   id = "game",
   triggerInit,
   triggerReturn,
+  startVal = 1,
   result = c("hide", "disable"),
   n2find,
   n_items = 24,
@@ -49,6 +50,8 @@ matchServer(
 \item{color}{A single hex code or vector of hex codes indicating the color of the icons or text. Default is black.}
 
 \item{fill}{A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).}
+
+\item{startScore}{Integer. Default = 1. The participant's score when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive value, should be wrapped in \code{isolate()}.}
 }
 \value{
 A reactive list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.

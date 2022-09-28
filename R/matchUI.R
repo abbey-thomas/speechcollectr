@@ -3,7 +3,6 @@
 #' @param id The input ID associated with the matching game module. Must match the ID of `matchServer()`.
 #' @param title Character. The title that will be displayed at the top of the UI. Defaults to "Find a Match!"
 #' @param instructions Character. The instructions that will be displayed above the grid of buttons. Defaults to general instructions for the matching game.
-#' @param n2find The number of items a participant must find. Must be the same as `n2find` in `matchServer()`
 #'
 #' @return A minimal user interface for the matching game that includes a title, instructions, and a progress bar.
 #' @seealso Must be used with \code{\link{matchServer}}.
@@ -53,9 +52,7 @@ matchUI <- function(id = "game",
                                     shiny::uiOutput(ns("target")),
                                     shiny::tags$h5(id = ns("instr"), paste0(instructions)),
                                     shiny::uiOutput(ns("grid")),
-                                    shinyWidgets::progressBar(id = ns("score"),
-                                                              value = 0,
-                                                              total = n2find)
+                                    shiny::uiOutput(ns("score_ui"))
     ))
   )
 }
