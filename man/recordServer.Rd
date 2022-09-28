@@ -19,7 +19,7 @@ recordServer(
 
 \item{outPrefix}{Character. Where to store the audio file. A character string indicating the portion of the filepath that will be appended to the front of the automatically generated numeric file identifier (unique for each file) and ".wav" suffix. Can indicate any subdirectory of the present working directory.}
 
-\item{writtenStim}{A character vector that you want a participant to read while recording.}
+\item{writtenStim}{Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.}
 
 \item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
 }

@@ -4,7 +4,7 @@
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordUI()`.
 #' @param trigger A reactive expression (i.e., something wrapped in "shiny::reactive()") that will trigger the recording interface to appear and run. Default is "NULL", so the module will only run (and output a uniquely named file) each time the user clicks start. If using the default NULL trigger, you must call "shinyjs::showElement()" to make the recording interface appear!
 #' @param outPrefix Character. Where to store the audio file. A character string indicating the portion of the filepath that will be appended to the front of the automatically generated numeric file identifier (unique for each file) and ".wav" suffix. Can indicate any subdirectory of the present working directory.
-#' @param writtenStim A character vector that you want a participant to read while recording.
+#' @param writtenStim Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
 #'
 #' @return In the case of a NULL trigger, returns a reactive expression containing two values: (1) `n`: the number of files recorded and (2) `file`: a character vector with length `n`, where each element is the name of a recorded wav file. If `trigger` argument is not NULL, returns a reactive expression containing: (1) `n`: the number of attempts at recording the current file and (2) `file`: the filename where only the most recent attempt is saved (previous attempts have been overwritten). Also returns a 16 bit, 44.1 kHz wav file in a filename comprising `outPrefix` and a unique four digit number.
@@ -143,7 +143,13 @@ recordServer <- function(id = "record",
     shiny::observeEvent(session$input[[paste0(id, record_rvs$n, "-ready")]], {
       shinyjs::delay(500, shinyjs::enable(paste0(id, "-stop")))
       if (!is.null(writtenStim)) {
-        session$output[[paste0(id, "-stim")]] <- shiny::renderText({as.character(writtenStim)})
+
+        if (is.vector(writtenStim)) {
+          session$output[[paste0(id, "-stim")]] <- shiny::renderText({as.character(writtenStim)})
+        } else {
+          session$output[[paste0(id, "-stim")]] <- shiny::renderText({as.character(writtenStim())})
+        }
+
         shinyjs::delay(as.numeric(writtenDelay),
                        shinyjs::showElement(paste0(id, "-stimDiv")))
       }
@@ -168,6 +174,10 @@ recordServer <- function(id = "record",
 
   shiny::observeEvent(session$input[[paste0(id, "-stop")]], {
     shinyjs::disable(paste0(id, "-stop"))
+
+    if (!is.null(writtenStim)) {
+      shinyjs::hide(paste0(id, "-stimDiv"))
+    }
 
     shinyjs::delay(500, shinyjs::enable(paste0(id, "-start")))
     shinyjs::delay(500, shiny::removeUI(selector = paste0("#", id, record_rvs$n, "-audio")))

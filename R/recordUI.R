@@ -76,7 +76,6 @@
 #' @importFrom gplots col2hex
 #'
 recordUI <- function(id = "record",
-                     writtenStim = FALSE,
                      startText = "RECORD",
                      startTextCol = "white",
                      startFillCol = "#228833",
