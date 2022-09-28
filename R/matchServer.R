@@ -3,7 +3,7 @@
 #' @param id The input ID associated with the matching game module. Must match the ID of `matchUI()`.
 #' @param triggerInit The reactive expression that triggers the initial appearance of the matching game. Must be created with or wrapped in `reactive()`.
 #' @param triggerReturn The reactive expression that triggers the reappearance of the matching game UI. Must be created with or wrapped in `reactive()`.
-#' @param startScore Integer. Default = 1. The participant's score when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive value, should be wrapped in `isolate()`.
+#' @param startVal Integer or reactive expression that returns an integer. Default = 1. The participant's trial number when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive expression, should be wrapped in `reactive()`.
 #' @param result A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".
 #' @param n2find Integer. How many items must the participant find in total?
 #' @param n_items Integer. How many items should be displayed? Should be evenly divisible by `n_cols`
@@ -130,9 +130,7 @@ matchServer <- function(id = "game",
     id = id,
     server <- function(input, output, session) {
       ns <- session$ns
-      rvs <- shiny::reactiveValues(score = as.numeric(startVal)-1,
-                                   clicked = NA,
-                                   counter = as.numeric(startVal))
+      rvs <- shiny::reactiveValues(clicked = NA, score = 0)
       times <- shiny::reactiveVal(value = data.frame(event = character(),
                                                      start = character(),
                                                      end = character(),
@@ -141,7 +139,20 @@ matchServer <- function(id = "game",
 
       shiny::observeEvent(triggerInit(), {
         shinyjs::showElement("matchdiv")
+        if (!shiny::is.reactive(startVal)) {
+          rvs$counter <- as.numeric(startVal)
+        } else {
+          rvs$counter <- as.numeric(startVal())
+        }
+
+        rvs$score <- rvs$counter - 1
         rt$start(paste0("trial", (rvs$counter)))
+      })
+
+      shiny::observe({
+        shiny::req(rvs$counter)
+        shiny::req(rvs$score)
+
 
         output$score_ui <- shiny::renderUI({
           shiny::tagList(
@@ -151,10 +162,6 @@ matchServer <- function(id = "game",
                                       total = n2find)
           )
         })
-      })
-
-      shiny::observe({
-        shiny::req(rvs$counter)
 
         output$target <- shiny::renderUI({
           shiny::tagList(
@@ -217,29 +224,27 @@ matchServer <- function(id = "game",
                                                          icon = shiny::icon("question-circle")))
 
           if (rvs$clicked == targs$items[as.numeric(rvs$counter)]) {
-            rt$stop(paste0("trial", (rvs$score+1)))
+            rt$stop(paste0("trial", (rvs$counter)))
             times(dplyr::bind_rows(times(), rt$getEvent(paste0("trial", (rvs$score+1)))))
+            shinyjs::disable("matchdiv")
 
-            if (rvs$score < n2find) {
-              rvs$score <- rvs$score + 1
+            rvs$score <- rvs$score + 1
+            shinyWidgets::updateProgressBar(session = session,
+                                            id = "score",
+                                            value = rvs$score,
+                                            total = n2find,
+                                            status = "success")
 
-              shinyWidgets::updateProgressBar(session = session,
-                                              id = "score",
-                                              value = rvs$score,
-                                              total = n2find,
-                                              status = "success")
-            } else {
+            if (rvs$counter == n2find) {
               shinyalert::shinyalert(
                 title = "Congratulations!",
                 text = "You found all the matches!",
-                type = success)
+                type = "success")
             }
 
             if (result == "hide") {
               shinyjs::delay(1500,
                              shinyjs::hide("matchdiv"))
-            } else if (result == "disable") {
-              shinyjs::disable("matchdiv")
             }
           } else {
             shinyWidgets::updateProgressBar(session = session,
@@ -252,16 +257,21 @@ matchServer <- function(id = "game",
       })
 
       observeEvent(triggerReturn(), {
-        rvs$counter <- rvs$counter + 1
+        shinyjs::enable("matchdiv")
 
-        rt$start(paste0("trial", (rvs$score+1)))
-        if (result == "hide") {
-          shinyjs::toggleElement(id = "matchdiv",
-                                 condition = triggerReturn())
+        if (shiny::isTruthy(rvs$counter)) {
+          rvs$counter <- rvs$counter + 1
         } else {
-          shinyjs::toggleState(id = "matchdiv",
-                               condition = triggerReturn())
+          if (!shiny::is.reactive(startVal)) {
+            rvs$counter <- as.numeric(startVal)
+          } else {
+            rvs$counter <- as.numeric(startVal())
+          }
         }
+
+        rvs$score <- rvs$counter - 1
+        rt$start(paste0("trial", (rvs$counter)))
+        shinyjs::showElement("matchdiv")
       })
 
       return(shiny::reactive(

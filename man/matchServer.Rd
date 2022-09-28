@@ -29,6 +29,8 @@ matchServer(
 
 \item{triggerReturn}{The reactive expression that triggers the reappearance of the matching game UI. Must be created with or wrapped in \code{reactive()}.}
 
+\item{startVal}{Integer or reactive expression that returns an integer. Default = 1. The participant's trial number when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive expression, should be wrapped in \code{reactive()}.}
+
 \item{result}{A character value describing what should happen when the participant finds a match. Must be either "disable" or "hide".}
 
 \item{n2find}{Integer. How many items must the participant find in total?}
@@ -50,8 +52,6 @@ matchServer(
 \item{color}{A single hex code or vector of hex codes indicating the color of the icons or text. Default is black.}
 
 \item{fill}{A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).}
-
-\item{startScore}{Integer. Default = 1. The participant's score when entering the game for this session. Useful if the participant resumes a game from a previous session. If using a reactive value, should be wrapped in \code{isolate()}.}
 }
 \value{
 A reactive list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
