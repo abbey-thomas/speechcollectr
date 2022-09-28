@@ -33,6 +33,7 @@ evalWav <- function(wave,
     snr <- NA
     clipped <- NA
     tg <- NULL
+    trimmed <- NULL
     plot <- NULL
   } else {
     snr <- getSNR(wave,
