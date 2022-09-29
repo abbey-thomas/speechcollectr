@@ -71,7 +71,7 @@ wwwPrep <- function(from = NULL, is_dir = FALSE, path = ".",
 
     hp_data <- HugginsPitchData
     for (i in 1:14) {
-      tuneR::writeWave(hp_data[[i]], filename = paste0("www/hps_audio", names(hp_data)[i], ".wav"))
+      tuneR::writeWave(hp_data[[i]], filename = paste0("www/hps_audio/", names(hp_data)[i], ".wav"))
     }
     cat("Success: Huggins-Pitch Headphone Screen data added to 'www/hps_audio'! All Huggins Pitch files (12) are prefixed with 'hp_'.")
   }
@@ -83,7 +83,7 @@ wwwPrep <- function(from = NULL, is_dir = FALSE, path = ".",
 
     ap_data <- AntiphaseData
     for (i in 1:7) {
-      tuneR::writeWave(ap_data[[i]], filename = paste0("www/hps_audio", names(ap_data)[i], ".wav"))
+      tuneR::writeWave(ap_data[[i]], filename = paste0("www/hps_audio/", names(ap_data)[i], ".wav"))
     }
     cat("Success: Antiphase Headphone Screen data added to 'www/hps_audio'! All antiphase screen files (6) are prefixed with 'ap_'.")
   }
