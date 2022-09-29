@@ -3,7 +3,7 @@
 #' @description The server function for recording user audio enables the 'stop' button after the user begins recording and checks to make sure the user has given the website permission to record audio in their browser. Requires the UI \code{\link{recordUI}}.
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordUI()`.
 #' @param trigger A reactive expression (i.e., something wrapped in "shiny::reactive()") that will trigger the recording interface to appear and run. Default is "NULL", so the module will only run (and output a uniquely named file) each time the user clicks start. If using the default NULL trigger, you must call "shinyjs::showElement()" to make the recording interface appear!
-#' @param outPrefix Character. Where to store the audio file. A character string indicating the portion of the filepath that will be appended to the front of the automatically generated numeric file identifier (unique for each file) and ".wav" suffix. Can indicate any subdirectory of the present working directory.
+#' @param outPrefix Character or reactive expression. Where to store the audio file. A character string indicating the portion of the filepath that will be appended to the front of the automatically generated numeric file identifier (unique for each file) and ".wav" suffix. Can indicate any subdirectory of the present working directory. If dynamic, wrap in `reactive()`.
 #' @param writtenStim Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
 #'
@@ -87,15 +87,18 @@ recordServer <- function(id = "record",
       shinyjs::disable(paste0(id, "-start"))
       record_rvs$n <- record_rvs$n+1
 
-      file_list <- list.files(path = gsub("/[^/]+?$", "", outPrefix),
-                              pattern = paste0(gsub(".*/", "", outPrefix), ".*", "\\.wav$"),
+      record_rvs$outPrefix <- ifelse(!is.reactive(outPrefix),
+                                     paste0(outPrefix), paste0(outPrefix()))
+
+      file_list <- list.files(path = gsub("/[^/]+?$", "", record_rvs$outPrefix),
+                              pattern = paste0(gsub(".*/", "", record_rvs$outPrefix), ".*", "\\.wav$"),
                               full.names = TRUE)
 
-      file_nums <- gsub(paste0(outPrefix), "", file_list)
+      file_nums <- gsub(paste0(record_rvs$outPrefix), "", file_list)
       file_nums <- gsub("\\.wav", "", file_nums)
       file_nums <- as.numeric(file_nums[grepl("\\d{4}", file_nums)])
       file_num <- ifelse(length(file_nums) > 0, max(file_nums) + 1, 0)
-      record_rvs$filepath <- paste0(outPrefix,
+      record_rvs$filepath <- paste0(record_rvs$outPrefix,
                                     formatC(file_num, width = 4,
                                             format = "d", flag = "0"),
                                     ".wav")
@@ -111,15 +114,19 @@ recordServer <- function(id = "record",
     shiny::observeEvent(trigger(), {
       shinyjs::showElement(paste0(id))
       record_rvs$attempt <- 0
-      file_list <- list.files(path = gsub("/[^/]+?$", "", outPrefix),
-                              pattern = paste0(gsub(".*/", "", outPrefix), ".*", "\\.wav$"),
+
+      record_rvs$outPrefix <- ifelse(!is.reactive(outPrefix),
+                                     paste0(outPrefix), paste0(outPrefix()))
+
+      file_list <- list.files(path = gsub("/[^/]+?$", "", record_rvs$outPrefix),
+                              pattern = paste0(gsub(".*/", "", record_rvs$outPrefix), ".*", "\\.wav$"),
                               full.names = TRUE)
 
-      file_nums <- gsub(paste0(outPrefix), "", file_list)
+      file_nums <- gsub(paste0(record_rvs$outPrefix), "", file_list)
       file_nums <- gsub("\\.wav", "", file_nums)
       file_nums <- as.numeric(file_nums[grepl("\\d{4}", file_nums)])
       file_num <- ifelse(length(file_nums) > 0, max(file_nums) + 1, 0)
-      record_rvs$filepath <- paste0(outPrefix,
+      record_rvs$filepath <- paste0(record_rvs$outPrefix,
                                     formatC(file_num, width = 4,
                                             format = "d", flag = "0"),
                                     ".wav")
