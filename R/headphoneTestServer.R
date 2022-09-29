@@ -3,7 +3,7 @@
 #' @description The server portion of the Headphone Test module. Make your headphoneTestUI() do things!
 #'
 #' @param id The Id of this module. Must match the Id of `headphoneTestUI()`. Defaults to "headphone_test".
-#' @param trigger A reactive value indicating the event that should trigger the appearance of the consent form. May be an `input$...` value from outside the module wrapped in `reactive()`.
+#' @param trigger Optional. A reactive expression indicating the event that should trigger the appearance of the consent form. Must be wrapped in `reactive()`.
 #' @param type Whether to use the Huggins Pitch headphone screen (see Milne et al., 2020) or the Antiphase headphone screen (Woods et al., 2017). Must be one of "huggins" or "antiphase" and must match the value given in `headphoneTestUI()`.
 #' @param n_trials Integer. How many trials should be presented to each participant? Defaults to 6. Must match the n_trials argument of `headphoneTestUI()`
 #' @param threshold Integer. How many trials must a participant get correct to pass the screen?
@@ -48,7 +48,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 headphoneTestServer <- function(id = "headphone_test",
-                                trigger,
+                                trigger = NULL,
                                 type = c("huggins", "antiphase"),
                                 n_trials = 6, threshold,
                                 n_attempts = 2,
@@ -69,7 +69,7 @@ headphoneTestServer <- function(id = "headphone_test",
 
       if (type == "huggins") {
         files <- data.frame(filename =
-                              list.files(path = "www/",
+                              list.files(path = "www/hps_audio",
                                          pattern = "hp_\\d")) %>%
           tidyr::extract(col = .data$filename, into = "answer",
                          regex = ".+?_(\\d)\\.wav", remove = FALSE) %>%
@@ -77,7 +77,7 @@ headphoneTestServer <- function(id = "headphone_test",
                                         as.character(.data$answer)))
       } else {
         files <- data.frame(filename =
-                              list.files(path = "www/",
+                              list.files(path = "www/hps_audio",
                                          pattern = "ap_\\d")) %>%
           tidyr::extract(col = .data$filename, into = "answer",
                          regex = ".+?_(\\d)\\.wav", remove = FALSE) %>%
@@ -89,9 +89,15 @@ headphoneTestServer <- function(id = "headphone_test",
       files <- files[samp,]
       print(files)
 
-      shiny::observeEvent(trigger(), {
-        shinyjs::showElement("adjust")
-      })
+      if (is.null(trigger)) {
+        shiny::observe({
+          shinyjs::showElement("adjust")
+        })
+      } else {
+        shiny::observeEvent(trigger(), {
+          shinyjs::showElement("adjust")
+        })
+      }
 
       shiny::observeEvent(input$adjust_play, {
         shinyjs::enable("adjust_done")

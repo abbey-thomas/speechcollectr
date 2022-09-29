@@ -6,7 +6,7 @@
 \usage{
 headphoneTestServer(
   id = "headphone_test",
-  trigger,
+  trigger = NULL,
   type = c("huggins", "antiphase"),
   n_trials = 6,
   threshold,
@@ -19,7 +19,7 @@ headphoneTestServer(
 \arguments{
 \item{id}{The Id of this module. Must match the Id of \code{headphoneTestUI()}. Defaults to "headphone_test".}
 
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the consent form. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+\item{trigger}{Optional. A reactive expression indicating the event that should trigger the appearance of the consent form. Must be wrapped in \code{reactive()}.}
 
 \item{type}{Whether to use the Huggins Pitch headphone screen (see Milne et al., 2020) or the Antiphase headphone screen (Woods et al., 2017). Must be one of "huggins" or "antiphase" and must match the value given in \code{headphoneTestUI()}.}
 
@@ -68,8 +68,8 @@ shinyApp(ui = ui, server = server)
 }
 }
 \references{
-Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & Chait, M. 2020. An online headphone screening test based on dichotic pitch.\emph{Behavior Research Methods} 53, 1551-1562 (2021).
-Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics} 79, 2064-2072 (2017).
+Milne, A.E., Bianco, R., Poole, K.C., Zhao, S., Oxenham, A.J., Billing, A.J., & Chait, M. 2021. An online headphone screening test based on dichotic pitch.\emph{Behavior Research Methods 53}, 1551-1562.\cr
+Woods, K.J.P., Siegel, M.H., Traer, J., & McDermott, J.H. 2017. Headphone screening to facilitate web-based auditory experiments. \emph{Attention, Perception, & Psychophysics 79}, 2064-2072.
 }
 \seealso{
 \code{\link{wwwPrep}}, \code{\link{headphoneTestUI}}

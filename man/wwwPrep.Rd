@@ -14,7 +14,7 @@ wwwPrep(
 )
 }
 \arguments{
-\item{from}{A character vector of filenames or a single directory name wrapped in c(). Leave \code{NULL} (default) if you only want to add one of the datasets included in the package.}
+\item{from}{A character vector of filenames or a single directory name. Leave \code{NULL} (default) if you only want to add one of the datasets included in the package.}
 
 \item{is_dir}{Boolean. Is 'from' a directory?}
 
