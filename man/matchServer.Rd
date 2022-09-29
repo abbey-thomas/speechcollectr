@@ -54,7 +54,7 @@ matchServer(
 \item{fill}{A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).}
 }
 \value{
-A reactive list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
+A reactive list with 4 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds, and (4) a reactive value indicating whether the participant's answer is correct (1) or incorrect (0).
 }
 \description{
 Matching Game Server Function

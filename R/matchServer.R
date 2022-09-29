@@ -16,7 +16,7 @@
 #' @param color A single hex code or vector of hex codes indicating the color of the icons or text. Default is black.
 #' @param fill A single hex code or vector of hex codes indicating the fill of the matching game buttons. Defaults to values from the "Bright" colorblind friendly palette from Paul Tol (see link in references below).
 #'
-#' @return A reactive list with 3 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, and (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds.
+#' @return A reactive list with 4 items: (1) score = the number of matches the participant has found so far, (2) i_df = a data.frame containing the list of items used in the present game and their order, (3) time_df: a data frame containing the start and stop times for each trial and the difference between the two in milliseconds, and (4) a reactive value indicating whether the participant's answer is correct (1) or incorrect (0).
 #' @export
 #' @seealso Must be used with \code{\link{matchUI}}.
 #' @references Paul Tol's colorblind-friendly palettes (the source of the default button colors) can be found at \url{https://personal.sron.nl/~pault/#sec:qualitative}.
@@ -145,6 +145,7 @@ matchServer <- function(id = "game",
           rvs$counter <- as.numeric(startVal())
         }
 
+        rvs$correct <- 0
         rvs$score <- rvs$counter - 1
         rt$start(paste0("trial", (rvs$counter)))
       })
@@ -228,6 +229,7 @@ matchServer <- function(id = "game",
             times(dplyr::bind_rows(times(), rt$getEvent(paste0("trial", (rvs$score+1)))))
             shinyjs::disable("matchdiv")
 
+            rvs$correct <- 1
             rvs$score <- rvs$score + 1
             shinyWidgets::updateProgressBar(session = session,
                                             id = "score",
@@ -258,6 +260,7 @@ matchServer <- function(id = "game",
 
       observeEvent(triggerReturn(), {
         shinyjs::enable("matchdiv")
+        rvs$correct <- 0
 
         if (shiny::isTruthy(rvs$counter)) {
           rvs$counter <- rvs$counter + 1
@@ -274,12 +277,16 @@ matchServer <- function(id = "game",
         shinyjs::showElement("matchdiv")
       })
 
-      return(shiny::reactive(
-        list(
+      retval <- shiny::eventReactive(rvs$correct, {
+        return(list(
+          correct = rvs$correct,
           n_found = rvs$score,
           i_df = i_df,
           time_df = times()
-        )))
+        ))
+      })
+
+      return(retval)
     }
   )
 }
