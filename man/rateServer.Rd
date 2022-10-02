@@ -2,34 +2,42 @@
 % Please edit documentation in R/rateServer.R
 \name{rateServer}
 \alias{rateServer}
-\title{Actions for likert scale tasks}
+\title{Actions for likert scales}
 \usage{
 rateServer(
   id = "rate",
   trigger,
-  wait = 1000,
+  wait = 1,
+  type = c("button", "slider"),
   n_scales = 1,
   answer_all = FALSE,
-  answers,
+  answers = NULL,
   instructions = "",
   pretext = "",
   scale_labs = NULL,
   posttext = "",
-  direction = "horizontal"
+  direction = "horizontal",
+  sliderInit = 50,
+  sliderMin = 0,
+  sliderMax = 100,
+  pips = NULL,
+  step = 0.01
 )
 }
 \arguments{
 \item{id}{The id of the module. Must be the same as the ID of \code{rateUI()}.}
 
-\item{trigger}{A reactive value indicating the event that should trigger the appearance of the instructions and (optionally) the play button for the audio stimulus. May be an \code{input$...} value from outside the module wrapped in \code{reactive()}.}
+\item{trigger}{If not \code{NULL} (the default), a reactive expression returning the event that should trigger the appearance of the instructions.}
 
-\item{wait}{Integer. How long should we wait to display the scale(s) after the trigger event occurs? If this value will describe the delay between when the participant clicks "play" and when the scale appears. In milliseconds.}
+\item{wait}{Integer. How long should we wait to display the scale(s) after the trigger event occurs? In milliseconds.}
 
-\item{n_scales}{Integer. The number of scales to be displayed on the page.}
+\item{type}{One of "button" or "slider". Must be the same as the \code{type} of \code{rateUI()}.}
+
+\item{n_scales}{Integer. The number of scales to be displayed on the page. Must match the value given in the corresponding call to \code{rateUI()}}
 
 \item{answer_all}{If \code{n_scales} > 1, does the participant need to give a response on each scale or only one of them?}
 
-\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector in this list. If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
+\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector in this list. If \code{type="slider"}, each scale must have EXACTLY 2 answers (the first representing the lower extreme and the second representing the higher extreme). If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
 
 \item{instructions}{Instructions that will appear at the top of the page.}
 
@@ -39,13 +47,35 @@ rateServer(
 
 \item{posttext}{Character. The text that will appear below the likert scale.}
 
-\item{direction}{Either "horizontal" or "vertical". Describes the position of the scale options relative to each other.}
+\item{direction}{Either "horizontal" or "vertical". Describes the position of the scale options (NOT the scales themselves) relative to each other.}
+
+\item{sliderInit}{Numeric. The starting value of the slider. Must be between \code{sliderMin} and \code{sliderMax}. Default is in the middle of the scale.}
+
+\item{sliderMin}{Numeric. The lower of the slider. Default is \code{0}.}
+
+\item{sliderMax}{Numeric. The upper limit of the slider. Default is \code{100}.}
+
+\item{pips}{List with two elements. Where to place numeric markers on the slider scale. See Details for more information.}
+
+\item{step}{Numeric. The distance between consecutive points (i.e., potential answers) on the slider. Default is \code{.01},}
+
+\item{showAnswer}{Boolean. Defaults to \code{FALSE}. Whether to display the current numeric value of the slider above the handle.}
 }
 \value{
 Returns a reactive vector of the answers selected from each scale when the participant clicks submit.
 }
 \description{
-Actions for likert scale tasks
+Actions for likert scales
+}
+\details{
+Notes on sliders:
+\itemize{
+\item Consider carefully whether you need a slider. Do you expect participant responses to fall on a continuous scale in meaningful ways, or do you expect answers to fall in a number of blocks along the slider? If the latter, consider using a button scale as they are easier for participants to use (See Toepoel & Funke, 2018 and Chyung et al., 2018 (references below) for more information.).
+\item Placing numeric markers along the scale and displaying the numeric response values are best for scales where the answer is truly numeric. (i.e., "How tall (in inches) do you think the talker in this recording is?") (See Gummer & Kunz, 2021 (reference below) for more information.)
+\item The argument pips should be a list with 2 values: The first value, "density", indicates how far apart the minor divisions on the scale should be (e.g., \code{density=5} will place a marker every 5 integers between \code{sliderMin} and \code{sliderMax}). The second element in the list, "values", is a vector denoting where the major breaks of the scale and their numeric labels should go (e.g., if \code{values=c(0, 50, 100)} markers and numeric labels will be placed at 0, 50, and 100.) All values in \code{values} must fall between \code{sliderMin} and \code{sliderMax}.
+\item The default starting answer is in the center of the scale, as initializing the handle at the left of the scale has been shown to bias the answers towards the lower values. (CITE)
+\item Currently, the \verb{rate*()} functions only support text values at the beginning and end of the slider. These will be placed inline with the slider and should represent the two extreme values (low and high, in that order). To place text at only one or the other extreme, just use an empty text string (\code{""}) for the end of the scale where you do not wish to show a value.
+}
 }
 \examples{
 if (interactive()){
@@ -53,25 +83,29 @@ if (interactive()){
   library(shinyjs)
   ui <- fluidPage(
     actionButton("btn", "Click me"),
-    rateUI(id = "example"),
+    rateUI(id = "example",
+           type = "button"),
     textOutput("confirmation")
   )
 
   server <- function(input, output, session) {
+  rvs <- reactiveValues(rating = NULL)
     observeEvent(input$btn, {
-      hideElement("btn")
+      disable("btn")
+
+      rvs$rating <- rateServer(id = "example",
+                               type = "button",
+                               instructions = "What do you think?",
+                               answers = c("Strongly disagree", "Disagree",
+                                           "Neutral", "Agree", "Strongly agree"),
+                               pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
     })
-    rating <- rateServer(id = "example",
-                         trigger = reactive(input$btn),
-                         instructions = "What do you think?",
-                         answers = c("Strongly disagree", "Disagree",
-                                     "Neutral", "Agree", "Strongly agree"),
-                         pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
-    observe({
-      if (isTruthy(rating())) {
+
+    observeEvent(input[["example-submit"]]{
+    enable("btn")
         output$confirmation <- renderText({
-          paste0("You selected ", rating(),".")})
-      }
+          paste0("You selected ", rvs$rating(),".")})
+
     })
   }
   shinyApp(ui = ui, server = server)
@@ -79,41 +113,52 @@ if (interactive()){
 
 # An example with 2 scales....
 if (interactive()){
-  library(shiny)
-  library(shinyjs)
-  ui <- fluidPage(
-    actionButton("btn", "Click me"),
-    rateUI(id = "example"),
-    textOutput("confirmation")
-  )
+   library(shiny)
+   library(shinyjs)
+   ui <- fluidPage(
+     actionButton("btn", "Click me"),
+     rateUI(id = "example",
+            type = "button",
+            n_scales = 2),
+     textOutput("confirmation")
+   )
 
-  server <- function(input, output, session) {
-    observeEvent(input$btn, {
-      hideElement("btn")
-    })
-    rating <- rateServer(id = "example",
-                         trigger = reactive(input$btn),
-                         instructions = "Finish the sentence:",
-                         answers = list(c("Sound completely the same",
-                                          "Sound similar, but not totally alike",
-                                          "Sound pretty different",
-                                          "Sound totally different"),
-                                        c("Are produced in the exact same way",
-                                          "Are produced similarly",
-                                          "Are produced pretty distinctly",
-                                          "Are produced in totally distinct ways")),
-                         pretext = "The vowels 'aw' and 'ah'...",
-                         n_scales = 2,
-                         answer_all = TRUE,
-                         direction = "vertical",
-                         scale_labs = c("perception", "production"))
-    observe({
-      if (isTruthy(rating())) {
-        output$confirmation <- renderText({
-          paste0("You selected ", rating(),".")})
-      }
-    })
-  }
-  shinyApp(ui = ui, server = server)
+   server <- function(input, output, session) {
+     rvs <- reactiveValues(rating = NULL)
+
+     observeEvent(input$btn, {
+       disable("btn")
+
+       rvs$rating <- rateServer(id = "example",
+                                trigger = NULL,
+                                type = "button",
+                                instructions = "Finish the sentence:",
+                                answers = list(c("Sound completely the same",
+                                                 "Sound similar, but not totally alike",
+                                                 "Sound pretty different",
+                                                 "Sound totally different"),
+                                               c("Are produced in the exact same way",
+                                                 "Are produced similarly",
+                                                 "Are produced pretty distinctly",
+                                                 "Are produced in totally distinct ways")),
+                                pretext = "The vowels 'aw' and 'ah'...",
+                                n_scales = 2,
+                                answer_all = TRUE,
+                                direction = "vertical",
+                                scale_labs = c("perception", "production"))
+     })
+
+     observeEvent(input[["example-submit"]], {
+       enable("btn")
+       output$confirmation <- renderText({
+         paste0("You selected '", rvs$rating()[[1]],"' and '",  rvs$rating()[[2]], "'.")})
+     })
+   }
+   shinyApp(ui = ui, server = server)
+ }
 }
+\references{
+Chyung, S. Y., Swanson, I., Roberts, K., & Hankinson, A. (2018). Evidence‐based survey design: The use of continuous rating scales in surveys. \emph{Performance Improvement, 57}(5), 38-48.\cr
+Gummer, T., & Kunz, T. (2021). Using only numeric labels instead of verbal labels: Stripping rating scales to their bare minimum in web surveys. \emph{Social Science Computer Review, 39}(5), 1003-1029.\cr
+Toepoel, V., & Funke, F. (2018). Sliders, visual analogue scales, or buttons: Influence of formats and scales in mobile and desktop surveys. \emph{Mathematical Population Studies, 25}(2), 112-122.
 }
