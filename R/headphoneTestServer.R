@@ -138,7 +138,7 @@ headphoneTestServer <- function(id = "headphone_test",
         shinyjs::disable("screenplay")
         shiny::insertUI(paste0("#", ns("screenplay")),
                         where = "afterEnd",
-                        ui = htmltools::tags$audio(src = files$filename[trial() + 1],
+                        ui = htmltools::tags$audio(src = paste0("hps_audio/", files$filename[trial() + 1]),
                                                    type = "audio/wav",
                                                    autoplay = NA, controls = NA,
                                                    style="display:none;"))

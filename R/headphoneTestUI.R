@@ -43,10 +43,10 @@ headphoneTestUI <- function(id = "headphone_test",
 
   if (!dir.exists("www")) stop("You must create a 'www' subdirectory with the necessary sound files. Use function wwwPrep() before running your ShinyApp for the first time.")
   if (type == "huggins") {
-    if (!file.exists("www/hp_practice.wav")) stop("Use wwwPrep(HugginsPitchScreen = TRUE) before running your ShinyApp to get the sound files needed for this headphone screen.")
+    if (!file.exists("www/hps_audio/hp_practice.wav")) stop("Use wwwPrep(HugginsPitchScreen = TRUE) before running your ShinyApp to get the sound files needed for this headphone screen.")
   }
 
-  if (!file.exists("www/cal_noise.wav")) stop("Calibration noise file does not exist. Use wwwPrep() to download the sound files before running the headphone screen. Run '?wwwPrep()' for more information.")
+  if (!file.exists("www/hps_audio/cal_noise.wav")) stop("Calibration noise file does not exist. Use wwwPrep() to download the sound files before running the headphone screen. Run '?wwwPrep()' for more information.")
 
   shiny::tagList(
     shinyalert::useShinyalert(),
