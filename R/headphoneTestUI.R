@@ -49,7 +49,6 @@ headphoneTestUI <- function(id = "headphone_test",
   if (!file.exists("www/hps_audio/cal_noise.wav")) stop("Calibration noise file does not exist. Use wwwPrep() to download the sound files before running the headphone screen. Run '?wwwPrep()' for more information.")
 
   shiny::tagList(
-    shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
     shinyjs::hidden(htmltools::tags$table(id = ns("adjust"), style = "border: 1px solid #c5c5c5;",
                                           htmltools::tags$tr(htmltools::tags$th(style = "padding: 15px; border: 1px solid #c5c5c5;","Adjust your Sound Volume...")),

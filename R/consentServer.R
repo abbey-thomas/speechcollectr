@@ -110,12 +110,14 @@ consentServer <- function(id = "consent",
           })
 
           shiny::observeEvent(input$agree, {
-            if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
-              shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                     type = "info",
-                                     confirmButtonText = "Return to Experiment",
-                                     inputId = "return2",
-                                     closeOnEsc = FALSE)
+            if (isTRUE(cons2rec)) {
+              if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
+                shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
+                                       type = "info",
+                                       confirmButtonText = "Return to Experiment",
+                                       inputId = "return2",
+                                       closeOnEsc = FALSE)
+              }
             }
 
             if (result == "disable") {
@@ -197,12 +199,14 @@ consentServer <- function(id = "consent",
           })
 
           shiny::observeEvent(input$agree, {
-            if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
-              shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                     type = "info",
-                                     confirmButtonText = "Return to Experiment",
-                                     inputId = "return2",
-                                     closeOnEsc = FALSE)
+            if (isTRUE(cons2rec)) {
+              if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
+                shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
+                                       type = "info",
+                                       confirmButtonText = "Return to Experiment",
+                                       inputId = "return2",
+                                       closeOnEsc = FALSE)
+              }
             }
 
             if (result == "disable") {
@@ -246,8 +250,12 @@ consentServer <- function(id = "consent",
 
 
       retval <- shiny::eventReactive(input$agree, {
-        if (isTRUE(react$rec) & input$cons2rec_bttn == "yes") {
-          return(2)
+        if (isTRUE(cons2rec)) {
+          if (isTRUE(react$rec) & input$cons2rec_bttn == "yes") {
+            return(2)
+          } else {
+            return(1)
+          }
         } else {
           return(1)
         }
