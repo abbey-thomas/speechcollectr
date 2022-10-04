@@ -131,12 +131,8 @@ rateServer <- function(id = "rate",
                        sliderMax = 100,
                        pips = NULL,
                        step = .01) {
-  if (n_scales > 1) {
-    if (!is.list(answers)|length(answers) != n_scales)
-      stop("Argument 'answers' must be a list the same length as 'n_scales', containing a vector of choices for each scale.")
-  } else {
-    answers <- list(c(answers))
-  }
+  if (!is.list(answers)|length(answers) != n_scales)
+    stop("Argument 'answers' must be a list the same length as 'n_scales', containing a vector of choices for each scale.")
 
   if (all(!is.null(scale_labs))) {
     if (length(scale_labs) != n_scales)
@@ -144,13 +140,17 @@ rateServer <- function(id = "rate",
   }
 
   if (type == "slider") {
-    if (length(pips) != 2)
-      stop("Argument 'pips' must be a list of length=2. ")
-
-
+    if (!is.null(pips)) {
+      if (length(pips) != 2)
+        stop("Argument 'pips' must be a list of length=2. ")
+    }
   }
 
-  scale_labs <- as.list(scale_labs)
+  scale_labs <- if (!is.null(scale_labs)) {
+    as.list(scale_labs)
+  } else {
+    as.list(rep.int("", times = n_scales))
+  }
 
   colspan <- if (type == "slider"){
     ifelse(direction == "vertical", n_scales, 3)
@@ -236,7 +236,7 @@ rateServer <- function(id = "rate",
                           if (type == "slider") {
                             lapply(seq_along(c(1:n_scales)), function(i) {
                               shiny::tags$tr(shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), ""))),
+                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), ""))),
                                              shiny::tags$td(style = "padding: 15px;",
                                                             shinyWidgets::noUiSliderInput(inputId = paste0(id, "-scale", i),
                                                                                           min = sliderMin,
@@ -248,7 +248,7 @@ rateServer <- function(id = "rate",
                                                                                           orientation = "horizontal",
                                                                                           pips = pips)),
                                              shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), ""))))
+                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), ""))))
                             })
                           } else {
                             lapply(seq_along(c(1:n_scales)), function(i) {
@@ -278,7 +278,7 @@ rateServer <- function(id = "rate",
 
     if (type == "slider") {
       shiny::observe({
-        if (all(nscales != sliderInit)) {
+        if (all(n_scales != sliderInit)) {
           shinyjs::showElement(paste0(id, "-submit"))
         }
       })
@@ -295,7 +295,7 @@ rateServer <- function(id = "rate",
   } else {
     if (type == "slider") {
       lapply(seq_along(c(1:n_scales)), function(i){
-        shiny::observe({
+        shiny::observeEvent(session$input[[paste0(id, "-scale", i)]], {
           if (session$input[[paste0(id, "-scale", i)]] != sliderInit) {
             shinyjs::showElement(paste0(id, "-submit"))
             rate_rvs$sel[i] <- session$input[[paste0(id, "-scale", i)]]
@@ -353,7 +353,7 @@ rateServer <- function(id = "rate",
   })
 
   retval <- shiny::eventReactive(session$input[[paste0(id, "-submit")]], {
-    return((rate_rvs$sel))
+    return((rate_rvs$selected))
   })
 
   return(retval)
