@@ -125,7 +125,7 @@ headphoneTestServer <- function(id = "headphone_test",
         shinyjs::disable("test")
 
         shinyjs::delay(5000, shinyjs::enable("test"))
-        shinyjs::delay(5500, shinyjs::enable("ready"))
+        shinyjs::delay(5000, shinyjs::enable("ready"))
       })
 
       shiny::observeEvent(input$ready, {
@@ -153,62 +153,82 @@ headphoneTestServer <- function(id = "headphone_test",
         shinyjs::disable("submit")
         if (input$choices != as.character(files$answer[trial() + 1])) {
           mistakes(mistakes() + 1)
-        }
 
-        if (mistakes() > (n_trials-threshold)) {
-          if (attempt() < n_attempts) {
-            shinyalert::shinyalert(type = "warning",
-                                   text = if (warn_msg == "default") {paste0("Unfortunately, you did not pass the headphone screen. Please make sure you are in a quiet environment and have BOTH headphones on properly. To continue with the experiment, click 'Try Again'. You will have a total of ", n_attempts, " chances to pass the headphone screen. If you do not wish to continue, you may close your browser window now.")
-                                   } else {as.character(warn_msg)},
-                                   confirmButtonText = "Try Again",
-                                   inputId = "warn",
-                                   closeOnEsc = FALSE)
+          if (mistakes() > (n_trials-threshold)) {
+            if (attempt() < n_attempts) {
+              shinyalert::shinyalert(type = "warning",
+                                     text = if (warn_msg == "default") {paste0("Unfortunately, you did not pass the headphone screen. Please make sure you are in a quiet environment and have BOTH headphones on properly. To continue with the experiment, click 'Try Again'. You will have a total of ", n_attempts, " chances to pass the headphone screen. If you do not wish to continue, you may close your browser window now.")
+                                     } else {as.character(warn_msg)},
+                                     confirmButtonText = "Try Again",
+                                     inputId = "warn",
+                                     closeOnEsc = FALSE)
 
-            trial(0)
-            mistakes(0)
-            attempt(attempt() + 1)
-            status(0)
+              trial(0)
+              mistakes(0)
+              attempt(attempt() + 1)
+              status(0)
 
-            shinyjs::hide("screen")
-            shinyjs::showElement("adjust")
+              shinyjs::hide("screen")
+              shinyjs::showElement("instr")
 
+              if (type == "antiphase") {
+                shinyjs::delay(2500, shinyjs::enable("ready"))
+              }
+
+              shinyjs::delay(250, shinyWidgets::updateRadioGroupButtons(session, "choices",
+                                                                        label = if (type == "huggins") {"Select the sound containing the hidden tone..."
+                                                                        } else {"Select the quietest sound..."},
+                                                                        choices = list("Sound 1" = "answer1",
+                                                                                       "Sound 2" = "answer2",
+                                                                                       "Sound 3" = "answer3"),
+                                                                        selected = character(0),
+                                                                        disabled = TRUE))
+              shinyjs::delay(500, enable("screenplay"))
+              shinyjs::delay(500, disable("choices"))
+
+              shinyWidgets::updateProgressBar(session = session,
+                                              id = session$ns("progress"),
+                                              value = trial(), total = n_trials,
+                                              range_value = c(1:n_trials))
+
+            } else {
+              shinyjs::hide("screen")
+              shinyalert::shinyalert(type = "error",
+                                     text = if (fail_msg == "default") {"Unfortunately you did not pass the headphone screen. You have used all available attempts. Fully functioning headphones are required for this experiment. Thank you for your time!"
+                                     } else {as.character(fail_msg)},
+                                     confirmButtonText = "OKAY",
+                                     inputId = "fail")
+              status(0)
+            }
+          }
+        } else {
+          if (trial() < (n_trials-1)) {
+            trial(trial() + 1)
+            shinyWidgets::updateProgressBar(session = session,
+                                            id = session$ns("progress"),
+                                            value = trial(), total = n_trials,
+                                            range_value = c(1:n_trials))
+
+            shinyWidgets::updateRadioGroupButtons(session, "choices",
+                                                  label = if (type == "huggins") {"Select the sound containing the hidden tone..."
+                                                  } else {"Select the quietest sound..."},
+                                                  choices = list("Sound 1" = "answer1",
+                                                                 "Sound 2" = "answer2",
+                                                                 "Sound 3" = "answer3"),
+                                                  selected = character(0),
+                                                  disabled = TRUE)
+
+            shinyjs::delay(500, shinyjs::enable("screenplay"))
           } else {
             shinyjs::hide("screen")
-            shinyalert::shinyalert(type = "error",
-                                   text = if (fail_msg == "default") {"Unfortunately you did not pass the headphone screen. You have used all available attempts. Fully functioning headphones are required for this experiment. Thank you for your time!"
-                                   } else {as.character(fail_msg)},
-                                   confirmButtonText = "OKAY",
-                                   inputId = "fail")
-            status(0)
+            shinyalert::shinyalert(type = "success",
+                                   title = "Success!",
+                                   text = if (success_msg == "default") {"You passed the headphone screen."
+                                   } else {as.character(success_msg)},
+                                   timer = 3000)
+            status(1)
           }
         }
-        if (trial() < (n_trials-1)) {
-          trial(trial() + 1)
-          shinyWidgets::updateProgressBar(session = session,
-                                          id = session$ns("progress"),
-                                          value = trial(), total = n_trials,
-                                          range_value = c(1:n_trials))
-
-          shinyWidgets::updateRadioGroupButtons(session, "choices",
-                                                label = if (type == "huggins") {"Select the sound containing the hidden tone..."
-                                                } else {"Select the quietest sound..."},
-                                                choices = list("Sound 1" = "answer1",
-                                                               "Sound 2" = "answer2",
-                                                               "Sound 3" = "answer3"),
-                                                selected = character(0),
-                                                disabled = TRUE)
-
-          shinyjs::delay(500, shinyjs::enable("screenplay"))
-        } else {
-          shinyjs::hide("screen")
-          shinyalert::shinyalert(type = "success",
-                                 title = "Success!",
-                                 text = if (success_msg == "default") {"You passed the headphone screen."
-                                 } else {as.character(success_msg)},
-                                 timer = 3000)
-          status(1)
-        }
-
       })
 
       return(shiny::reactive(status()))
