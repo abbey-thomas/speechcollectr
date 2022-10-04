@@ -6,6 +6,7 @@
 \usage{
 transcribeServer(
   id = "transcribe",
+  trigger = NULL,
   audioFile,
   outFile,
   allowPause = FALSE,
@@ -15,10 +16,7 @@ transcribeServer(
     instructions = "Play the audio file. Then, enter what you heard in the box below. Click the submit button when you are finished.",
   n_lines = 1,
   width = "100\%",
-  submitLab = "SUBMIT",
-  correct = NULL,
-  counter = 1,
-  attempts = 1
+  submitLab = "SUBMIT"
 )
 }
 \arguments{
@@ -41,6 +39,8 @@ transcribeServer(
 \item{width}{Character. Defaults to "100\%", defines how much of the horizontal space the transcription interface will occupy.}
 
 \item{submitLab}{The label on the submit button. Defaults to "SUBMIT".}
+
+\item{If}{not \code{NULL} (the default), a reactive expression returning the event that should trigger the appearance of the interface.}
 }
 \value{
 Returns a set of reactive values including the name of the audio file, the text the participant entered, and the number of times they clicked play.
@@ -54,47 +54,54 @@ tuneR::writeWave(samp_wav, "sample.wav")
 wwwPrep(from = "sample.wav")
 
 if (interactive()) {
- library(shiny)
- library(speechcollectr)
- library(shinyjs)
- ui <- fluidPage(
-  actionButton("begin", "Begin"),
-  transcribeUI(id = "transcribe"),
-  h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
-  h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
-  h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
- )
+  library(shiny)
+  library(speechcollectr)
+  library(shinyjs)
 
+  ui <- fluidPage(
+    actionButton("begin", "Begin"),
+    transcribeUI(id = "transcribe"),
+    h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
+    h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
+    h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
+  )
 
-server <- function(input, output, session) {
-  rvs <- reactiveValues(n = 1, attempt = 1)
-  answers <- c("a", "ab", "abc", "abcd")
+  server <- function(input, output, session) {
+    rvs <- reactiveValues(n = 1, attempt = 1)
+    answers <- c("a", "ab", "abc", "abcd")
 
-  observeEvent(input$begin, {
-    disable("begin")
-    rvs$out <- transcribeServer(id="transcribe",
-                     audioFile = "sample.wav",
-                     n_play = 4,
-                     outFile = paste0("sample", rvs$n, ".rds"),
-                     result = "hide",
-                     correct = answers[rvs$n],
-                     counter = rvs$attempt,
-                     attempts = 2)
+    observeEvent(input$begin, {
+      disable("begin")
+      rvs$out <- transcribeServer(id="transcribe",
+                                  audioFile = "sample.wav",
+                                  n_play = 4,
+                                  outFile = paste0("sample", rvs$n, ".rds"),
+                                  result = "hide")
+    })
+
+    observeEvent(input[["transcribe-submit"]], {
+      delay(500,
+            correct <- evalTranscServer(filename = paste0("sample", rvs$n, ".rds"),
+                                        correct = answers[rvs$n],
+                                        attempts = 2,
+                                        counter = rvs$attempt,
+                                        passInputId = "pass",
+                                        warnInputId = "warn",
+                                        failInputId = "fail"))
+    })
+  }
+
+  observeEvent(input$pass, {
+    rvs$n <- rvs$n + 1
+    rvs$attempt <- 1
+    enable("begin")
   })
 
-  observeEvent(input[["transcribe-submit"]], {
-    if (rvs$attempt < 2) {
-      enable("begin")
-    }
-
-    if (rvs$out()$correct == 1) {
-      rvs$n <- rvs$n + 1
-    } else {
-      rvs$attempt <- rvs$attempt + 1
-    }
+  observeEvent(input$warn, {
+    rvs$attempt <- rvs$attempt + 1
+    enable("begin")
   })
 
- }
- shinyApp(ui = ui, server = server)
+  shinyApp(ui = ui, server = server)
 }
 }

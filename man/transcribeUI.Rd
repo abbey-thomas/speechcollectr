@@ -23,48 +23,54 @@ tuneR::writeWave(samp_wav, "sample.wav")
 wwwPrep(from = "sample.wav")
 
 if (interactive()) {
- library(shiny)
- library(speechcollectr)
- library(shinyjs)
- ui <- fluidPage(
-  actionButton("begin", "Begin"),
-  transcribeUI(id = "transcribe"),
-  h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
-  h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
-  h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
- )
+  library(shiny)
+  library(speechcollectr)
+  library(shinyjs)
 
+  ui <- fluidPage(
+    actionButton("begin", "Begin"),
+    transcribeUI(id = "transcribe"),
+    h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
+    h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
+    h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
+  )
 
- server <- function(input, output, session) {
-  rvs <- reactiveValues(n = 1, attempt = 1)
-  answers <- c("a", "ab", "abc", "abcd")
+  server <- function(input, output, session) {
+    rvs <- reactiveValues(n = 1, attempt = 1)
+    answers <- c("a", "ab", "abc", "abcd")
 
-  observeEvent(input$begin, {
-    disable("begin")
-    transcribeServer(id="transcribe",
-                     audioFile = "sample.wav",
-                     n_play = 4,
-                     outFile = paste0("sample", rvs$n, ".rds"),
-                     result = "hide")
-  })
+    observeEvent(input$begin, {
+      disable("begin")
+      rvs$out <- transcribeServer(id="transcribe",
+                                  audioFile = "sample.wav",
+                                  n_play = 4,
+                                  outFile = paste0("sample", rvs$n, ".rds"),
+                                  result = "hide")
+    })
 
-  observeEvent(input[["transcribe-submit"]], {
+    observeEvent(input[["transcribe-submit"]], {
+      delay(500,
+            correct <- evalTranscServer(filename = paste0("sample", rvs$n, ".rds"),
+                                        correct = answers[rvs$n],
+                                        attempts = 2,
+                                        counter = rvs$attempt,
+                                        passInputId = "pass",
+                                        warnInputId = "warn",
+                                        failInputId = "fail"))
+    })
+  }
+
+  observeEvent(input$pass, {
+    rvs$n <- rvs$n + 1
+    rvs$attempt <- 1
     enable("begin")
-
-    rvs$is_correct <- evalTranscServer(filename = paste0("sample", rvs$n, ".rds"),
-                                       counter = rvs$attempt,
-                                       attempts = 2,
-                                       correct = answers[rvs$n])
-
-    shiny::req(!is.null(rvs$is_correct))
-    if (rvs$is_correct == 1) {
-      rvs$n <- rvs$n + 1
-    } else {
-      rvs$attempt <- rvs$attempt + 1
-    }
   })
 
- }
- shinyApp(ui = ui, server = server)
+  observeEvent(input$warn, {
+    rvs$attempt <- rvs$attempt + 1
+    enable("begin")
+  })
+
+  shinyApp(ui = ui, server = server)
 }
 }
