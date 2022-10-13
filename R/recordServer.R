@@ -83,6 +83,9 @@ recordServer <- function(id = "record",
   })
 
   if (is.null(trigger)) {
+    shiny::observe({
+      shinyjs::showElement(paste0(id))
+    })
     shiny::observeEvent(session$input[[paste0(id, "-start")]], {
       shinyjs::disable(paste0(id, "-start"))
       record_rvs$n <- record_rvs$n+1
