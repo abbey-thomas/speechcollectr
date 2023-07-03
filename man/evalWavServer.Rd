@@ -6,19 +6,19 @@
 \usage{
 evalWavServer(
   wave,
-  counter,
+  counter = 1,
   min_sf = 44100,
   snr_best = 15,
   snr_good = 5,
   max_clip = 0.01,
-  tries = 3,
+  tries = Inf,
   onFail = "continue"
 )
 }
 \arguments{
 \item{wave}{Required. Either a \code{tuneR::Wave} object or a valid file path to an existing wav file.}
 
-\item{counter}{Required. A (usually reactive) value that tells this function how many tries a participant has had so far.}
+\item{counter}{Required. A value that tells this function how many tries a participant has had so far.}
 
 \item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
 
@@ -66,8 +66,7 @@ if (interactive()) {
     observeEvent(input$submit, {
       disable("submit")
       result <- evalWavServer(wave = recording()$file,
-                              tries = 2,
-                              counter = recording()$n)
+                              tries = 3)
       observeEvent(result(), {
         # If the recording is not good enough, but the participant has had fewer 2 attempts
         # the recording interface will remain visible,

@@ -1,7 +1,7 @@
 #' Give feedback to participants on recording quality
 #'
 #' @param wave Required. Either a `tuneR::Wave` object or a valid file path to an existing wav file.
-#' @param counter Required. A (usually reactive) value that tells this function how many tries a participant has had so far.
+#' @param counter Required. A value that tells this function how many tries a participant has had so far.
 #' @param min_sf What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.
 #' @param snr_best Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.
 #' @param snr_good Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than `snr_best`. Defaults to 5.
@@ -40,8 +40,7 @@
 #'     observeEvent(input$submit, {
 #'       disable("submit")
 #'       result <- evalWavServer(wave = recording()$file,
-#'                               tries = 2,
-#'                               counter = recording()$n)
+#'                               tries = 3)
 #'       observeEvent(result(), {
 #'         # If the recording is not good enough, but the participant has had fewer 2 attempts
 #'         # the recording interface will remain visible,
@@ -67,11 +66,11 @@
 #'   shinyApp(ui = ui, server = server)
 #' }
 evalWavServer <- function(wave,
-                          counter,
+                          counter = 1,
                           min_sf = 44100,
                           snr_best = 15, snr_good = 5,
                           max_clip = 0.01,
-                          tries = 3,
+                          tries = Inf,
                           onFail = "continue"){
   if (class(wave)[1] != "Wave") {
     wave <- tuneR::readWave(wave)
@@ -80,6 +79,8 @@ evalWavServer <- function(wave,
   session <- shiny::getDefaultReactiveDomain()
 
   eval <- evalWav(wave)
+
+  if (is.reactive(counter)) { counter <- isolate(counter)}
 
   if (eval$samp.rate < min_sf) {
     shinyalert::shinyalert(type = "error", title = "Error:",
