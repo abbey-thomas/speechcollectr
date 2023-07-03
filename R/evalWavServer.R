@@ -116,7 +116,7 @@ evalWavServer <- function(wave,
       clip_score <- 0
       clip_tip <- c("<li>Whoa! That recording was loud. Try moving back from your microphone a little.</li>")
     }
-    if (counter < tries) {
+    if (counter <= tries) {
       if (sum(snr_score, clip_score) == 4) {
         tips <- c("<h4>Sounds good!</h4>")
       }
@@ -131,33 +131,34 @@ evalWavServer <- function(wave,
                                html = TRUE,
                                inputId = "evalWav-pass",
                                closeOnEsc = FALSE)
-      }
-      else {
-        shinyalert::shinyalert(type = "warning", title = "Hmm...",
-                               text = paste0(tips, "<h5>Click the button below to try again and help us complete the calibration of our system to your environment.</h5>"),
-                               confirmButtonText = "Try Again", html = TRUE,
-                               inputId = "evalWav-warn", closeOnEsc = FALSE)
-        counter <- counter + 1
+      } else {
+        if (counter < tries) {
+          shinyalert::shinyalert(type = "warning", title = "Hmm...",
+                                 text = paste0(tips, "<h5>Click the button below to try again and help us complete the calibration of our system to your environment.</h5>"),
+                                 confirmButtonText = "Try Again", html = TRUE,
+                                 inputId = "evalWav-warn", closeOnEsc = FALSE)
+          counter <- counter + 1
+        } else {
+          if (onFail == "continue") {
+            tips <- c("<h6>Sounds good!</h6>")
+            shinyalert::shinyalert(type = "success", title = "Success!",
+                                   text = paste0(tips), confirmButtonText = "Confirm Submission",
+                                   html = TRUE,
+                                   inputId = "evalWav-pass",
+                                   closeOnEsc = FALSE)
+          }
+          else {
+            tips <- c("<h6>Unfortunately, you do not seem to have the right equipment for this task. Thank you for your interest in the study! You may close this browser window.")
+            shinyalert::shinyalert(type = "error", title = "Error:",
+                                   text = paste0(tips), confirmButtonText = "Exit Experiment",
+                                   html = TRUE,
+                                   inputId = "evalWav-fail",
+                                   closeOnEsc = FALSE)
+          }
+        }
       }
     }
-    else {
-      if (onFail == "continue") {
-        tips <- c("<h6>Sounds good!</h6>")
-        shinyalert::shinyalert(type = "success", title = "Success!",
-                               text = paste0(tips), confirmButtonText = "Confirm Submission",
-                               html = TRUE,
-                               inputId = "evalWav-pass",
-                               closeOnEsc = FALSE)
-      }
-      else {
-        tips <- c("<h6>Unfortunately, you do not seem to have the right equipment for this task. Thank you for your interest in the study! You may close this browser window.")
-        shinyalert::shinyalert(type = "error", title = "Error:",
-                               text = paste0(tips), confirmButtonText = "Exit Experiment",
-                               html = TRUE,
-                               inputId = "evalWav-fail",
-                               closeOnEsc = FALSE)
-      }
-    }
+
   }
 
   feedback <- shiny::eventReactive(session$input[["evalWav-fail"]], {

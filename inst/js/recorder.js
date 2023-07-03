@@ -56,7 +56,7 @@ var blob = null;
                         function (e) {
                             console.error(e);
                         });
-            Shiny.setInputValue(params.ready, true);            
+            Shiny.setInputValue(params.ready, true);
         });
 
         stop.addEventListener('click', function () {
@@ -102,9 +102,9 @@ var blob = null;
 
             // our final blob
             blob = new Blob([view], { type: 'audio/wav' });
-            Shiny.setInputValue(params.output, blob)
+            Shiny.setInputValue(params.output, blob);
         });
-        
+
         function flattenArray(channelBuffer, recordingLength) {
             var result = new Float32Array(recordingLength);
             var offset = 0;
@@ -115,7 +115,7 @@ var blob = null;
             }
             return result;
         }
-        
+
         function writeUTFBytes(view, offset, string) {
             for (var i = 0; i < string.length; i++) {
                 view.setUint8(offset + i, string.charCodeAt(i));
