@@ -59,7 +59,7 @@
 #'                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
 #'     })
 #'
-#'     observeEvent(input[["example-submit"]]{
+#'     observeEvent(input[["example-submit"]], {
 #'     enable("btn")
 #'         output$confirmation <- renderText({
 #'           paste0("You selected ", rvs$rating(),".")})
@@ -115,12 +115,12 @@
 #'    shinyApp(ui = ui, server = server)
 #'  }
 rateServer <- function(id = "rate",
-                       trigger,
+                       trigger = NULL,
                        wait = 1,
                        type = c("button", "slider"),
                        n_scales = 1,
                        answer_all = FALSE,
-                       answers = NULL,
+                       choices = NULL,
                        instructions = "",
                        pretext = "",
                        scale_labs = NULL,
@@ -131,8 +131,15 @@ rateServer <- function(id = "rate",
                        sliderMax = 100,
                        pips = NULL,
                        step = .01) {
-  if (!is.list(answers)|length(answers) != n_scales)
-    stop("Argument 'answers' must be a list the same length as 'n_scales', containing a vector of choices for each scale.")
+  if (is.list(choices)) {
+    if (length(choices) != n_scales) {
+      stop("Argument 'answers' must be a list the same length as 'n_scales', containing a vector of choices for each scale.")
+    } else {
+      answers <- choices
+    }
+  } else {
+    answers <- lapply(seq_along(1:n_scales), function(x) {c(choices)})
+  }
 
   if (all(!is.null(scale_labs))) {
     if (length(scale_labs) != n_scales)

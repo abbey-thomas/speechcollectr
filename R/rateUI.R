@@ -36,7 +36,7 @@
 #'                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
 #'     })
 #'
-#'     observeEvent(input[["example-submit"]]{
+#'     observeEvent(input[["example-submit"]], {
 #'     enable("btn")
 #'         output$confirmation <- renderText({
 #'           paste0("You selected ", rvs$rating(),".")})
@@ -97,6 +97,7 @@ rateUI <- function(id = "rate",
                    n_scales = 1,
                    scaleFillCol = "white",
                    scaleTextCol = "black",
+                   scaleTextSz = "20px",
                    submitText = "SUBMIT",
                    submitFillCol = "white",
                    submitTextCol = "black") {
@@ -112,7 +113,7 @@ rateUI <- function(id = "rate",
                                              fills[i], "; color:", texts[i],
                                              "; border-color:", texts[i],
                                              "; white-space:normal;
-                                             font-size:20px}")))
+                                             font-size:", scaleTextSz, "}")))
       } else {
         shiny::tags$style(shiny::HTML(paste0("#", id, "-scale", i,
                                              ".noUi-connect {background:",

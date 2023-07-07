@@ -6,12 +6,12 @@
 \usage{
 rateServer(
   id = "rate",
-  trigger,
+  trigger = NULL,
   wait = 1,
   type = c("button", "slider"),
   n_scales = 1,
   answer_all = FALSE,
-  answers = NULL,
+  choices = NULL,
   instructions = "",
   pretext = "",
   scale_labs = NULL,
@@ -37,8 +37,6 @@ rateServer(
 
 \item{answer_all}{If \code{n_scales} > 1, does the participant need to give a response on each scale or only one of them?}
 
-\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector in this list. If \code{type="slider"}, each scale must have EXACTLY 2 answers (the first representing the lower extreme and the second representing the higher extreme). If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
-
 \item{instructions}{Instructions that will appear at the top of the page.}
 
 \item{pretext}{Character. The text that will appear above the likert scale.}
@@ -58,6 +56,8 @@ rateServer(
 \item{pips}{List with two elements. Where to place numeric markers on the slider scale. See Details for more information.}
 
 \item{step}{Numeric. The distance between consecutive points (i.e., potential answers) on the slider. Default is \code{.01},}
+
+\item{answers}{A list with length \code{n_scales}. The answer choices for each scale should be a character vector in this list. If \code{type="slider"}, each scale must have EXACTLY 2 answers (the first representing the lower extreme and the second representing the higher extreme). If \code{n_scales} > 1 and the options are different for each scale, the character vectors should be wrapped in a list.}
 
 \item{showAnswer}{Boolean. Defaults to \code{FALSE}. Whether to display the current numeric value of the slider above the handle.}
 }
@@ -101,7 +101,7 @@ if (interactive()){
                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
     })
 
-    observeEvent(input[["example-submit"]]{
+    observeEvent(input[["example-submit"]], {
     enable("btn")
         output$confirmation <- renderText({
           paste0("You selected ", rvs$rating(),".")})

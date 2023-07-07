@@ -11,6 +11,7 @@ rateUI(
   n_scales = 1,
   scaleFillCol = "white",
   scaleTextCol = "black",
+  scaleTextSz = "20px",
   submitText = "SUBMIT",
   submitFillCol = "white",
   submitTextCol = "black"
@@ -65,7 +66,7 @@ if (interactive()){
                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
     })
 
-    observeEvent(input[["example-submit"]]{
+    observeEvent(input[["example-submit"]], {
     enable("btn")
         output$confirmation <- renderText({
           paste0("You selected ", rvs$rating(),".")})
