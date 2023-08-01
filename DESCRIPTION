@@ -17,7 +17,6 @@ Imports:
     base64enc,
     data.table,
     dplyr,
-    gplots,
     htmltools,
     magrittr,
     RCurl,
