@@ -125,7 +125,6 @@ recordUI <- function(id = "record",
         var recordingLength = 0;
         var volume = null;
         var mediaStream = null;
-        var sampleRate = 44100;
         var context = null;
         var blob = null;
         var ready = params.recId+'-ready'
@@ -151,7 +150,7 @@ recordUI <- function(id = "record",
 
                 // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createScriptProcessor
                 // bufferSize: the onaudioprocess event is called when the buffer is full
-                var bufferSize = 2048;
+                var bufferSize = 4096;
                 var numberOfInputChannels = 2;
                 var numberOfOutputChannels = 2;
                 if (context.createScriptProcessor) {
@@ -195,15 +194,15 @@ recordUI <- function(id = "record",
 
             // RIFF chunk descriptor
             writeUTFBytes(view, 0, 'RIFF');
-            view.setUint32(4, 44 + leftBuffer.length * 2, true);
+            view.setUint32(4, 36 + leftBuffer.length * 2, true);
             writeUTFBytes(view, 8, 'WAVE');
             // FMT sub-chunk
             writeUTFBytes(view, 12, 'fmt ');
             view.setUint32(16, 16, true); // chunkSize
             view.setUint16(20, 1, true); // wFormatTag
             view.setUint16(22, 1, true); // wChannels: stereo (2 channels), change to 1 for mono
-            view.setUint32(24, sampleRate, true); // dwSamplesPerSec
-            view.setUint32(28, sampleRate * 2, true); // dwAvgBytesPerSec, change to *2 for mono
+            view.setUint32(24, context.sampleRate, true); // dwSamplesPerSec
+            view.setUint32(28, context.sampleRate * 2, true); // dwAvgBytesPerSec, change to *2 for mono
             view.setUint16(32, 4, true); // wBlockAlign
             view.setUint16(34, 16, true); // wBitsPerSample
             // data sub-chunk
