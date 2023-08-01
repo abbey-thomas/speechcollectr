@@ -73,7 +73,6 @@
 #' }
 #'
 #' @importFrom grDevices col2rgb
-#' @importFrom gplots col2hex
 #'
 recordUI <- function(id = "record",
                      startText = "RECORD",

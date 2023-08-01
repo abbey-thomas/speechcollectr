@@ -102,8 +102,8 @@ rateUI <- function(id = "rate",
                    submitFillCol = "white",
                    submitTextCol = "black") {
 
-  fills <- gplots::col2hex(rep(c(scaleFillCol), length.out = n_scales))
-  texts <- gplots::col2hex(rep(c(scaleTextCol), length.out = n_scales))
+  fills <- col2hex(rep(c(scaleFillCol), length.out = n_scales))
+  texts <- col2hex(rep(c(scaleTextCol), length.out = n_scales))
 
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
