@@ -97,95 +97,81 @@
 #'   }
 #'   shinyApp(ui = ui, server = server)
 #' }
-randomStim <- function(dataFile,
-                       blockCol = NULL,
-                       n_practice = 0,
-                       n_perBlock = NULL,
-                       n_blocks = NULL,
-                       blocksSameOrd = FALSE,
-                       outFile = NULL) {
-
+randomStim <- function (dataFile, blockCol = "Block", n_practice = 1, n_perBlock = NULL,
+                        n_blocks = NULL, blocksSameOrd = FALSE, outFile = NULL)
+{
   if (!is.data.frame(dataFile)) {
     if (grepl("csv$", dataFile)) {
       df_init <- read.csv(dataFile)
-    } else if (grepl("rds$", dataFile)){
+    }
+    else if (grepl("rds$", dataFile)) {
       df_init <- readRDS(dataFile)
     }
-  } else {
+  }
+  else {
     df_init <- dataFile
   }
-
   if (!is.null(blockCol)) {
-    grps <- df_init %>%
-      dplyr::group_by(.data[[blockCol]]) %>%
-      dplyr::mutate(b_count = dplyr::n()) %>%
-      dplyr::select(.data[[blockCol]], b_count) %>%
-      unique()
+    grps <- df_init %>% dplyr::group_by(.data[[blockCol]]) %>%
+      dplyr::mutate(b_count = dplyr::n()) %>% dplyr::select(block = .data[[blockCol]],
+                                                            b_count) %>% unique()
     if (n_practice > 0) {
       n_perBlock <- c(unique(grps$b_count[2:nrow(grps)]))
-      n_blocks <- nrow(grps)-1
-    } else {
+      n_blocks <- nrow(grps) - 1
+    }
+    else {
       n_perBlock <- c(unique(grps$b_count))
       n_blocks <- nrow(grps)
     }
-  } else {
+  }
+  else {
     if (n_practice > 0) {
-      grps <- data.frame(block = c(0, 1:n_blocks),
-                         b_count = c(n_practice,
-                                     rep.int(n_perBlock, n_blocks)))
-    } else {
-      grps <- data.frame(block = c(1:n_blocks),
-                         b_count = rep.int(n_perBlock, n_blocks))
+      grps <- data.frame(block = c(0, 1:n_blocks), b_count = c(n_practice,
+                                                               rep.int(n_perBlock, n_blocks)))
+    }
+    else {
+      grps <- data.frame(block = c(1:n_blocks), b_count = rep.int(n_perBlock,
+                                                                  n_blocks))
     }
   }
-
   if ((length(n_perBlock) > 1) & is.null(blockCol))
     stop("If you wish to have variable numbers of trials per block, you must give a key as to which stimuli belong to which blocks using `blockCol`, and then number of rows in `datafile` must be equal to the total number of practice + experimental trials across all blocks.")
-
-  if ((length(n_perBlock) > 1) & (nrow(df_init) != (n_practice + (n_perBlock*n_blocks))))
+  if ((length(n_perBlock) > 1) & (nrow(df_init) != (n_practice +
+                                                    (n_perBlock * n_blocks))))
     stop("If you wish to have variable numbers of trials per block, you must give a key as to which stimuli belong to which blocks using `blockCol`, and then number of rows in `datafile` must be equal to the total number of practice + experimental trials across all blocks.")
-
   if (isTRUE(blocksSameOrd)) {
-    #if (length(n_perBlock) > 1 | !is.integer((n_blocks*n_perBlock)/(nrow(df_init)-n_practice)))
-    #stop("To use the same order across blocks, the number of experimental trials must be the same across blocks and the same as or an integer multiple of the total number of rows in `dataFile` minus `n_practice`.")
-    ord_df <- data.frame(block = unlist(mapply(rep,
-                                               c(grps$block),
-                                               grps$b_count)),
-                         ord = c(seq.int(length.out = n_practice),
-                                 rep(sample(c(1:n_perBlock),
-                                            size = n_perBlock),
-                                     times = n_blocks))) %>%
-      tidyr::pivot_longer(cols = tidyr::contains("block"),
-                          values_to = "block") %>%
-      dplyr::select(block, ord) %>% dplyr::arrange(block)
-  } else {
-    ord_df <- data.frame(block = c(mapply(rep,
-                                          c(grps$block),
-                                          grps$b_count)),
-                         ord = c(sapply(grps$b_count, function(i){
-                           sample(c(1:i), i)
-                         })))
+    ord_df <- data.frame(block = unlist(mapply(rep, c(grps$block),
+                                               grps$b_count)), ord = c(seq.int(length.out = n_practice),
+                                                                       rep(sample(c(1:n_perBlock), size = n_perBlock),
+                                                                           times = n_blocks))) %>% tidyr::pivot_longer(cols = tidyr::contains("block"),
+                                                                                                                       values_to = "block") %>% dplyr::select(block, ord) %>%
+      dplyr::arrange(block)
   }
-
-  if (nrow(df_init) < (n_practice + (n_perBlock*n_blocks))) {
-    exper <- df_init %>% dplyr::filter(row_number()>n_practice)
-    b_list <- replicate((n_blocks-1), exper, simplify = FALSE)
+  else {
+    ord_df <- data.frame(block = c(df_init[,blockCol]),
+                         ord = c(unlist(lapply(grps$b_count, function(i){
+                           sample(c(1:i), i)})
+                         ))
+    )
+  }
+  if (nrow(df_init) < (n_practice + (n_perBlock * n_blocks))) {
+    exper <- df_init %>% dplyr::filter(row_number() > n_practice)
+    b_list <- replicate((n_blocks - 1), exper, simplify = FALSE)
     all_trials <- dplyr::bind_rows(df_init, b_list)
-  } else {
+  }
+  else {
     all_trials <- df_init
   }
-
   if ("block" %in% colnames(all_trials)) {
     all_trials <- all_trials %>% dplyr::select(-block)
   }
-
   df_end <- dplyr::bind_cols(all_trials, ord_df) %>%
     dplyr::arrange(block, ord) %>% dplyr::rename(trial = ord)
-
   if (!is.null(outFile)) {
     if (grepl("csv$", outFile)) {
       write.csv(df_end, outFile, row.names = FALSE)
-    } else {
+    }
+    else {
       saveRDS(df_end, outFile)
     }
   }

@@ -83,14 +83,14 @@ recordServer <- function(id = "record",
   })
 
   if (is.null(trigger)) {
-    shiny::observe({
-      shinyjs::showElement(paste0(id))
-    })
+    #shiny::observe({
+    #shinyjs::showElement(paste0(id))
+    #})
     shiny::observeEvent(session$input[[paste0(id, "-start")]], {
       shinyjs::disable(paste0(id, "-start"))
       record_rvs$n <- record_rvs$n+1
 
-      record_rvs$outPrefix <- ifelse(!is.reactive(outPrefix),
+      record_rvs$outPrefix <- ifelse(!shiny::is.reactive(outPrefix),
                                      paste0(outPrefix), paste0(outPrefix()))
 
       file_list <- list.files(path = gsub("/[^/]+?$", "", record_rvs$outPrefix),
@@ -118,9 +118,8 @@ recordServer <- function(id = "record",
       shinyjs::showElement(paste0(id))
       record_rvs$attempt <- 0
 
-      record_rvs$outPrefix <- ifelse(!is.reactive(outPrefix),
+      record_rvs$outPrefix <- ifelse(!shiny::is.reactive(outPrefix),
                                      paste0(outPrefix), paste0(outPrefix()))
-
       file_list <- list.files(path = gsub("/[^/]+?$", "", record_rvs$outPrefix),
                               pattern = paste0(gsub(".*/", "", record_rvs$outPrefix), ".*", "\\.wav$"),
                               full.names = TRUE)
@@ -192,23 +191,7 @@ recordServer <- function(id = "record",
     shinyjs::delay(500, shinyjs::enable(paste0(id, "-start")))
     shinyjs::delay(500, shiny::removeUI(selector = paste0("#", id, record_rvs$n, "-audio")))
     shinyjs::delay(500, shiny::removeUI(selector = paste0("#", id, record_rvs$n, "-ready")))
-
-    #if (isTRUE(playback)) {
-    #shiny::insertUI(selector = paste0("#", id, "-stop"),
-    #where = "afterEnd",
-    #ui = {
-    #playBttn(inputId = paste0(id, "-play", record_rvs$n),
-    #label = "Listen to your recording.",
-    #src = paste0(record_rvs$filepath),
-    #audioId = paste0(id, "-recording", record_rvs$n),
-    #fill = "white", text = "black")},
-    #session = session)
-    #}
   })
-
-  #shiny::observeEvent(session$input[[paste0(id, "-play", record_rvs$n)]], {
-  #shinyjs::hide(paste0(id, "-play", record_rvs$n))
-  #})
 
   retval <- shiny::eventReactive(session$input[[paste0(id, "-stop")]], {
     if (is.null(trigger)) {

@@ -68,7 +68,8 @@
 evalWavServer <- function(wave,
                           counter = 1,
                           min_sf = 44100,
-                          snr_best = 15, snr_good = 5,
+                          snr_best = 15,
+                          snr_good = 5,
                           max_clip = 0.01,
                           tries = Inf,
                           onFail = "continue"){
@@ -143,7 +144,8 @@ evalWavServer <- function(wave,
           if (onFail == "continue") {
             tips <- c("<h6>Sounds good!</h6>")
             shinyalert::shinyalert(type = "success", title = "Success!",
-                                   text = paste0(tips), confirmButtonText = "Confirm Submission",
+                                   text = paste0(tips),
+                                   confirmButtonText = "Confirm Submission",
                                    html = TRUE,
                                    inputId = "evalWav-pass",
                                    closeOnEsc = FALSE)
@@ -151,7 +153,8 @@ evalWavServer <- function(wave,
           else {
             tips <- c("<h6>Unfortunately, you do not seem to have the right equipment for this task. Thank you for your interest in the study! You may close this browser window.")
             shinyalert::shinyalert(type = "error", title = "Error:",
-                                   text = paste0(tips), confirmButtonText = "Exit Experiment",
+                                   text = paste0(tips),
+                                   confirmButtonText = "Exit Experiment",
                                    html = TRUE,
                                    inputId = "evalWav-fail",
                                    closeOnEsc = FALSE)
