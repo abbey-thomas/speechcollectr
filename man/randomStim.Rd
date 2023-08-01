@@ -6,8 +6,8 @@
 \usage{
 randomStim(
   dataFile,
-  blockCol = NULL,
-  n_practice = 0,
+  blockCol = "Block",
+  n_practice = 1,
   n_perBlock = NULL,
   n_blocks = NULL,
   blocksSameOrd = FALSE,
