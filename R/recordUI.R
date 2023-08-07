@@ -249,7 +249,15 @@ recordUI <- function(id = "record",
 
   ui <- shiny::tags$span(
     shiny::tags$head(
-      shiny::includeScript(file.path("rec","WAR", "WebAudioRecorder.min.js")),
+      shiny::tagList(
+        htmltools::htmlDependency(
+          name = "webAudioRecorder",
+          version = as.character(utils::packageVersion("speechcollectr")),
+          package = "speechcollectr",
+          src = "recorder/WAR",
+          script = "WebAudioRecorder.min.js"
+        ),
+      ),
       shinyjs::useShinyjs(),
       shinyjs::extendShinyjs(script = file.path("rec", "js", "recorder_ext.js"),
                              functions = "webAudioRecorder")),
