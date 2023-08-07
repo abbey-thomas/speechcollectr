@@ -176,5 +176,5 @@ evalWavServer <- function(wave,
   feedback <- shiny::eventReactive(session$input[["evalWav-pass"]], {
     return("pass")
   })
-  return(feedback)
+  return(shiny::isolate(feedback))
 }
