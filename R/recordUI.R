@@ -104,6 +104,8 @@ recordUI <- function(id = "record",
     stop("Error: stopTextCol argument requires a valid color name or hexadecimal code.")
   }
 
+  shiny::addResourcePath("rec", system.file("recorder", package = "speechcollectr"))
+
   txt <- "shinyjs.webAudioRecorder = function(params) {
   var defaultParams =
   {
@@ -247,10 +249,10 @@ recordUI <- function(id = "record",
 
   ui <- shiny::tags$span(
     shiny::tags$head(
-      #shiny::includeScript(file.path("WAR", "WebAudioRecorder.min.js")),
-                     shinyjs::useShinyjs(),
-                     shinyjs::extendShinyjs(text = txt,
-                                            functions = "webAudioRecorder")),
+      shiny::includeScript(file.path("rec","WAR", "WebAudioRecorder.min.js")),
+      shinyjs::useShinyjs(),
+      shinyjs::extendShinyjs(script = file.path("rec", "js", "recorder_ext.js"),
+                             functions = "webAudioRecorder")),
     shinyjs::hidden(shiny::tags$div(id = paste0(id), style = paste0("text-align:", align,";"),
                                     shinyjs::hidden(shiny::tags$div(id = paste0(id, "-stimDiv"),
                                                                     style = paste0("text-align:", align,";"),
