@@ -256,7 +256,7 @@ recordUI <- function(id = "record",
           package = "speechcollectr",
           src = "recorder",
           script = c("rec_backend.js", "rec_frontend.js")
-        ),
+        )
       ),
       shinyjs::useShinyjs(),
       #shinyjs::extendShinyjs(script = file.path("rec", "js", "recorder_ext.js"),
