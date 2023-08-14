@@ -249,15 +249,15 @@ recordUI <- function(id = "record",
 
   ui <- shiny::tags$span(
     shiny::tags$head(
-      shiny::tagList(
-        htmltools::htmlDependency(
-          name = "webAudioRecorder",
-          version = as.character(utils::packageVersion("speechcollectr")),
-          package = "speechcollectr",
-          src = "recorder",
-          script = c("rec_backend.js", "rec_frontend.js")
-        )
-      ),
+      #shiny::tagList(
+      #  htmltools::htmlDependency(
+      #    name = "webAudioRecorder",
+      #    version = as.character(utils::packageVersion("speechcollectr")),
+      #    package = "speechcollectr",
+      #    src = "recorder",
+      #    script = c("rec_backend.js", "rec_frontend.js")
+      #  )
+      #),
       shinyjs::useShinyjs(),
       #shinyjs::extendShinyjs(script = file.path("rec", "js", "recorder_ext.js"),
       #                       functions = "webAudioRecorder")
@@ -283,7 +283,9 @@ recordUI <- function(id = "record",
                                                           inline = stopInline)),
                                     # shiny::uiOutput(paste0(id, "-replay")),
                                     shinyjs::hidden(shiny::actionButton(paste0(id, "-file"),
-                                                                        label = ""))))
+                                                                        label = "")))),
+    shiny::includeScript("recorder/rec_frontend.js"),
+    shiny::includeScript("recorder/rec_backend.js")
 
   )
 

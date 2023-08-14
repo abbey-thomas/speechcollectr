@@ -77,12 +77,12 @@ recordServer <- function(id = "record",
   session <- shiny::getDefaultReactiveDomain()
   record_rvs <- shiny::reactiveValues(n = 0, played = 0)
 
-  shiny::observe({
-    shiny::req(record_rvs$n)
-    js$webAudioRecorder(recId = paste0(id, record_rvs$n),
-                        startId = paste0(id, "-file"),
-                        stopId = paste0(id, "-stop"))
-  })
+  #shiny::observe({
+  #  shiny::req(record_rvs$n)
+  #  js$webAudioRecorder(recId = paste0(id, record_rvs$n),
+  #                      startId = paste0(id, "-file"),
+  #                      stopId = paste0(id, "-stop"))
+  #})
 
   if (is.null(trigger)) {
     #shiny::observe({
