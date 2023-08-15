@@ -284,8 +284,8 @@ recordUI <- function(id = "record",
                                     # shiny::uiOutput(paste0(id, "-replay")),
                                     shinyjs::hidden(shiny::actionButton(paste0(id, "-file"),
                                                                         label = "")))),
-    shiny::includeScript("recorder/rec_frontend.js"),
-    shiny::includeScript("recorder/rec_backend.js")
+    shiny::includeScript(system.file("recorder/rec_frontend.js", package = "speechcollectr")),
+    shiny::includeScript(system.file("recorder/rec_backend.js", package = "speechcollectr"))
 
   )
 
