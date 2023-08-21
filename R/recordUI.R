@@ -286,7 +286,6 @@ recordUI <- function(id = "record",
                                                                         label = "")))),
     shiny::includeScript(system.file("recorder/rec_frontend.js", package = "speechcollectr")),
     shiny::includeScript(system.file("recorder/rec_backend.js", package = "speechcollectr")),
-    shiny::includeScript(system.file("recorder/upload.php", package = "speechcollectr"))
 
   )
 
