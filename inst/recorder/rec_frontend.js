@@ -125,22 +125,23 @@ function stopRecording() {
 }
 
 function createDownloadLink(blob) {
+  Shiny.setInputValue('audioOut'+count, URL.createObjectURL(blob));
 
-	var url = URL.createObjectURL(blob);
-	var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function(){
-                Shiny.setInputValue('audioOut'+count, reader.result);
-            };
+	//var url = URL.createObjectURL(blob);
+	//var reader = new FileReader();
+    //        reader.readAsDataURL(blob);
+    //        reader.onloadend = function(){
+    //            Shiny.setInputValue('audioOut'+count, reader.result);
+    //        };
 
-  var xhr=new XMLHttpRequest();
-		  xhr.onload=function(e) {
-		      if(this.readyState === 4) {
-		          console.log("Server returned: ",e.target.responseText);
-		      }
-		  };
-		  var fd=new FormData();
-		  fd.append("audio_data",blob, filename);
-		  xhr.open("POST","upload.php",true);
-		  xhr.send(fd);
+  //var xhr=new XMLHttpRequest();
+		//  xhr.onload=function(e) {
+		//      if(this.readyState === 4) {
+		//          console.log("Server returned: ",e.target.responseText);
+		//      }
+		//  };
+		  //var fd=new FormData();
+		  //fd.append("audio_data",blob, filename);
+		  //xhr.open("POST","upload.php",true);
+		  //xhr.send(fd);
 }
