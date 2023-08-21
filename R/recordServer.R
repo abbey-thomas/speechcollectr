@@ -183,7 +183,12 @@ recordServer <- function(id = "record",
       }
     })
 
-    #shiny::observeEvent(session$input[[paste0("audioOut", session$input$js_count)]], {
+    shiny::observeEvent(session$input[[paste0("audioOut", session$input$js_count)]], {
+      inFile <- file(record_rvs$filepath, "w")
+      audio <- httr::POST(session$input[[paste0("audioOut", session$input$js_count)]],
+                          body = httr::upload_file(record_rvs$filepath))
+      close(inFile)
+
     #  audio <- session$input[[paste0("audioOut", session$input$js_count)]]
     #  audio <- gsub('data:audio/wav;base64,', '', audio)
     #  audio <- gsub(' ', '+', audio)
@@ -195,7 +200,7 @@ recordServer <- function(id = "record",
     #  writeBin(audio, inFile$file)
     #  close(inFile$file)
     #  file.rename(inFile$datapath, record_rvs$filepath)
-    #})
+    })
   })
 
   shiny::observeEvent(session$input[[paste0(id, "-stop")]], {
@@ -212,7 +217,7 @@ recordServer <- function(id = "record",
   observe({
     if (shiny::isTruthy(shiny::req(record_rvs$check))) {
       if (file.exists(shiny::req(record_rvs$filepath))) {
-  #      shiny::removeUI(selector = paste0("#audioOut", session$input$js_count))
+        shiny::removeUI(selector = paste0("#audioOut", session$input$js_count))
         shiny::removeUI(selector = paste0("#ready", session$input$js_count))
         record_rvs$check <- FALSE
       }
