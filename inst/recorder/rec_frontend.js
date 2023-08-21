@@ -9,6 +9,7 @@ var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext; //audio context to help us record
 
 var count = 0;
+var filename = "init.wav";
 
 let startBtns = document.querySelectorAll('.startRec');
 let stopBtns = document.querySelectorAll('.stopRec');
@@ -20,6 +21,10 @@ startBtns.forEach(function (i) {
 stopBtns.forEach(function (i) {
   i.addEventListener('click', stopRecording);
 });
+
+function assignFilename(r_file) {
+  filename = r_file;
+}
 
 //var recordButton = document.getElementById("recordButton");
 //var stopButton = document.getElementById("stopButton");
@@ -109,15 +114,7 @@ function startRecording() {
 function stopRecording() {
 	console.log("stopButton clicked");
 
-	//disable the stop button, enable the record too allow for new recordings
-	//stopButton.disabled = true;
-	//recordButton.disabled = false;
-	//pauseButton.disabled = true;
-
-	//reset button just in case the recording is stopped while paused
-	//pauseButton.innerHTML="Pause";
-
-	//tell the recorder to stop the recording
+	Shiny.addCustomMessageHandler("assign_fn", assignFilename);
 	rec.stop();
 
 	//stop microphone access
@@ -135,16 +132,15 @@ function createDownloadLink(blob) {
             reader.onloadend = function(){
                 Shiny.setInputValue('audioOut'+count, reader.result);
             };
-	//var link = document.createElement('a');
 
-	//name of .wav file to use during upload and download (without extendion)
-	//var filename = new Date().toISOString();
-
-	//save to disk link
-	//link.href = url;
-	//link.download = filename+".wav";
-	//link.innerHTML = "";
-
-	//add the li element to the ol
-	//recOutputs.appendChild(link);
+  var xhr=new XMLHttpRequest();
+		  xhr.onload=function(e) {
+		      if(this.readyState === 4) {
+		          console.log("Server returned: ",e.target.responseText);
+		      }
+		  };
+		  var fd=new FormData();
+		  fd.append("audio_data",blob, filename);
+		  xhr.open("POST","upload.php",true);
+		  xhr.send(fd);
 }

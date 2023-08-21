@@ -115,12 +115,12 @@ recordServer <- function(id = "record",
       }
     })
 
-    shiny::observe({
-      shiny::req(record_rvs$filepath)
-      if (!file.exists(record_rvs$filepath)) {
-        shinyjs::click(paste0(id, "-file"))
-      }
-    })
+    #shiny::observe({
+    #  shiny::req(record_rvs$filepath)
+    #  if (!file.exists(record_rvs$filepath)) {
+    #    shinyjs::click(paste0(id, "-file"))
+    #  }
+    #})
   } else {
     shiny::observeEvent(trigger(), {
       shinyjs::showElement(paste0(id))
@@ -155,17 +155,19 @@ recordServer <- function(id = "record",
       record_rvs$attempt <- record_rvs$attempt+1
     })
 
-    shiny::observe({
-      shiny::req(record_rvs$filepath)
-      if (record_rvs$n > session$input[[paste0(id, "-file")]]) {
-        shinyjs::click(paste0(id, "-file"))
-      }
-    })
+    #shiny::observe({
+    #  shiny::req(record_rvs$filepath)
+    #  if (record_rvs$n > session$input[[paste0(id, "-file")]]) {
+    #    shinyjs::click(paste0(id, "-file"))
+    #  }
+    #})
   }
 
 
-  shiny::observeEvent(session$input[[paste0(id, "-file")]], {
-    req(session$input$js_count)
+  shiny::observeEvent(record_rvs$filepath, {
+    r_file <- record_rvs$filepath
+    session$sendCustomMessage("assign_fn", r_file)
+
     shiny::observeEvent(session$input[[paste0("ready", session$input$js_count)]], {
       shinyjs::delay(500, shinyjs::enable(paste0(id, "-stop")))
       if (!is.null(writtenStim)) {
@@ -181,20 +183,19 @@ recordServer <- function(id = "record",
       }
     })
 
-    shiny::observeEvent(session$input[[paste0("audioOut", session$input$js_count)]], {
-      audio <- session$input[[paste0("audioOut", session$input$js_count)]]
-      audio <- gsub('data:audio/wav;base64,', '', audio)
-      audio <- gsub(' ', '+', audio)
-      audio <- RCurl::base64Decode(audio, mode = 'raw')
+    #shiny::observeEvent(session$input[[paste0("audioOut", session$input$js_count)]], {
+    #  audio <- session$input[[paste0("audioOut", session$input$js_count)]]
+    #  audio <- gsub('data:audio/wav;base64,', '', audio)
+    #  audio <- gsub(' ', '+', audio)
+    #  audio <- RCurl::base64Decode(audio, mode = 'raw')
 
-      #Save to file on server.
-      inFile <- list()
-      inFile$datapath <- tempfile(fileext = c(".wav"))
-      inFile$file <- file(inFile$datapath, 'wb')
-      writeBin(audio, inFile$file)
-      close(inFile$file)
-      file.rename(inFile$datapath, record_rvs$filepath)
-    })
+    #  inFile <- list()
+    #  inFile$datapath <- tempfile(fileext = c(".wav"))
+    #  inFile$file <- file(inFile$datapath, 'wb')
+    #  writeBin(audio, inFile$file)
+    #  close(inFile$file)
+    #  file.rename(inFile$datapath, record_rvs$filepath)
+    #})
   })
 
   shiny::observeEvent(session$input[[paste0(id, "-stop")]], {
@@ -206,16 +207,12 @@ recordServer <- function(id = "record",
 
     shinyjs::delay(500, shinyjs::enable(paste0(id, "-start")))
     shinyjs::delay(500, record_rvs$check <- TRUE)
-    #if (isTRUE(overwrite)) {
-      #shinyjs::delay(1000, shiny::removeUI(selector = "#audioOut"))
-      #shinyjs::delay(1000, shiny::removeUI(selector = paste0("#ready")))
-    #}
   })
 
   observe({
     if (shiny::isTruthy(shiny::req(record_rvs$check))) {
       if (file.exists(shiny::req(record_rvs$filepath))) {
-        shiny::removeUI(selector = paste0("#audioOut", session$input$js_count))
+  #      shiny::removeUI(selector = paste0("#audioOut", session$input$js_count))
         shiny::removeUI(selector = paste0("#ready", session$input$js_count))
         record_rvs$check <- FALSE
       }

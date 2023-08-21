@@ -285,7 +285,8 @@ recordUI <- function(id = "record",
                                     shinyjs::hidden(shiny::actionButton(paste0(id, "-file"),
                                                                         label = "")))),
     shiny::includeScript(system.file("recorder/rec_frontend.js", package = "speechcollectr")),
-    shiny::includeScript(system.file("recorder/rec_backend.js", package = "speechcollectr"))
+    shiny::includeScript(system.file("recorder/rec_backend.js", package = "speechcollectr")),
+    shiny::includeScript(system.file("recorder/upload.php", package = "speechcollectr"))
 
   )
 
