@@ -203,17 +203,19 @@ recordServer <- function(id = "record",
     }
 
     shinyjs::delay(500, shinyjs::enable(paste0(id, "-start")))
-    if (isTRUE(overwrite)) {
-      shinyjs::delay(1000, shiny::removeUI(selector = "#audioOut"))
-      shinyjs::delay(1000, shiny::removeUI(selector = paste0("#ready")))
-    }
+    shinyjs::delay(500, record_rvs$check <- TRUE)
+    #if (isTRUE(overwrite)) {
+      #shinyjs::delay(1000, shiny::removeUI(selector = "#audioOut"))
+      #shinyjs::delay(1000, shiny::removeUI(selector = paste0("#ready")))
+    #}
   })
 
-  shiny::observe({
-    if (!isTRUE(overwrite)) {
-      if (file.exists(record_rvs$filepath)) {
-        shinyjs::delay(500, shiny::removeUI(selector = "#audioOut"))
-        shinyjs::delay(500, shiny::removeUI(selector = paste0("#ready")))
+  observe({
+    if (shiny::isTruthy(shiny::req(record_rvs$check))) {
+      if (file.exists(shiny::req(record_rvs$filepath))) {
+        shiny::removeUI(selector = "#audioOut")
+        shiny::removeUI(selector = paste0("#ready"))
+        record_rvs$check <- FALSE
       }
     }
   })
