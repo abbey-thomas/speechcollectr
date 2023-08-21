@@ -4,9 +4,11 @@ var gumStream; 						//stream from getUserMedia()
 var rec; 							//Recorder.js object
 var input; 							//MediaStreamAudioSourceNode we'll be recording
 
-// shim for AudioContext when it's not avb. 
+// shim for AudioContext when it's not avb.
 var AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioContext //audio context to help us record
+var audioContext; //audio context to help us record
+
+var count = 0;
 
 let startBtns = document.querySelectorAll('.startRec');
 let stopBtns = document.querySelectorAll('.stopRec');
@@ -30,16 +32,17 @@ stopBtns.forEach(function (i) {
 
 function startRecording() {
 	console.log("recordButton clicked");
+	count++
 
 	/*
 		Simple constraints object, for more advanced audio features see
 		https://addpipe.com/blog/audio-constraints-getusermedia/
 	*/
-    
+
     var constraints = { audio: true, video:false }
 
  	/*
-    	Disable the record button until we get a success or fail from getUserMedia() 
+    	Disable the record button until we get a success or fail from getUserMedia()
 	*/
 
 	//recordButton.disabled = true;
@@ -47,7 +50,7 @@ function startRecording() {
 	//pauseButton.disabled = false
 
 	/*
-    	We're using the standard promise based getUserMedia() 
+    	We're using the standard promise based getUserMedia()
     	https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 	*/
 
@@ -64,12 +67,13 @@ function startRecording() {
 
 		/*  assign to gumStream for later use  */
 		gumStream = stream;
-		
+
 		/* use the stream */
 		input = audioContext.createMediaStreamSource(stream);
-		Shiny.setInputValue("ready", "yes")
+		Shiny.setInputValue("js_count", count);
+		Shiny.setInputValue("ready"+count, "yes");
 
-		/* 
+		/*
 			Create the Recorder object and configure to record mono sound (1 channel)
 			Recording 2 channels  will double the file size
 		*/
@@ -112,7 +116,7 @@ function stopRecording() {
 
 	//reset button just in case the recording is stopped while paused
 	//pauseButton.innerHTML="Pause";
-	
+
 	//tell the recorder to stop the recording
 	rec.stop();
 
@@ -124,12 +128,12 @@ function stopRecording() {
 }
 
 function createDownloadLink(blob) {
-	
+
 	var url = URL.createObjectURL(blob);
 	var reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = function(){
-                Shiny.setInputValue('audioOut', reader.result);
+                Shiny.setInputValue('audioOut'+count, reader.result);
             };
 	//var link = document.createElement('a');
 
@@ -138,9 +142,9 @@ function createDownloadLink(blob) {
 
 	//save to disk link
 	//link.href = url;
-	//link.download = filename+".wav"; 
+	//link.download = filename+".wav";
 	//link.innerHTML = "";
-	
+
 	//add the li element to the ol
 	//recOutputs.appendChild(link);
 }
