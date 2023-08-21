@@ -1,6 +1,6 @@
 Package: speechcollectr
 Title: R Tools for Collecting Speech Production & Perception Data
-Version: 0.0.0.9008
+Version: 0.0.0.9009
 Authors@R: 
     person(given = "Abbey",
            family = "Thomas",
