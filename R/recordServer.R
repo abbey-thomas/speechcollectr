@@ -184,22 +184,19 @@ recordServer <- function(id = "record",
     })
 
     shiny::observeEvent(session$input[[paste0("audioOut", session$input$js_count)]], {
-      inFile <- file(record_rvs$filepath, "w")
-      audio <- httr::POST(session$input[[paste0("audioOut", session$input$js_count)]],
-                          body = httr::upload_file(record_rvs$filepath))
+      #inFile <- file(record_rvs$filepath, "w")
+      #audio <- httr::POST(session$input[[paste0("audioOut", session$input$js_count)]],
+      #                    body = httr::upload_file(record_rvs$filepath))
+      #close(inFile)
+
+      audio <- session$input[[paste0("audioOut", session$input$js_count)]]
+      audio <- gsub('data:audio/wav;base64,', '', audio)
+      audio <- gsub(' ', '+', audio)
+      audio <- RCurl::base64Decode(audio, mode = 'raw')
+
+      inFile <- file(record_rvs$filepath, 'wb')
+      writeBin(audio, inFile)
       close(inFile)
-
-    #  audio <- session$input[[paste0("audioOut", session$input$js_count)]]
-    #  audio <- gsub('data:audio/wav;base64,', '', audio)
-    #  audio <- gsub(' ', '+', audio)
-    #  audio <- RCurl::base64Decode(audio, mode = 'raw')
-
-    #  inFile <- list()
-    #  inFile$datapath <- tempfile(fileext = c(".wav"))
-    #  inFile$file <- file(inFile$datapath, 'wb')
-    #  writeBin(audio, inFile$file)
-    #  close(inFile$file)
-    #  file.rename(inFile$datapath, record_rvs$filepath)
     })
   })
 

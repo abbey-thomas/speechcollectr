@@ -125,14 +125,14 @@ function stopRecording() {
 }
 
 function createDownloadLink(blob) {
-  Shiny.setInputValue('audioOut'+count, URL.createObjectURL(blob));
+  //Shiny.setInputValue('audioOut'+count, URL.createObjectURL(blob));
 
-	//var url = URL.createObjectURL(blob);
-	//var reader = new FileReader();
-    //        reader.readAsDataURL(blob);
-    //        reader.onloadend = function(){
-    //            Shiny.setInputValue('audioOut'+count, reader.result);
-    //        };
+	var url = URL.createObjectURL(blob);
+	var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function(){
+                Shiny.setInputValue('audioOut'+count, reader.result);
+            };
 
   //var xhr=new XMLHttpRequest();
 		//  xhr.onload=function(e) {

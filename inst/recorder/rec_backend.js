@@ -42,7 +42,7 @@ var Recorder = exports.Recorder = (function () {
         _classCallCheck(this, Recorder);
 
         this.config = {
-            bufferLen: 4096,
+            bufferLen: 1024,
             numChannels: 2,
             mimeType: 'audio/wav'
         };
