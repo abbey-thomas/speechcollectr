@@ -203,8 +203,19 @@ recordServer <- function(id = "record",
     }
 
     shinyjs::delay(500, shinyjs::enable(paste0(id, "-start")))
-    #shinyjs::delay(500, shiny::removeUI(selector = paste0("#", id, record_rvs$n, "-audio")))
-    #shinyjs::delay(500, shiny::removeUI(selector = paste0("#", id, record_rvs$n, "-ready")))
+    if (isTRUE(overwrite)) {
+      shinyjs::delay(1000, shiny::removeUI(selector = "#audioOut"))
+      shinyjs::delay(1000, shiny::removeUI(selector = paste0("#ready")))
+    }
+  })
+
+  shiny::observe({
+    if (!isTRUE(overwrite)) {
+      if (file.exists(record_rvs$filepath)) {
+        shinyjs::delay(500, shiny::removeUI(selector = "#audioOut"))
+        shinyjs::delay(500, shiny::removeUI(selector = paste0("#ready")))
+      }
+    }
   })
 
   retval <- shiny::eventReactive(session$input[[paste0(id, "-stop")]], {
