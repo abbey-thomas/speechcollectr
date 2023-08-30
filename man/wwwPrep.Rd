@@ -25,6 +25,8 @@ wwwPrep(
 \item{HugginsPitchScreen}{Boolean. Should \code{HugginsPitchData()} for Huggins Pitch Headphone Screen be copied to 'www'?}
 
 \item{AntiphaseScreen}{Boolean. Should \code{AntiphaseData()} for Antiphase Headphone Screen be copied to 'www'?}
+
+\item{recordJS}{Boolean. Should the JavaScript files for \code{localRecordUI()} and \code{localRecordServer()} be copied to 'www'?}
 }
 \value{
 A www subdirectory in the current working directory. Success messages will be printed in the console as each step towards creating the directory is completed.

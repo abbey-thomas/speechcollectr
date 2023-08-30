@@ -4,6 +4,7 @@
 #' @param from A character vector of filenames or a single directory name. Leave `NULL` (default) if you only want to add one of the datasets included in the package.
 #' @param is_dir Boolean. Is 'from' a directory?
 #' @param path A character vector naming the path to the parent directory of 'www'. Defaults to working directory.
+#' @param recordJS Boolean. Should the JavaScript files for `localRecordUI()` and `localRecordServer()` be copied to 'www'?
 #' @param volumeCalibration Boolean. Should `cal_noise()` for testing headphone volume be copied to 'www'?
 #' @param HugginsPitchScreen Boolean. Should `HugginsPitchData()` for Huggins Pitch Headphone Screen be copied to 'www'?
 #' @param AntiphaseScreen Boolean. Should `AntiphaseData()` for Antiphase Headphone Screen be copied to 'www'?
@@ -62,6 +63,16 @@ wwwPrep <- function(from = NULL, is_dir = FALSE, path = ".",
     vol_cal <- cal_noise
     tuneR::writeWave(vol_cal, "www/cal_noise.wav")
     cat("Success: Volume calibration noise WAV added to 'www' as 'cal_noise.wav'.")
+  }
+
+  if (isTRUE(recordJS)) {
+    rfe <- file.copy(from = system.file("recorder/rec_frontend.js", package = "speechcollectr"),
+                         to = "www/rec_frontend.js", overwrite = FALSE)
+    rbe <- file.copy(from = system.file("recorder/rec_backend.js", package = "speechcollectr"),
+                     to = "www/rec_backend.js", overwrite = FALSE)
+    if (isTRUE(rfe) & isTRUE(rbe)) {
+      cat("Success: Recording scripts copied to 'www' as 'rec_backend.js' and 'rec_frontend.js'.")
+    }
   }
 
   if (isTRUE(HugginsPitchScreen)) {
