@@ -43,7 +43,7 @@ consentServer(
 \item{cons2recNo}{Character. Label for the radio button the participant will click to decline consent to audio recording. Defaults to a generic statement.}
 }
 \value{
-A reactive value of type \code{integer} indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
+A value of type \code{integer} indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
 }
 \description{
 Shiny Server function for documenting participant consent

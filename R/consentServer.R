@@ -12,7 +12,7 @@
 #' @param cons2recYes Character. Label for the radio button the participant will click to agree to audio recording. Defaults to a generic statement.
 #' @param cons2recNo Character. Label for the radio button the participant will click to decline consent to audio recording. Defaults to a generic statement.
 #'
-#' @return A reactive value of type `integer` indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
+#' @return A value of type `integer` indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
 #' @note Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace `id` with the `id` you supplied for the module): `input[["id-agree"]]`.
 #' @seealso Must be used with \code{\link{consentUI}}. If `cons2rec = TRUE`, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
 #' @export
@@ -261,7 +261,12 @@ consentServer <- function(id = "consent",
         }
       })
 
-      return(retval)
+      retval <- shiny::eventReactive(input$disagree, {
+        return(0)
+      })
+
+      shiny::req(retval)
+      return(shiny::isolate(retval))
 
     }
   )
