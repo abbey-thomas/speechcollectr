@@ -43,7 +43,7 @@ if (interactive()) {
 
     # Show the output value. In principle you'd probably want a command that tests whether the output of the consentServer is > 0.
     shiny::observeEvent(input$done, {
-      output$result <- shiny::renderText({consent()})
+      output$result <- shiny::renderText({consent$agree})
     })
  }
   shiny::shinyApp(ui = ui, server = server)

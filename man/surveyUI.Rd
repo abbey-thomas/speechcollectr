@@ -9,7 +9,6 @@ surveyUI(
   questionFile,
   title = "Survey",
   subtitle = "Please answer the questions below. Questions marked with * are required.",
-  notListedLab = NULL,
   requiredLab = "*",
   submitLab = "SUBMIT"
 )
@@ -23,11 +22,11 @@ surveyUI(
 
 \item{subtitle}{The subtitle of the survey to display to participants.}
 
-\item{notListedLab}{For non-textInput questions, the name of the choice that will allow your participants to enter their own value for all questions that include this string in the 'options' column of \code{questionFile}.}
-
 \item{requiredLab}{The value that will be appended to required questions' labels. Defaults to asterisk (*).}
 
 \item{submitLab}{The label that should be displayed on the button participants will click to submit the form.}
+
+\item{notListedLab}{For non-textInput questions, the name of the choice that will allow your participants to enter their own value for all questions that include this string in the 'options' column of \code{questionFile}.}
 }
 \value{
 A Shiny user interface with the questions specified in the \code{questionFile} CSV file.

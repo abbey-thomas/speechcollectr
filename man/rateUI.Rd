@@ -11,10 +11,7 @@ rateUI(
   n_scales = 1,
   scaleFillCol = "white",
   scaleTextCol = "black",
-  scaleTextSz = "20px",
-  submitText = "SUBMIT",
-  submitFillCol = "white",
-  submitTextCol = "black"
+  scaleTextSz = "20px"
 )
 }
 \arguments{
@@ -29,12 +26,6 @@ rateUI(
 \item{scaleFillCol}{A valid hexidecimal code or color name for the scale background. Defaults to white.}
 
 \item{scaleTextCol}{A valid hexidecimal code or color name for the scale text and border. Defaults to black.}
-
-\item{submitText}{Character. Label for the submit button. Defaults to 'SUBMIT'.}
-
-\item{submitFillCol}{A valid hexidecimal code or color name for the submit button background.}
-
-\item{submitTextCol}{A valid hexidecimal code or color name for the submit button text.}
 }
 \value{
 A shiny UI for likert scale tasks.
@@ -50,6 +41,7 @@ if (interactive()){
     actionButton("btn", "Click me"),
     rateUI(id = "example",
            type = "button"),
+    actionButton("submit", "SUBMIT"),
     textOutput("confirmation")
   )
 
@@ -58,7 +50,7 @@ if (interactive()){
     observeEvent(input$btn, {
       disable("btn")
 
-      rvs$rating <- rateServer(id = "example",
+      rvs$ans <- rateServer(id = "example",
                                type = "button",
                                instructions = "What do you think?",
                                answers = c("Strongly disagree", "Disagree",
@@ -66,10 +58,10 @@ if (interactive()){
                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
     })
 
-    observeEvent(input[["example-submit"]], {
+    observeEvent(input$submit, {
     enable("btn")
         output$confirmation <- renderText({
-          paste0("You selected ", rvs$rating(),".")})
+          paste0("You selected ", rvs$ans$ratings[1],".")})
 
     })
   }
@@ -85,6 +77,7 @@ if (interactive()){
      rateUI(id = "example",
             type = "button",
             n_scales = 2),
+     actionButton("submit", "SUBMIT")
      textOutput("confirmation")
    )
 
@@ -94,7 +87,7 @@ if (interactive()){
      observeEvent(input$btn, {
        disable("btn")
 
-       rvs$rating <- rateServer(id = "example",
+       rvs$ans <- rateServer(id = "example",
                                 trigger = NULL,
                                 type = "button",
                                 instructions = "Finish the sentence:",
@@ -113,10 +106,10 @@ if (interactive()){
                                 scale_labs = c("perception", "production"))
      })
 
-     observeEvent(input[["example-submit"]], {
+     observeEvent(input$submit, {
        enable("btn")
        output$confirmation <- renderText({
-         paste0("You selected '", rvs$rating()[[1]],"' and '",  rvs$rating()[[2]], "'.")})
+         paste0("You selected '", rvs$ans$ratings[1],"' and '",  rvs$ans$ratings[2], "'.")})
      })
    }
    shinyApp(ui = ui, server = server)

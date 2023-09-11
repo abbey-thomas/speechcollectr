@@ -92,12 +92,19 @@ surveyUI <- function (id = "survey",
                       questionFile,
                       title = "Survey",
                       subtitle = "Please answer the questions below. Questions marked with * are required.",
-                      notListedLab = NULL,
                       requiredLab = "*",
                       submitLab = "SUBMIT")
 {
   ns <- shiny::NS(id)
-  qs <- read.csv(file = questionFile) %>%
+  if (grepl("\\.csv$", questionFile)) {
+    qs_pre <- read.csv(file = questionFile)
+  } else if (is.data.frame(questionFile)) {
+    qs_pre <- questionFile
+  } else {
+    stop("questionFile must be a valid path to a .csv file or a data.frame in your current R environment!")
+  }
+
+  qs_init <- qs_pre %>%
     dplyr::mutate(priority = ifelse(priority ==
                                       "required" | priority == "req", "r",
                                     ifelse(priority == "optional" | priority == "opt", "o",
@@ -112,6 +119,15 @@ surveyUI <- function (id = "survey",
     dplyr::mutate(label = ifelse(priority == "r" & !is.null(requiredLab),
                                  paste0(label, " <span style=color:#CC3311>", requiredLab,
                                         "</span>"), as.character(label)))
+  if ("trigger_id" %in% colnames(qs_init)) {
+    qs <- qs_init
+
+    # if (!all((qs_init$trigger_id %in% qs_init$id)|is.na(qs_init$trigger_id)))
+    #  stop("Error: The trigger_id column must contain ONLY NA or a value from the 'id' column in 'questionFile'.")
+
+  } else {
+    qs <- qs_init %>% dplyr::mutate(trigger_id = NA)
+  }
   qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
   ui <- shiny::tagList(shinyjs::useShinyjs(),
                        shinyjs::hidden(
@@ -134,31 +150,60 @@ surveyUI <- function (id = "survey",
                                                if (qsl[[i]]$type != "t" & qsl[[i]]$type != "r") {
                                                  opts <- c("", opts)
                                                }
-
-                                               if (qsl[[i]]$type == "t") {
-                                                 input <- shiny::textInput(inputId = ns(qsl[[i]]$id),
-                                                                           label = HTML(qsl[[i]]$label),
-                                                                           width = "100%")
-                                               } else if (qsl[[i]]$type == "s" | qsl[[i]]$type ==  "n") {
-                                                 input <- shiny::selectInput(inputId = ns(qsl[[i]]$id),
+                                               if (is.na(qsl[[i]]$trigger_id)) {
+                                                 if (qsl[[i]]$type == "t") {
+                                                   input <- shiny::textInput(inputId = ns(qsl[[i]]$id),
                                                                              label = HTML(qsl[[i]]$label),
-                                                                             choices = opts,
-                                                                             selected = character())
-                                               } else if (qsl[[i]]$type == "r") {
-                                                 input <- shiny::radioButtons(inputId = ns(qsl[[i]]$id),
-                                                                              label = HTML(qsl[[i]]$label),
-                                                                              width = "100%",
-                                                                              choiceNames = opts,
-                                                                              choiceValues = vals,
-                                                                              selected = character())
+                                                                             width = "100%")
+                                                 } else if (qsl[[i]]$type == "s" | qsl[[i]]$type ==  "n") {
+                                                   input <- shiny::selectInput(inputId = ns(qsl[[i]]$id),
+                                                                               label = HTML(qsl[[i]]$label),
+                                                                               choices = opts,
+                                                                               selected = character())
+                                                 } else if (qsl[[i]]$type == "r") {
+                                                   input <- shiny::radioButtons(inputId = ns(qsl[[i]]$id),
+                                                                                label = HTML(qsl[[i]]$label),
+                                                                                width = "100%",
+                                                                                choiceNames = opts,
+                                                                                choiceValues = vals,
+                                                                                selected = character())
+                                                 } else {
+                                                   input <- shiny::checkboxGroupInput(inputId = ns(qsl[[i]]$id),
+                                                                                      label = HTML(qsl[[i]]$label),
+                                                                                      width = "100%",
+                                                                                      choiceNames = opts,
+                                                                                      choiceValues = vals,
+                                                                                      selected = character())
+                                                 }
+                                                 return(input)
                                                } else {
-                                                 input <- shiny::checkboxGroupInput(inputId = ns(qsl[[i]]$id),
-                                                                                    label = HTML(qsl[[i]]$label),
-                                                                                    width = "100%",
-                                                                                    choiceNames = opts,
-                                                                                    choiceValues = vals,
-                                                                                    selected = character())
+                                                 if (qsl[[i]]$type == "t") {
+                                                   input <- shinyjs::hidden(shiny::textInput(inputId = ns(qsl[[i]]$id),
+                                                                                             label = HTML(qsl[[i]]$label),
+                                                                                             width = "100%"))
+                                                 } else if (qsl[[i]]$type == "s" | qsl[[i]]$type ==  "n") {
+                                                   input <- shinyjs::hidden(shiny::selectInput(inputId = ns(qsl[[i]]$id),
+                                                                                               label = HTML(qsl[[i]]$label),
+                                                                                               choices = opts,
+                                                                                               selected = character()))
+                                                 } else if (qsl[[i]]$type == "r") {
+                                                   input <- shinyjs::hidden(shiny::radioButtons(inputId = ns(qsl[[i]]$id),
+                                                                                                label = HTML(qsl[[i]]$label),
+                                                                                                width = "100%",
+                                                                                                choiceNames = opts,
+                                                                                                choiceValues = vals,
+                                                                                                selected = character()))
+                                                 } else {
+                                                   input <- shinyjs::hidden(shiny::checkboxGroupInput(inputId = ns(qsl[[i]]$id),
+                                                                                                      label = HTML(qsl[[i]]$label),
+                                                                                                      width = "100%",
+                                                                                                      choiceNames = opts,
+                                                                                                      choiceValues = vals,
+                                                                                                      selected = character()))
+                                                 }
+                                                 return(input)
                                                }
+
                                                return(input)
                                              }),
                                              shinyjs::disabled(shiny::actionButton(ns("submit"), submitLab)),

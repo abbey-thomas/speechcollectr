@@ -48,7 +48,7 @@
 consentServer <- function(id = "consent",
                           trigger = NULL,
                           result = c("disable", "hide"),
-                          delayResponse = 1,
+                          delayResponse = 1000,
                           agreeLab = "Agree",
                           disagreeLab = NULL,
                           cons2rec = FALSE,
@@ -60,214 +60,154 @@ consentServer <- function(id = "consent",
   if (result != "disable" & result != "hide")
     stop("Error: result parameter must either be 'disable' or 'hide'. ")
 
-  shiny::moduleServer(
-    id = id,
+  shiny::moduleServer(id = id, function(input, output, session) {
+    ns <- session$ns
 
-    function(input, output, session) {
-      ns <- session$ns
+    react <- shiny::reactiveValues(rec = cons2rec,
+                                   rec_req = cons2recRequire)
+    returns <- shiny::reactiveValues()
+    if (!is.null(trigger)) {
+      shiny::observeEvent(trigger(), {
+        shinyjs::showElement("consent")
 
-      react <- shiny::reactiveValues(rec = cons2rec,
-                                     rec_req = cons2recRequire)
-      if (is.null(trigger)) {
-        observe({
-          shinyjs::showElement("title")
-          shinyjs::showElement("text")
-          output$interface <- shiny::renderUI({
-            shiny::tagList(
-              if (isTRUE(cons2rec)) {
-                shiny::radioButtons(ns("cons2rec_bttn"),
-                                    label = cons2recLab,
-                                    choiceNames = c(cons2recYes, cons2recNo),
-                                    choiceValues = c("yes", "no"),
-                                    selected = character(),
-                                    width = "100%")
-              },
-              shinyjs::disabled(shiny::actionButton(ns("agree"), agreeLab)),
-              if (!is.null(disagreeLab)) {
-                shinyjs::disabled(shiny::actionButton(ns("disagree"), disagreeLab,
-                                                      inline = TRUE))
-              }
-            )
-          })
-
-          shinyjs::delay(as.numeric(delayResponse),
-                         shinyjs::enable("agree"))
-
-          shinyjs::delay(as.numeric(delayResponse),
-                         shinyjs::enable("disagree"))
-
-          shiny::observeEvent(input$cons2rec_bttn, {
-            if (isTRUE(react$rec_req) & input$cons2rec_bttn == "no") {
-              shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                     type = "info",
-                                     confirmButtonText = "Return to Experiment",
-                                     inputId = "return1",
-                                     closeOnEsc = FALSE)
-              shinyjs::disable("cons2rec_bttn")
-              shinyjs::disable("agree")
-              shinyjs::disable("disagree")
-            }
-          })
-
-          shiny::observeEvent(input$agree, {
+        output$interface <- shiny::renderUI({
+          shiny::tagList(
             if (isTRUE(cons2rec)) {
-              if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
-                shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                       type = "info",
-                                       confirmButtonText = "Return to Experiment",
-                                       inputId = "return2",
-                                       closeOnEsc = FALSE)
-              }
+              shiny::radioButtons(ns("cons2rec_bttn"),
+                                  label = cons2recLab,
+                                  choiceNames = c(cons2recYes, cons2recNo),
+                                  choiceValues = c("yes", "no"),
+                                  selected = character(),
+                                  width = "100%")
+            },
+            shinyjs::disabled(shiny::actionButton(ns("agree"), agreeLab)),
+            if (!is.null(disagreeLab)) {
+              shinyjs::disabled(shiny::actionButton(ns("disagree"), disagreeLab,
+                                                    inline = TRUE))
             }
-
-            if (result == "disable") {
-              shinyjs::disable("cons2rec_bttn")
-              shinyjs::disable("agree")
-              shinyjs::disable("disagree")
-            } else {
-              shinyjs::hide("title")
-              shinyjs::hide("text")
-              shinyjs::hide("cons2rec_bttn")
-              shinyjs::hide("agree")
-              shinyjs::hide("disagree")
-              shinyjs::hide("end")
-            }
-
-          })
-
-          shiny::observeEvent(input$disagree, {
-            shinyalert::shinyalert(text = "This experiment requires your consent. If you do NOT wish to consent to the procedures outlined above, you may close this tab now. If you wish to consent to the procedures outlined above, click 'Return to Experiment' below.",
-                                   type = "info",
-                                   confirmButtonText = "Return to Experiment",
-                                   inputId = "return3",
-                                   closeOnEsc = FALSE)
-            shinyjs::disable("cons2rec_bttn")
-            shinyjs::disable("agree")
-            shinyjs::disable("disagree")
-          })
-
-          shiny::observeEvent(input$return1|input$return2|input$return3, {
-            shiny::updateRadioButtons(session,
-                                      inputId = "cons2rec_bttn",
-                                      label = cons2recLab,
-                                      choiceNames = c(cons2recYes, cons2recNo),
-                                      choiceValues = c("yes", "no"),
-                                      selected = character())
-            shinyjs::enable("agree")
-            shinyjs::enable("disagree")
-          })
+          )
         })
+
+        shinyjs::delay(delayResponse, click("invis"))
+      })
+    } else {
+      observe({
+        shinyjs::showElement("consent")
+
+        output$interface <- shiny::renderUI({
+          shiny::tagList(
+            if (isTRUE(cons2rec)) {
+              shiny::radioButtons(ns("cons2rec_bttn"),
+                                  label = cons2recLab,
+                                  choiceNames = c(cons2recYes, cons2recNo),
+                                  choiceValues = c("yes", "no"),
+                                  selected = character(),
+                                  width = "100%")
+            },
+            shiny::actionButton(ns("agree"), agreeLab),
+            if (!is.null(disagreeLab)) {
+              shiny::actionButton(ns("disagree"), disagreeLab,
+                                  inline = TRUE)
+            }
+          )
+        })
+      })
+    }
+
+    shiny::observeEvent(input$invis, {
+      shinyjs::enable("agree")
+      shinyjs::enable("disagree")
+    })
+
+    shiny::observeEvent(input$cons2rec_bttn, {
+      if (isTRUE(react$rec_req) & input$cons2rec_bttn == "no") {
+        shiny::showModal(shiny::modalDialog(title = "Consent to Record Required!",
+                                            shiny::tags$p("You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form."),
+                                            footer = shiny::actionButton(inputId = ns("return"), label = "Return to Experiment")
+        ))
+        shinyjs::disable("agree")
+        shinyjs::disable("disagree")
+      }
+    })
+
+    shiny::observeEvent(input$agree, {
+      if (isTRUE(cons2rec)) {
+        if (is.null(input$cons2rec_bttn)) {
+          if (isTRUE(react$rec_req)) {
+            shiny::showModal(shiny::modalDialog(title = "Consent to Record Required!",
+                                                shiny::tags$p("You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form."),
+                                                footer = shiny::actionButton(inputId = ns("return"), label = "Return to Experiment")
+            ))
+          } else {
+            returns$agree <- 1
+          }
+        } else {
+          if (isTRUE(react$rec_req)) {
+            returns$agree <- 1
+          } else {
+            returns$agree <- 2
+          }
+        }
       } else {
-        observeEvent(trigger(), {
-          shinyjs::showElement("title")
-          shinyjs::showElement("text")
-          output$interface <- shiny::renderUI({
-            shiny::tagList(
-              if (isTRUE(cons2rec)) {
-                shiny::radioButtons(ns("cons2rec_bttn"),
-                                    label = cons2recLab,
-                                    choiceNames = c(cons2recYes, cons2recNo),
-                                    choiceValues = c("yes", "no"),
-                                    selected = character(),
-                                    width = "100%")
-              },
-              shinyjs::disabled(shiny::actionButton(ns("agree"), agreeLab)),
-              if (!is.null(disagreeLab)) {
-                shinyjs::disabled(shiny::actionButton(ns("disagree"), disagreeLab,
-                                                      inline = TRUE))
-              }
-            )
-          })
-
-          shinyjs::delay(as.numeric(delayResponse),
-                         shinyjs::enable("agree"))
-
-          shinyjs::delay(as.numeric(delayResponse),
-                         shinyjs::enable("disagree"))
-
-          shiny::observeEvent(input$cons2rec_bttn, {
-            if (isTRUE(react$rec_req) & input$cons2rec_bttn == "no") {
-              shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                     type = "info",
-                                     confirmButtonText = "Return to Experiment",
-                                     inputId = "return1",
-                                     closeOnEsc = FALSE)
-              shinyjs::disable("cons2rec_bttn")
-              shinyjs::disable("agree")
-              shinyjs::disable("disagree")
-            }
-          })
-
-          shiny::observeEvent(input$agree, {
-            if (isTRUE(cons2rec)) {
-              if (isTRUE(react$rec_req) & is.null(input$cons2rec_bttn)) {
-                shinyalert::shinyalert(text = "You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form.",
-                                       type = "info",
-                                       confirmButtonText = "Return to Experiment",
-                                       inputId = "return2",
-                                       closeOnEsc = FALSE)
-              }
-            }
-
-            if (result == "disable") {
-              shinyjs::disable("cons2rec_bttn")
-              shinyjs::disable("agree")
-              shinyjs::disable("disagree")
-            } else {
-              shinyjs::hide("title")
-              shinyjs::hide("text")
-              shinyjs::hide("cons2rec_bttn")
-              shinyjs::hide("agree")
-              shinyjs::hide("disagree")
-              shinyjs::hide("end")
-            }
-
-          })
-
-          shiny::observeEvent(input$disagree, {
-            shinyalert::shinyalert(text = "This experiment requires your consent. If you do NOT wish to consent to the procedures outlined above, you may close this tab now. If you wish to consent to the procedures outlined above, click 'Return to Experiment' below.",
-                                   type = "info",
-                                   confirmButtonText = "Return to Experiment",
-                                   inputId = "return3",
-                                   closeOnEsc = FALSE)
-            shinyjs::disable("cons2rec_bttn")
-            shinyjs::disable("agree")
-            shinyjs::disable("disagree")
-          })
-
-          shiny::observeEvent(input$return1|input$return2|input$return3, {
-            shiny::updateRadioButtons(session,
-                                      inputId = "cons2rec_bttn",
-                                      label = cons2recLab,
-                                      choiceNames = c(cons2recYes, cons2recNo),
-                                      choiceValues = c("yes", "no"),
-                                      selected = character())
-            shinyjs::enable("agree")
-            shinyjs::enable("disagree")
-          })
-        })
+        returns$agree <- 1
       }
 
+      if (result == "disable") {
+        shinyjs::disable("cons2rec_bttn")
+        shinyjs::disable("agree")
+        shinyjs::disable("disagree")
+      } else {
+        shinyjs::hide("consent")
+      }
+    })
 
-      retval <- shiny::eventReactive(input$agree, {
-        if (isTRUE(cons2rec)) {
-          if (isTRUE(react$rec) & input$cons2rec_bttn == "yes") {
+    shiny::observeEvent(input[[paste0(id, "-disagree")]], {
+      shiny::showModal(shiny::modalDialog(title = "Consent Required",
+                                          shiny::tags$p("This experiment requires your consent. If you do NOT wish to consent to the procedures outlined above, you may close this tab now. If you wish to consent to the procedures outlined above, click 'Return to Experiment' below."),
+                                          footer = shiny::actionButton(inputId = ns("return"), label = "Return to Experiment")
+      ))
+
+      shinyjs::disable("cons2rec_bttn")
+      shinyjs::disable("agree")
+      shinyjs::disable("disagree")
+    })
+
+    shiny::observeEvent(input$return, {
+      shiny::removeModal()
+      if (isTRUE(cons2rec)) {
+        shiny::updateRadioButtons(session = session,
+                                  inputId = ns("cons2rec_bttn"),
+                                  label = cons2recLab,
+                                  choiceNames = c(cons2recYes, cons2recNo),
+                                  choiceValues = c("yes", "no"),
+                                  selected = character())
+      }
+      shinyjs::showElement("consent")
+      shinyjs::enable("agree")
+      shinyjs::enable("disagree")
+    })
+
+    retval <- shiny::eventReactive(input$agree, {
+      if (isTRUE(cons2rec)) {
+        if (isTRUE(react$rec_req)) {
+          return(1)
+        } else {
+          if (input$consent2rec_btn == "yes") {
             return(2)
           } else {
             return(1)
           }
-        } else {
-          return(1)
         }
-      })
+      } else {
+        return(1)
+      }
+    })
 
-      retval <- shiny::eventReactive(input$disagree, {
-        return(0)
-      })
+    retval <- shiny::eventReactive(input$disagree, {
+      return(0)
+    })
 
-      shiny::req(retval)
-      return(shiny::isolate(retval))
+    return(returns)
+  })
 
-    }
-  )
-  }
+}

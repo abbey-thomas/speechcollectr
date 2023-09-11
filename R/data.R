@@ -30,3 +30,17 @@
 #' @format A tuneR::Wave object.
 #' @source \url{https://librivox.org/the-wisdom-of-father-brown-by-g-k-chesterton/}
 "samp_wav"
+
+#' Questions for checking participant qualifications.
+#'
+#' A data frame containing a correctly formatted set of questions, for use with the `speechcollectr::check*()` functions.
+#'
+#' @format A data frame with 7 rows (corresponding to 7 survey questions) and 5 variables:
+#' \describe{
+#'   \item{id}{A unique input ID for each question}
+#'   \item{label}{Labels (i.e., the questions) that will be displayed to participants}
+#'   \item{priority}{Specifies whether an answer to a given question is required or not.}
+#'   \item{error}{If an item is required, specifies the error message that will be displayed to participants if answered with FALSE.}
+#'
+#' }
+"qualifications"

@@ -43,6 +43,7 @@
 #'     actionButton("btn", "Click me"),
 #'     rateUI(id = "example",
 #'            type = "button"),
+#'     actionButton("submit", "SUBMIT"),
 #'     textOutput("confirmation")
 #'   )
 #'
@@ -51,7 +52,7 @@
 #'     observeEvent(input$btn, {
 #'       disable("btn")
 #'
-#'       rvs$rating <- rateServer(id = "example",
+#'       rvs$ans <- rateServer(id = "example",
 #'                                type = "button",
 #'                                instructions = "What do you think?",
 #'                                answers = c("Strongly disagree", "Disagree",
@@ -59,10 +60,10 @@
 #'                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
 #'     })
 #'
-#'     observeEvent(input[["example-submit"]], {
+#'     observeEvent(input$submit, {
 #'     enable("btn")
 #'         output$confirmation <- renderText({
-#'           paste0("You selected ", rvs$rating(),".")})
+#'           paste0("You selected ", rvs$ans$ratings[1],".")})
 #'
 #'     })
 #'   }
@@ -78,6 +79,7 @@
 #'      rateUI(id = "example",
 #'             type = "button",
 #'             n_scales = 2),
+#'      actionButton("submit", "SUBMIT")
 #'      textOutput("confirmation")
 #'    )
 #'
@@ -87,7 +89,7 @@
 #'      observeEvent(input$btn, {
 #'        disable("btn")
 #'
-#'        rvs$rating <- rateServer(id = "example",
+#'        rvs$ans <- rateServer(id = "example",
 #'                                 trigger = NULL,
 #'                                 type = "button",
 #'                                 instructions = "Finish the sentence:",
@@ -106,10 +108,10 @@
 #'                                 scale_labs = c("perception", "production"))
 #'      })
 #'
-#'      observeEvent(input[["example-submit"]], {
+#'      observeEvent(input$submit, {
 #'        enable("btn")
 #'        output$confirmation <- renderText({
-#'          paste0("You selected '", rvs$rating()[[1]],"' and '",  rvs$rating()[[2]], "'.")})
+#'          paste0("You selected '", rvs$ans$ratings[1],"' and '",  rvs$ans$ratings[2], "'.")})
 #'      })
 #'    }
 #'    shinyApp(ui = ui, server = server)
@@ -175,193 +177,177 @@ rateServer <- function(id = "rate",
          values = pips[["values"]])
   }
 
-  session <- shiny::getDefaultReactiveDomain()
-  rate_rvs <- shiny::reactiveValues(sel = character(length = n_scales))
+  shiny::moduleServer(id = id, function(input, output, session) {
+    ns <- session$ns
 
-  if (is.null(trigger)) {
-    trigger <- shiny::reactive(1)
-  }
-
-  shiny::observeEvent(trigger(), {
-    rate_rvs$selected <- NULL
-    shinyjs::delay(wait, shinyjs::showElement(paste0(id)))
-    session$output[[paste0(id, "-likert")]] <- shiny::renderUI({
-      shiny::tags$table(id = paste0(id, "-tab"),
-                        shiny::tags$tr(shiny::tags$th(colspan = colspan, style = "text-align:center;", shiny::h5(instructions))),
-                        shiny::tags$tr(shiny::tags$th(colspan = colspan, style = "text-align:center;", shiny::h3(pretext))),
-                        if (direction=="vertical") {
-
-                          if (type == "slider") {
-                            shiny::tags$tr(
-                              lapply(seq_along(c(1:n_scales)), function(i){
-                                shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                               shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), "")))
-                              })
-                            )
-                            shiny::tags$tr(
-                              lapply(seq_along(c(1:n_scales)), function(i){
-                                shiny::tags$td(style = "padding: 15px;",
-                                               shinyWidgets::noUiSliderInput(inputId = paste0(id, "-scale", i),
-                                                                             min = sliderMin,
-                                                                             max = sliderMax,
-                                                                             value = sliderInit,
-                                                                             tooltips = FALSE,
-                                                                             step = step,
-                                                                             update_on = "end",
-                                                                             orientation = "vertical",
-                                                                             pips = pips)
-                                )
-                              })
-                            )
-
-                            shiny::tags$tr(
-                              lapply(seq_along(c(1:n_scales)), function(i){
-                                shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                               shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), "")))
-
-                              })
-                            )
-
-                          } else {
-                            shiny::tags$tr(
-                              lapply(seq_along(c(1:n_scales)), function(i){
-                                shiny::tags$td(style = "padding: 15px;",
-                                               shinyWidgets::radioGroupButtons(inputId = paste0(id, "-scale", i),
-                                                                               label = scale_labs[[i]],
-                                                                               choiceNames = answers[[i]],
-                                                                               choiceValues = answers[[i]],
-                                                                               width = "100%",
-                                                                               selected = character(),
-                                                                               checkIcon = list(yes = icon("check")),
-                                                                               justified = TRUE,
-                                                                               direction = "vertical",
-                                                                               status = paste0("likert", i)))
-                              })
-                            )
-                          }
-                        } else {
-                          if (type == "slider") {
-                            lapply(seq_along(c(1:n_scales)), function(i) {
-                              shiny::tags$tr(shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), ""))),
-                                             shiny::tags$td(style = "padding: 15px;",
-                                                            shinyWidgets::noUiSliderInput(inputId = paste0(id, "-scale", i),
-                                                                                          min = sliderMin,
-                                                                                          max = sliderMax,
-                                                                                          value = sliderInit,
-                                                                                          tooltips = FALSE,
-                                                                                          step = step,
-                                                                                          update_on = "end",
-                                                                                          orientation = "horizontal",
-                                                                                          pips = pips)),
-                                             shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
-                                                            shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), ""))))
-                            })
-                          } else {
-                            lapply(seq_along(c(1:n_scales)), function(i) {
-                              shiny::tags$tr(shiny::tags$td(shinyWidgets::radioGroupButtons(inputId = paste0(id, "-scale", i),
-                                                                                            label = scale_labs[[i]],
-                                                                                            choiceNames = answers[[i]],
-                                                                                            choiceValues = answers[[i]],
-                                                                                            width = "100%",
-                                                                                            selected = character(),
-                                                                                            checkIcon = list(yes = icon("check")),
-                                                                                            justified = TRUE,
-                                                                                            direction = "horizontal",
-                                                                                            status = paste0("likert", i))))
-                            })
-                          }
-
-                        },
-                        shiny::tags$tr(shiny::tags$td(colspan = colspan, style = "text-align:center;", shiny::h2(posttext))))
-    })
-  })
-  if (isTRUE(answer_all)) {
-    lapply(seq_along(c(1:n_scales)), function(i){
-      shiny::observeEvent(session$input[[paste0(id, "-scale", i)]], {
-        rate_rvs$sel[i] <- session$input[[paste0(id, "-scale", i)]]
-      })
-    })
-
-    if (type == "slider") {
-      shiny::observe({
-        if (all(n_scales != sliderInit)) {
-          shinyjs::showElement(paste0(id, "-submit"))
-        }
-      })
-    } else {
-      shiny::observe({
-        shinyjs::toggleElement(paste0(id, "-submit"),
-                               condition = all(nzchar(rate_rvs$sel)))
-      })
+    rate_rvs <- shiny::reactiveValues(sel = character(length = n_scales))
+    returns <- shiny::reactiveValues()
+    if (is.null(trigger)) {
+      trigger <- shiny::reactive(1)
     }
 
-    shiny::observeEvent(session$input[[paste0(id, "-submit")]], {
-      rate_rvs$selected <- rate_rvs$sel
+    shiny::observeEvent(trigger(), {
+      rate_rvs$selected <- NULL
+      shinyjs::delay(wait, shinyjs::showElement("scaleDiv"))
+      output$likert <- shiny::renderUI({
+        shiny::tags$table(id = "tab",
+                          shiny::tags$tr(shiny::tags$th(colspan = colspan, style = "text-align:center;", shiny::h5(instructions))),
+                          shiny::tags$tr(shiny::tags$th(colspan = colspan, style = "text-align:center;", shiny::h3(pretext))),
+                          if (direction=="vertical") {
+
+                            if (type == "slider") {
+                              shiny::tags$tr(
+                                lapply(seq_along(c(1:n_scales)), function(i){
+                                  shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
+                                                 shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), "")))
+                                })
+                              )
+                              shiny::tags$tr(
+                                lapply(seq_along(c(1:n_scales)), function(i){
+                                  shiny::tags$td(style = "padding: 15px;",
+                                                 shinyWidgets::noUiSliderInput(inputId = ns(paste0("scale", i)),
+                                                                               min = sliderMin,
+                                                                               max = sliderMax,
+                                                                               value = sliderInit,
+                                                                               tooltips = FALSE,
+                                                                               step = step,
+                                                                               update_on = "end",
+                                                                               orientation = "vertical",
+                                                                               pips = pips)
+                                  )
+                                })
+                              )
+
+                              shiny::tags$tr(
+                                lapply(seq_along(c(1:n_scales)), function(i){
+                                  shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
+                                                 shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), "")))
+
+                                })
+                              )
+
+                            } else {
+                              shiny::tags$tr(
+                                lapply(seq_along(c(1:n_scales)), function(i){
+                                  shiny::tags$td(style = "padding: 15px;",
+                                                 shinyWidgets::radioGroupButtons(inputId = ns(paste0("scale", i)),
+                                                                                 label = scale_labs[[i]],
+                                                                                 choiceNames = answers[[i]],
+                                                                                 choiceValues = answers[[i]],
+                                                                                 width = "100%",
+                                                                                 selected = character(),
+                                                                                 checkIcon = list(yes = icon("check")),
+                                                                                 justified = TRUE,
+                                                                                 direction = "vertical",
+                                                                                 status = paste0("likert", i)))
+                                })
+                              )
+                            }
+                          } else {
+                            if (type == "slider") {
+                              lapply(seq_along(c(1:n_scales)), function(i) {
+                                shiny::tags$tr(shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
+                                                              shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][1]), ""))),
+                                               shiny::tags$td(style = "padding: 15px;",
+                                                              shinyWidgets::noUiSliderInput(inputId = ns(paste0("scale", i)),
+                                                                                            min = sliderMin,
+                                                                                            max = sliderMax,
+                                                                                            value = sliderInit,
+                                                                                            tooltips = FALSE,
+                                                                                            step = step,
+                                                                                            update_on = "end",
+                                                                                            orientation = "horizontal",
+                                                                                            pips = pips)),
+                                               shiny::tags$td(style = "padding: 15px; text-align: center; white-space: normal;",
+                                                              shiny::tags$h6(ifelse(!is.null(answers), paste0(answers[[i]][2]), ""))))
+                              })
+                            } else {
+                              lapply(seq_along(c(1:n_scales)), function(i) {
+                                shiny::tags$tr(shiny::tags$td(shinyWidgets::radioGroupButtons(inputId = ns(paste0("scale", i)),
+                                                                                              label = scale_labs[[i]],
+                                                                                              choiceNames = answers[[i]],
+                                                                                              choiceValues = answers[[i]],
+                                                                                              width = "100%",
+                                                                                              selected = character(),
+                                                                                              checkIcon = list(yes = icon("check")),
+                                                                                              justified = TRUE,
+                                                                                              direction = "horizontal",
+                                                                                              status = paste0("likert", i))))
+                              })
+                            }
+
+                          },
+                          shiny::tags$tr(shiny::tags$td(colspan = colspan, style = "text-align:center;", shiny::h2(posttext))))
+      })
     })
-  } else {
-    if (type == "slider") {
+    if (isTRUE(answer_all)) {
       lapply(seq_along(c(1:n_scales)), function(i){
-        shiny::observeEvent(session$input[[paste0(id, "-scale", i)]], {
-          if (session$input[[paste0(id, "-scale", i)]] != sliderInit) {
-            shinyjs::showElement(paste0(id, "-submit"))
-            rate_rvs$sel[i] <- session$input[[paste0(id, "-scale", i)]]
+        shiny::observeEvent(input[[paste0("scale", i)]], {
+          rate_rvs$sel[i] <- input[[paste0("scale", i)]]
+        })
+      })
+
+      if (type == "slider") {
+        shiny::observe({
+          if (all(n_scales != sliderInit)) {
+            returns$ratings <- rate_rvs$sel
+          }
+        })
+      } else {
+        shiny::observe({
+          if (all(nzchar(rate_rvs$sel))) {
+            returns$ratings <- rate_rvs$sel
+          }
+        })
+      }
+    } else {
+      if (type == "slider") {
+        lapply(seq_along(c(1:n_scales)), function(i){
+          shiny::observeEvent(input[[paste0("scale", i)]], {
+            if (input[[paste0("scale", i)]] != sliderInit) {
+              rate_rvs$sel[i] <- input[[paste0("scale", i)]]
+
+              lapply(seq_along(c(1:n_scales)), function(j) {
+                if (j != i) {
+                  if (shiny::isTruthy(input[[paste0("scale", j)]])) {
+                    shinyWidgets::updateNoUiSliderInput(session,
+                                                        inputId = ns(paste0("scale", j)),
+                                                        value = sliderInit,
+                                                        color = "#D3D3D3")
+                    rate_rvs$sel[j] <- ""
+                  }
+                }
+              })
+              returns$ratings <- rate_rvs$sel[i]
+
+            }
+          })
+          shiny::observeEvent(input[[paste0("scale", i)]], {
+            rate_rvs$sel[i] <- input[[paste0("scale", i)]]
+          })
+        })
+      } else {
+        lapply(seq_along(c(1:n_scales)), function(i){
+          shiny::observeEvent(input[[paste0("scale", i)]], {
+            rate_rvs$sel[i] <- input[[paste0("scale", i)]]
 
             lapply(seq_along(c(1:n_scales)), function(j) {
               if (j != i) {
-                if (shiny::isTruthy(session$input[[paste0(id, "-scale", j)]])) {
-                  shinyWidgets::updateNoUiSliderInput(session,
-                                                      inputId = paste0(id, "-scale", j),
-                                                      value = sliderInit,
-                                                      color = "#D3D3D3")
+                if (shiny::isTruthy(input[[paste0("scale", j)]])) {
+                  shinyWidgets::updateRadioGroupButtons(session,
+                                                        inputId = ns(paste0("scale", j)),
+                                                        selected = character())
                   rate_rvs$sel[j] <- ""
                 }
               }
             })
-            shiny::observeEvent(session$input[[paste0(id, "-submit")]], {
-              rate_rvs$selected <- rate_rvs$sel[i]
-            })
-          }
-        })
-        shiny::observeEvent(session$input[[paste0(id, "-scale", i)]], {
-          shinyjs::showElement(paste0(id, "-submit"))
-          rate_rvs$sel[i] <- session$input[[paste0(id, "-scale", i)]]
-        })
-      })
-    } else {
-      lapply(seq_along(c(1:n_scales)), function(i){
-        shiny::observeEvent(session$input[[paste0(id, "-scale", i)]], {
-          shinyjs::showElement(paste0(id, "-submit"))
-          rate_rvs$sel[i] <- session$input[[paste0(id, "-scale", i)]]
 
-          lapply(seq_along(c(1:n_scales)), function(j) {
-            if (j != i) {
-              if (shiny::isTruthy(session$input[[paste0(id, "-scale", j)]])) {
-                shinyWidgets::updateRadioGroupButtons(session,
-                                                      inputId = paste0(id, "-scale", j),
-                                                      selected = character())
-                rate_rvs$sel[j] <- ""
-              }
-            }
-          })
-
-          shiny::observeEvent(session$input[[paste0(id, "-submit")]], {
-            rate_rvs$selected <- rate_rvs$sel[i]
           })
         })
-      })
+      }
+
     }
 
-  }
-
-  shiny::observeEvent(session$input[[paste0(id, "-submit")]], {
-    shinyjs::hide(paste0(id, "-submit"))
-    shinyjs::hide(paste0(id))
+    return(returns)
   })
-
-  retval <- shiny::eventReactive(session$input[[paste0(id, "-submit")]], {
-    return((rate_rvs$selected))
-  })
-
-  return(retval)
 }

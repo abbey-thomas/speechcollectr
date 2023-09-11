@@ -8,7 +8,7 @@ consentServer(
   id = "consent",
   trigger = NULL,
   result = c("disable", "hide"),
-  delayResponse = 1,
+  delayResponse = 1000,
   agreeLab = "Agree",
   disagreeLab = NULL,
   cons2rec = FALSE,

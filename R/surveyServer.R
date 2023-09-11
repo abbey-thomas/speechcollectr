@@ -99,9 +99,19 @@ surveyServer <- function (id = "survey",
     stop("Argument 'outFile' must be of the format '.csv' or '.rds'.")
   if (result != "clear" & result != "hide")
     stop("Argument result must be either 'clear' or 'hide'")
-  qs <- read.csv(file = questionFile) %>% dplyr::mutate(priority = ifelse(priority ==  "required" | priority == "req", "r",
-                                                                          ifelse(priority == "optional" | priority == "opt", "o",
-                                                                                 as.character(priority)))) %>%
+
+  if (grepl("\\.csv$", questionFile)) {
+    qs_pre <- read.csv(file = questionFile)
+  } else if (is.data.frame(questionFile)) {
+    qs_pre <- questionFile
+  } else {
+    stop("questionFile must be a valid path to a .csv file or a data.frame in your current R environment!")
+  }
+
+  qs_init <- qs_pre %>%
+    dplyr::mutate(priority = ifelse(priority ==  "required" | priority == "req", "r",
+                                    ifelse(priority == "optional" | priority == "opt", "o",
+                                           as.character(priority)))) %>%
     dplyr::mutate(type = ifelse(type == "textInput" | type == "text", "t",
                                 ifelse(type == "selectInput" | type ==  "select", "s",
                                        ifelse(type == "numericInput" | type == "numeric", "n",
@@ -110,8 +120,19 @@ surveyServer <- function (id = "survey",
                                                             as.character(type))))))) %>%
     dplyr::mutate(across(everything(), .fns = as.character))
 
-  if (!all(returnVals %in% qs$id))
+  if ("trigger_id" %in% colnames(qs_init)) {
+    qs <- qs_init
+
+    #if (!all((qs_init$trigger_id %in% qs_init$id)|is.na(qs_init$trigger_id)))
+    #  stop("Error: The trigger_id column must contain ONLY NA or a value from the 'id' column in 'questionFile'.")
+
+  } else {
+    qs <- qs_init %>% dplyr::mutate(trigger_id = NA)
+  }
+
+  if (!all(returnVals %in% qs_init$id))
     stop("Error: returnVals must be a character vector that contains ONLY a set of values from the 'id' column in 'questionFile', that you want returned as reactives.")
+
 
   qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
 
@@ -131,6 +152,23 @@ surveyServer <- function (id = "survey",
                                               where = "afterEnd",
                                               ui = shiny::textInput(inputId = ns(paste0(qsl[[i]]$id, "_nl")),
                                                                     label = "Type your answer to add it to the list of choices above:"))
+                            }
+
+                            if ("trigger_id" %in% colnames(qs_init)) {
+                              if (qsl[[i]]$id %in% qs$trigger_id) {
+                                qs_add <- qs %>%
+                                  filter(trigger_id == qsl[[i]]$id) %>%
+                                  filter(is.na(trigger_value)|
+                                           trigger_value == as.character(input[[paste0(qsl[[i]]$id)]]))
+
+                                if (nrow(qs_add) > 0) {
+                                  qs_add_l <- setNames(split(qs_add, seq(nrow(qs_add))), rownames(qs_add))
+                                  lapply(seq_along(qs_add_l), function(j) {
+                                    showElement(qs_add_l[[j]]$id)
+                                  })
+                                }
+                              }
+
                             }
                           })
       shiny::observeEvent(input[[paste0(qsl[[i]]$id, "_nl")]],
@@ -226,4 +264,5 @@ surveyServer <- function (id = "survey",
     return(returns)
   })
 }
+
 

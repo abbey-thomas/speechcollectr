@@ -85,6 +85,7 @@ if (interactive()){
     actionButton("btn", "Click me"),
     rateUI(id = "example",
            type = "button"),
+    actionButton("submit", "SUBMIT"),
     textOutput("confirmation")
   )
 
@@ -93,7 +94,7 @@ if (interactive()){
     observeEvent(input$btn, {
       disable("btn")
 
-      rvs$rating <- rateServer(id = "example",
+      rvs$ans <- rateServer(id = "example",
                                type = "button",
                                instructions = "What do you think?",
                                answers = c("Strongly disagree", "Disagree",
@@ -101,10 +102,10 @@ if (interactive()){
                                pretext = "The vowels 'aw' and 'ah' sound exactly the same.")
     })
 
-    observeEvent(input[["example-submit"]], {
+    observeEvent(input$submit, {
     enable("btn")
         output$confirmation <- renderText({
-          paste0("You selected ", rvs$rating(),".")})
+          paste0("You selected ", rvs$ans$ratings[1],".")})
 
     })
   }
@@ -120,6 +121,7 @@ if (interactive()){
      rateUI(id = "example",
             type = "button",
             n_scales = 2),
+     actionButton("submit", "SUBMIT")
      textOutput("confirmation")
    )
 
@@ -129,7 +131,7 @@ if (interactive()){
      observeEvent(input$btn, {
        disable("btn")
 
-       rvs$rating <- rateServer(id = "example",
+       rvs$ans <- rateServer(id = "example",
                                 trigger = NULL,
                                 type = "button",
                                 instructions = "Finish the sentence:",
@@ -148,10 +150,10 @@ if (interactive()){
                                 scale_labs = c("perception", "production"))
      })
 
-     observeEvent(input[["example-submit"]], {
+     observeEvent(input$submit, {
        enable("btn")
        output$confirmation <- renderText({
-         paste0("You selected '", rvs$rating()[[1]],"' and '",  rvs$rating()[[2]], "'.")})
+         paste0("You selected '", rvs$ans$ratings[1],"' and '",  rvs$ans$ratings[2], "'.")})
      })
    }
    shinyApp(ui = ui, server = server)
