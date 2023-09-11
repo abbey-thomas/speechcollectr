@@ -19,10 +19,12 @@
 # 2. Add game functions.
 # 3. Add examples.
 
-wwwPrep <- function(from = NULL, is_dir = FALSE, path = ".",
-                       volumeCalibration = FALSE,
-                       HugginsPitchScreen = FALSE,
-                       AntiphaseScreen = FALSE){
+wwwPrep <- function(from = NULL, is_dir = FALSE,
+                    path = ".",
+                    recordJS = FALSE,
+                    volumeCalibration = FALSE,
+                    HugginsPitchScreen = FALSE,
+                    AntiphaseScreen = FALSE){
 
   if (path == ".") {
     to <- paste0(getwd(), "/www")
@@ -97,6 +99,12 @@ wwwPrep <- function(from = NULL, is_dir = FALSE, path = ".",
       tuneR::writeWave(ap_data[[i]], filename = paste0("www/hps_audio/", names(ap_data)[i], ".wav"))
     }
     cat("Success: Antiphase Headphone Screen data added to 'www/hps_audio'! All antiphase screen files (6) are prefixed with 'ap_'.")
+  }
+
+  if (isTRUE(demographics)) {
+    demog <- demographics
+    write.csv(demog, "www/demographics.csv")
+    cat("Success: Demographic survey questionnaire added to 'www' as 'demographics.csv'.")
   }
 
 }

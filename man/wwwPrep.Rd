@@ -8,6 +8,7 @@ wwwPrep(
   from = NULL,
   is_dir = FALSE,
   path = ".",
+  recordJS = FALSE,
   volumeCalibration = FALSE,
   HugginsPitchScreen = FALSE,
   AntiphaseScreen = FALSE
@@ -20,13 +21,13 @@ wwwPrep(
 
 \item{path}{A character vector naming the path to the parent directory of 'www'. Defaults to working directory.}
 
+\item{recordJS}{Boolean. Should the JavaScript files for \code{localRecordUI()} and \code{localRecordServer()} be copied to 'www'?}
+
 \item{volumeCalibration}{Boolean. Should \code{cal_noise()} for testing headphone volume be copied to 'www'?}
 
 \item{HugginsPitchScreen}{Boolean. Should \code{HugginsPitchData()} for Huggins Pitch Headphone Screen be copied to 'www'?}
 
 \item{AntiphaseScreen}{Boolean. Should \code{AntiphaseData()} for Antiphase Headphone Screen be copied to 'www'?}
-
-\item{recordJS}{Boolean. Should the JavaScript files for \code{localRecordUI()} and \code{localRecordServer()} be copied to 'www'?}
 }
 \value{
 A www subdirectory in the current working directory. Success messages will be printed in the console as each step towards creating the directory is completed.
