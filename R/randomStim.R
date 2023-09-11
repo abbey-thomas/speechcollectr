@@ -1,10 +1,12 @@
 #' Randomize Trials
 #'
 #' @param dataFile A data.frame, RDS file, or CSV file with, minimally, a column containing all the stimuli for the experiment. Each row is treated as one trial.
+#' @param what Required. One of "trial", "block", or "both". What should be randomized: trials within blocks, blocks of trials within the experiment, or both?
+#' @param trialCol Required. The name of the column in dataFile that contains unique values for each trial within a block (usually a stimulus word or sentence).
 #' @param blockCol The name of the column in dataFile that will serve as a key, noting which columns belong to which blocks.
 #' @param n_practice Required. Integer. The number of practice trials included in dataFile. If present, practice trials must always occupy the first row(s) of dataFile. If no practice trials are included, set this argument to 0 (the default).
 #' @param n_perBlock Integer. If blockCol = NULL, the number of rows that should be treated as a block in dataFile.
-#' @param n_blocks Integer. If blockCol = NULL, the number of blocks (not counting practice trials) in the experiment.
+#' @param n_blocks Integer. If blockCol = NULL, the number of blocks (not counting practice trials) in the experiment. Default is 1.
 #' @param blocksSameOrd Boolean. Should the stimuli be in the same random order in all blocks? Defaults to TRUE.
 #' @param outFile If not NULL, the file name (CSV or RDS) for writing the resulting randomized data to.
 #'
@@ -97,9 +99,17 @@
 #'   }
 #'   shinyApp(ui = ui, server = server)
 #' }
-randomStim <- function (dataFile, blockCol = "Block", n_practice = 1, n_perBlock = NULL,
-                        n_blocks = NULL, blocksSameOrd = FALSE, outFile = NULL)
+randomStim <- function (dataFile,
+                        what = c("trial", "block", "both"),
+                        trialCol,
+                        blockCol = NULL,
+                        n_practice = 0,
+                        n_perBlock = NULL,
+                        n_blocks = 1,
+                        blocksSameOrd = FALSE,
+                        outFile = NULL)
 {
+  # Read in the data frame with the practice trials.
   if (!is.data.frame(dataFile)) {
     if (grepl("csv$", dataFile)) {
       df_init <- read.csv(dataFile)
@@ -111,62 +121,102 @@ randomStim <- function (dataFile, blockCol = "Block", n_practice = 1, n_perBlock
   else {
     df_init <- dataFile
   }
+
+  # Keep just the experimental trials for randomization
+  if (n_practice > 0) {
+    exp_trials <- tail(df_init, -n_practice)
+    df_practice <- head(df_init, n_practice)
+  } else {
+    exp_trials <- df_init
+  }
+
+  # Get a list of unique items
+  items <- unique(exp_trials[,trialCol])
+
+  #Figure out the number of blocks and trials per block if not given.
   if (!is.null(blockCol)) {
-    grps <- df_init %>% dplyr::group_by(.data[[blockCol]]) %>%
-      dplyr::mutate(b_count = dplyr::n()) %>% dplyr::select(block = .data[[blockCol]],
-                                                            b_count) %>% unique()
-    if (n_practice > 0) {
-      n_perBlock <- c(unique(grps$b_count[2:nrow(grps)]))
-      n_blocks <- nrow(grps) - 1
-    }
-    else {
-      n_perBlock <- c(unique(grps$b_count))
-      n_blocks <- nrow(grps)
-    }
+    grps <- exp_trials %>%
+      dplyr::group_by(.data[[(blockCol)]]) %>%
+      dplyr::mutate(b_count = dplyr::n()) %>%
+      dplyr::select(dplyr::matches(blockCol),
+                    b_count) %>% unique()
+
+    n_perBlock <- c(unique(grps$b_count))
+    n_blocks <- nrow(grps)
+  } else {
+    # Make a block column if there isn't one
+    blockCol <- "block"
+    exp_trials <- exp_trials %>%
+      dplyr::mutate(block = rep(c(1:n_blocks), each = n_perBlock))
+    df_practice <- df_practice %>% dplyr::mutate(block = 0)
   }
-  else {
-    if (n_practice > 0) {
-      grps <- data.frame(block = c(0, 1:n_blocks), b_count = c(n_practice,
-                                                               rep.int(n_perBlock, n_blocks)))
-    }
-    else {
-      grps <- data.frame(block = c(1:n_blocks), b_count = rep.int(n_perBlock,
-                                                                  n_blocks))
-    }
-  }
+
+  # Send some errors if we're not set up for varying numbers of trials per block
   if ((length(n_perBlock) > 1) & is.null(blockCol))
     stop("If you wish to have variable numbers of trials per block, you must give a key as to which stimuli belong to which blocks using `blockCol`, and then number of rows in `datafile` must be equal to the total number of practice + experimental trials across all blocks.")
-  if ((length(n_perBlock) > 1) & (nrow(df_init) != (n_practice +
-                                                    (n_perBlock * n_blocks))))
+  if ((length(n_perBlock) > 1) & (nrow(df_init) != (n_practice + (n_perBlock * n_blocks))))
     stop("If you wish to have variable numbers of trials per block, you must give a key as to which stimuli belong to which blocks using `blockCol`, and then number of rows in `datafile` must be equal to the total number of practice + experimental trials across all blocks.")
-  if (isTRUE(blocksSameOrd)) {
-    ord_df <- data.frame(block = unlist(mapply(rep, c(grps$block),
-                                               grps$b_count)), ord = c(seq.int(length.out = n_practice),
-                                                                       rep(sample(c(1:n_perBlock), size = n_perBlock),
-                                                                           times = n_blocks))) %>% tidyr::pivot_longer(cols = tidyr::contains("block"),
-                                                                                                                       values_to = "block") %>% dplyr::select(block, ord) %>%
-      dplyr::arrange(block)
+
+  # Randomize trials within blocks
+  if (what == "both"|what == "trial") {
+
+    if (isTRUE(blocksSameOrd)) {
+
+      if (length(n_perBlock) > 1|(length(items) != n_perBlock))
+        stop("If you wish to have trials in the same order across blocks, the values in trialCol must be the same for all blocks.")
+
+      l_trial_ord <- data.frame(items = items) %>%
+        dplyr::mutate(trial = sample(c(1:length(items)),
+                                     size = length(items)))
+
+      names(l_trial_ord) <- c(paste0(trialCol), "trial_num")
+      trial_ord <- exp_trials %>% dplyr::left_join(l_trial_ord)
+
+    } else {
+      blocks <- split(exp_trials, f = exp_trials[,blockCol])
+      l_trial_ord <- lapply(blocks, function(i){
+        df <- i %>% dplyr::mutate(trial_num = sample(c(1:nrow(i))))
+      })
+
+      trial_ord <- dplyr::bind_rows(l_trial_ord)
+    }
+  } else {
+    blocks <- split(exp_trials, f = exp_trials[,blockCol])
+    l_trial_ord <- lapply(blocks, function(i){
+      df <- i %>% dplyr::mutate(trial_num = c(1:nrow(i)))
+    })
+
+    trial_ord <- dplyr::bind_rows(l_trial_ord)
   }
-  else {
-    ord_df <- data.frame(block = c(df_init[,blockCol]),
-                         ord = c(unlist(lapply(grps$b_count, function(i){
-                           sample(c(1:i), i)})
-                         ))
-    )
+
+  # Randomize blocks
+  if (what == "block"|what == "both") {
+    blocks <- data.frame(name = unique(exp_trials[,blockCol])) %>%
+      dplyr::mutate(block_num = sample(c(1:nrow(.)), size = nrow(.)))
+    names(blocks) <- c(paste0(blockCol), "block_num")
+    block_ord <- exp_trials %>% dplyr::left_join(blocks)
+  } else {
+    block_ord <- exp_trials %>%
+      dplyr::mutate(block_num = rep(c(1:n_blocks), each = n_perBlock))
   }
-  if (nrow(df_init) < (n_practice + (n_perBlock * n_blocks))) {
-    exper <- df_init %>% dplyr::filter(row_number() > n_practice)
-    b_list <- replicate((n_blocks - 1), exper, simplify = FALSE)
-    all_trials <- dplyr::bind_rows(df_init, b_list)
+
+  #if (is.null(blockCol)) {
+  df_practice <- df_practice %>%
+    dplyr::mutate(block_num = 0,
+                  trial_num = c(1:n_practice))
+  #} else
+
+  df_exp <- block_ord %>% dplyr::left_join(trial_ord)
+
+  if (n_practice > 0) {
+    df_end <- dplyr::bind_rows(df_practice, df_exp) %>%
+      dplyr::arrange(block_num, trial_num)
+  } else {
+    df_end <- df_exp %>%
+      dplyr::arrange(block_num, trial_num)
   }
-  else {
-    all_trials <- df_init
-  }
-  if ("block" %in% colnames(all_trials)) {
-    all_trials <- all_trials %>% dplyr::select(-block)
-  }
-  df_end <- dplyr::bind_cols(all_trials, ord_df) %>%
-    dplyr::arrange(block, ord) %>% dplyr::rename(trial = ord)
+
+
   if (!is.null(outFile)) {
     if (grepl("csv$", outFile)) {
       write.csv(df_end, outFile, row.names = FALSE)

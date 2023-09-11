@@ -6,10 +6,12 @@
 \usage{
 randomStim(
   dataFile,
-  blockCol = "Block",
-  n_practice = 1,
+  what = c("trial", "block", "both"),
+  trialCol,
+  blockCol = NULL,
+  n_practice = 0,
   n_perBlock = NULL,
-  n_blocks = NULL,
+  n_blocks = 1,
   blocksSameOrd = FALSE,
   outFile = NULL
 )
@@ -17,13 +19,17 @@ randomStim(
 \arguments{
 \item{dataFile}{A data.frame, RDS file, or CSV file with, minimally, a column containing all the stimuli for the experiment. Each row is treated as one trial.}
 
+\item{what}{Required. One of "trial", "block", or "both". What should be randomized: trials within blocks, blocks of trials within the experiment, or both?}
+
+\item{trialCol}{Required. The name of the column in dataFile that contains unique values for each trial within a block (usually a stimulus word or sentence).}
+
 \item{blockCol}{The name of the column in dataFile that will serve as a key, noting which columns belong to which blocks.}
 
 \item{n_practice}{Required. Integer. The number of practice trials included in dataFile. If present, practice trials must always occupy the first row(s) of dataFile. If no practice trials are included, set this argument to 0 (the default).}
 
 \item{n_perBlock}{Integer. If blockCol = NULL, the number of rows that should be treated as a block in dataFile.}
 
-\item{n_blocks}{Integer. If blockCol = NULL, the number of blocks (not counting practice trials) in the experiment.}
+\item{n_blocks}{Integer. If blockCol = NULL, the number of blocks (not counting practice trials) in the experiment. Default is 1.}
 
 \item{blocksSameOrd}{Boolean. Should the stimuli be in the same random order in all blocks? Defaults to TRUE.}
 
