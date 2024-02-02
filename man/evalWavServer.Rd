@@ -8,11 +8,11 @@ evalWavServer(
   wave,
   counter = 1,
   min_sf = 44100,
-  snr_best = 15,
-  snr_good = 5,
+  snr_best = 30,
+  snr_good = 20,
   max_clip = 0.01,
   tries = Inf,
-  onFail = "continue"
+  onFail = "stop"
 )
 }
 \arguments{
@@ -22,15 +22,15 @@ evalWavServer(
 
 \item{min_sf}{What is the minimum sample rate (in Hz) that you will allow for the recording? If a user's browser will not allow audio recording at this high of a sample rate, the user will get an error message. Set to 0 if you do not want to exclude participants who record at low sampling rates.}
 
-\item{snr_best}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 15.}
+\item{snr_best}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered of the best quality? Defaults to 30.}
 
-\item{snr_good}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than \code{snr_best}. Defaults to 5.}
+\item{snr_good}{Integer. If eval=TRUE, what is the minimum SNR (dB) required for the recording to be considered acceptable? Must be less than \code{snr_best}. Defaults to 20.}
 
 \item{max_clip}{Numeric. What proportion of the frames can be clipped and the recording still be acceptable? Defaults to .01.}
 
 \item{tries}{Integer. How many tries should the user get to create a quality recording?}
 
-\item{onFail}{If eval=TRUE, what kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
+\item{onFail}{What kind of message should the user receive if they try to record the maximum number of \code{tries} and the quality is still poor? Must be either "stop" (the default, user gets an error message) or "continue" (user gets a success message and we ignore recording quality).}
 }
 \value{
 One of three reactive values: "pass"=recording of sufficient quality; "warn"=recording of insufficient quality, but the participant has had fewer attempts than the number of \code{tries}; or "fail"=the recording is of insufficient quality and the participant has used all available attempts.
@@ -43,52 +43,112 @@ if (interactive()) {
   library(shiny)
   library(shinyjs)
 
+  # Build UI
   ui <- fluidPage(
-    actionButton("begin", "BEGIN"),
-    recordUI(id ="rec"),
-    disabled(actionButton("submit", "SUBMIT"))
+
+    ## Get background javascript ready
+    useShinyjs(),
+    tags$head(
+      useRecorder(directory = "www")
+    ),
+
+    actionButton("next_trial", "NEXT"),
+
+    ## Setup page layout
+    hidden(div(id = "trialDiv",
+               style = "text-align:center;",
+
+               hidden(div(id = "textDiv",
+                          h4("Please record yourself reading this sentence aloud:"),
+                          h2(textOutput(outputId = "read_this")))),
+
+               ## Create the buttons for controlling the recording
+               actionButton(inputId = "start",
+                            label = "start"),
+
+               ### Hide the stop button until user clicks start
+               hidden(actionButton(inputId = "stop",
+                                   label = "stop"))
+    ))
   )
 
+  # The Server function
   server <- function(input, output, session) {
-    recording <- recordServer(id ="rec",
-                              trigger = reactive(input$begin),
-                              outPrefix = paste0("www/rec_samp"))
+    ## Create an object that will count trials
+    rvs <- reactiveValues(trial_n = 0)
 
-    observeEvent(input$begin, {
-      disable("begin")
+    ## When the participant clicks "NEXT"...
+    observeEvent(input$next_trial, {
+      ### Increase the trial number
+      rvs$trial_n <- rvs$trial_n + 1
+
+      ### Show the recording interface
+      showElement("trialDiv")
+
+      ### Hide the next button
+      hide("next_trial")
     })
 
-    observe({
-      req(recording()$file)
-      enable("submit")
+    ## When the start button is clicked
+    observeEvent(input$start, {
+
+      ### Start the recording
+      startRec()
+
+      ### Disable the start button
+      disable("start")
+
+      ### Show the stop button
+      delay(500, showElement("stop"))
     })
 
-    observeEvent(input$submit, {
-      disable("submit")
-      result <- evalWavServer(wave = recording()$file,
-                              tries = 3)
-      observeEvent(result(), {
-        # If the recording is not good enough, but the participant has had fewer 2 attempts
-        # the recording interface will remain visible,
-        # and the participant can overwrite the file with by creating a new recording.
-        # Otherwise...
-        if (result() != "warn") {
-          hide("rec")
-        }
+    ## When the user gives permission to record....
+    observeEvent(input[["rec-ready"]], {
 
-        # If the recording is of sufficient quality,
-        # let the participant record a new file.
-        if (result() == "pass") {
-          enable("begin")
-        }
+      ### Show the text they should read
+      showElement("textDiv")
+      output$read_this <- renderText({paste0("This is recording ",
+                                             rvs$trial_n, ".")})
+    })
 
-        # If all attempts have been used (result == "fail")
-        # and the recording is still insufficient,
-        # then keep everything hidden/disabled.
-      })
+
+    ## When the user clicks stop
+    observeEvent(input$stop, {
+
+      ### Stop recording
+      stopRec(filename = paste0("rec", rvs$trial_n, ".wav"))
+
+      ### Enable the start button
+      enable("start")
+
+      ### Hide the stop button
+      hide("stop")
+      hide("textDiv")
+    })
+
+    ## Once the wav file exists...
+    observeEvent(input[["rec-done"]], {
+      ### Evaluate the recording
+      evalWavServer(wave = paste(input[["rec-done"]]))
+    })
+
+    ## Once the wav file has been evaluated...
+    observeEvent(input[["evalWav-result"]], {
+
+      ### If the recording is of sufficient quality...
+      if (input[["evalWav-result"]] == "pass") {
+
+        #### Hide the recording interface
+        hide("trialDiv")
+
+        #### And show the "next" button so that the participant can record the next file
+        showElement("next_trial")
+      }
     })
   }
 
+  # Run the application
   shinyApp(ui = ui, server = server)
 }
+
 }

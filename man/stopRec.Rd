@@ -10,7 +10,7 @@ stopRec(filename)
 \item{filename}{Required. A character vector giving the file name of the WAV file that will be saved.}
 }
 \value{
-Returns a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument.
+Adds the value "rec-done" to the application's input object after saving a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument. The value of "rec-done" is equal to the value of the filename argument.
 }
 \description{
 For use only inside a call to \code{observeEvent()} or \code{bindEvent()} in a Shiny application's server function.
