@@ -187,7 +187,14 @@ rateServer <- function(id = "rate",
     }
 
     shiny::observeEvent(trigger(), {
-      rate_rvs$selected <- NULL
+      rate_rvs$sel <- NULL
+      if (type == "slider") {
+        rate_rvs$sliderInit <- sliderInit
+      }
+    }, priority = 2)
+
+    shiny::observeEvent(trigger(), {
+
       shinyjs::delay(wait, shinyjs::showElement("scaleDiv"))
       output$likert <- shiny::renderUI({
         shiny::tags$table(id = "tab",
@@ -208,7 +215,7 @@ rateServer <- function(id = "rate",
                                                  shinyWidgets::noUiSliderInput(inputId = ns(paste0("scale", i)),
                                                                                min = sliderMin,
                                                                                max = sliderMax,
-                                                                               value = sliderInit,
+                                                                               value = rate_rvs$sliderInit,
                                                                                tooltips = FALSE,
                                                                                step = step,
                                                                                update_on = "end",
@@ -252,7 +259,7 @@ rateServer <- function(id = "rate",
                                                               shinyWidgets::noUiSliderInput(inputId = ns(paste0("scale", i)),
                                                                                             min = sliderMin,
                                                                                             max = sliderMax,
-                                                                                            value = sliderInit,
+                                                                                            value = rate_rvs$sliderInit,
                                                                                             tooltips = FALSE,
                                                                                             step = step,
                                                                                             update_on = "end",
@@ -312,7 +319,7 @@ rateServer <- function(id = "rate",
                   if (shiny::isTruthy(input[[paste0("scale", j)]])) {
                     shinyWidgets::updateNoUiSliderInput(session,
                                                         inputId = ns(paste0("scale", j)),
-                                                        value = sliderInit,
+                                                        value = rate_rvs$sliderInit,
                                                         color = "#D3D3D3")
                     rate_rvs$sel[j] <- ""
                   }

@@ -42,7 +42,7 @@ uttTG <- function(wave, outfile,
                         0, begin_t, "\"\"",
                         begin_t, end_t, paste0("\"", transcription, "\""),
                         end_t, length(wave@left)/wave@samp.rate, "\"\"")))
-  txt <- bind_rows(tg_head, utt_tier)
+  txt <- dplyr::bind_rows(tg_head, utt_tier)
   if (!is.null(outfile)) {
     write.table(txt, file = outfile,
                 row.names = FALSE, col.names = FALSE,

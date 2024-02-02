@@ -6,8 +6,8 @@
 \usage{
 recordServer(
   id = "record",
-  trigger = NULL,
   outFile,
+  attempts = Inf,
   overwrite = FALSE,
   writtenStim = NULL,
   writtenDelay = 500
@@ -16,9 +16,9 @@ recordServer(
 \arguments{
 \item{id}{The input ID associated with the record module. Must be the same as the id of \code{recordUI()}.}
 
-\item{trigger}{A reactive expression (i.e., something wrapped in "shiny::reactive()") that will trigger the recording interface to appear and run. Default is "NULL", so the module will only run (and output a uniquely named file) each time the user clicks start. If using the default NULL trigger, you must call "shinyjs::showElement()" to make the recording interface appear!}
-
 \item{outFile}{Character or reactive expression. Where to store the audio file. Can indicate any subdirectory of the present working directory. If dynamic, wrap in \code{reactive()}.}
+
+\item{attempts}{Numeric (Defaults to Inf). How many attempts to create this recording should the participant be allowed?}
 
 \item{writtenStim}{Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.}
 
@@ -27,75 +27,77 @@ recordServer(
 \item{Overwrite}{Boolean. Defaults to \code{FALSE} so that a unique digit is appended to each filename so that all recordings will be saved even when the filename value is the same. If \code{TRUE}, will overwrite a file of the same name.}
 }
 \value{
-In the case of a NULL trigger, returns a reactive expression containing two values: (1) \code{n}: the number of files recorded and (2) \code{file}: a character vector with length \code{n}, where each element is the name of a recorded wav file. If \code{trigger} argument is not NULL, returns a reactive expression containing: (1) \code{n}: the number of attempts at recording the current file and (2) \code{file}: the filename where only the most recent attempt is saved (previous attempts have been overwritten). Also returns a 16 bit, 44.1 kHz wav file in a filename comprising \code{outPrefix} and a unique four digit number.
+Returns a reactive expression containing: (1) \code{n}: the number of attempts at recording the current file and (2) \code{file}: the filename where only the most recent attempt is saved (previous attempts have been overwritten). Also returns a wav file in a filename comprising \code{outPrefix} and a unique four digit number.
 }
 \description{
 The server function for recording user audio enables the 'stop' button after the user begins recording and checks to make sure the user has given the website permission to record audio in their browser. Requires the UI \code{\link{recordUI}}.
 }
 \note{
-The "start" and "stop" buttons from this module can be accessed in the server code with the "id" of the module as follows: \code{input[["id-start"]]} or \code{input[["id-stop"]]}
+Must be placed at the top level of the application's server function. The "start" and "stop" buttons from this module can be accessed in the server code with the "id" of the module as follows: \code{input[["id-start"]]} or \code{input[["id-stop"]]}. The submit button can be accessed with \code{input[["id-submit"]]}.
 }
 \examples{
 if (interactive()) {
   library(shiny)
   library(shinyjs)
+
+  # Build UI
   ui <- fluidPage(
-    actionButton("begin", "BEGIN"),
-    recordUI(id ="rec")
+
+    ## Get background javascript ready
+    useShinyjs(),
+
+    ## Setup page layout
+    div(id = "trialDiv",
+        style = "text-align:center;",
+        actionButton("next_trial", "NEXT"),
+
+        ### Initialize the recording interface invisibly
+        hidden(recordUI(id = "rec_module"))
+    )
   )
 
-  # Using the default "NULL" trigger argument, the record server function will save
-  # a new file every time the participant clicks start,
-  # with a new name generated each time a participant clicks start.
+  # The Server function
   server <- function(input, output, session) {
-    recording <- recordServer(id ="rec",
-                          outPrefix = paste0("www/rec_samp"))
+    ## Create an object that will count trials
+    rvs <- reactiveValues(trial_n = 0)
 
-    # You'll need to make the recording interface visible though!
-    # Which can be accomplished with shinyjs::showElement()
-    observeEvent(input$begin, {
-      showElement("rec")
+    ## When the participant clicks "NEXT"...
+    observeEvent(input$next_trial, {
+      ### Increase the trial number
+      rvs$trial_n <- rvs$trial_n + 1
+
+      ### Show the recording interface
+      showElement("rec_module")
+
+      ### Hide the next button
+      hide("next_trial")
     })
+
+    ## Note that the call to recordServer() is at the top level of our app's server function
+    ## And the returned filename and text to be read are wrapped in reactive() (since they need to be reactive).
+    recordServer(id = "rec_module",
+                 attempts = 3, overwrite = TRUE,
+                 outFile = reactive(paste0("www/rec", rvs$trial_n, ".wav")),
+                 writtenStim = reactive(paste0("This is recording ", rvs$trial_n, ".")))
+
+    ## As with all speechcollectr modules, the submit button's Id can be accessed with the module id + `-submit`
+    ## Here when the user clicks submit inside the recording module...
+    observeEvent(input[["rec_module-submit"]], {
+
+      ## Make the next button reappear
+      showElement("next_trial")
+    })
+
   }
- shinyApp(ui = ui, server = server)
+  # Run the application
+  shinyApp(ui = ui, server = server)
 }
 
-# Alternatively an explicit trigger argument can be set as shown below
-if (interactive()) {
-  library(shiny)
-  library(shinyjs)
-
-  ui <- fluidPage(
-    actionButton("begin", "BEGIN"),
-    recordUI(id ="rec")
-  )
-
-  # Now a new filename will be used if and only if the participant clicks "begin"
-  # Otherwise, the same file will be over-written
-  # This is useful if we want to give a participant multiple attempts at recording...
-  server <- function(input, output, session) {
-    recording <- recordServer(id ="rec",
-                          trigger = reactive(input$begin),
-                          outPrefix = paste0("www/rec_samp"))
-
-    # But let's say we don't want them to have more than 3 attempts to record the file
-    # We can do this by attaching an event to the "stop" button of the recorder,
-    # which is saved in the apps input list as "(id)-stop"
-    observeEvent(input[["rec-stop"]], {
-      if (recording()$n == 3) {
-        hide("rec")
-      }
-    })
-  }
- shinyApp(ui = ui, server = server)
-}
 }
 \seealso{
-Must be used with \code{\link{recordUI}}.
+Must be used with \code{\link{recordUI}}. For a more flexible audio recording protocol, see \code{\link{startRec}}, \code{\link{stopRec}}, and \code{\link{useRecorder}}.
 
 Other Audio recording module: 
-\code{\link{localRecordServer}()},
-\code{\link{localRecordUI}()},
 \code{\link{recordUI}()}
 }
 \concept{Audio recording module}

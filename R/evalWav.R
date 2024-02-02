@@ -24,7 +24,7 @@ evalWav <- function(wave,
     #stop("You must give a valid filepath ending in .wav for argument 'trim'.")
 
   if (class(wave)[1] != "Wave") {
-    wave <- tuneR::readWave(wave)
+    wave <- suppressWarnings(tuneR::readWave(wave))
   }
 
   markers <- findSpeech(wave)
