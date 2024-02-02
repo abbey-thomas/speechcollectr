@@ -65,6 +65,13 @@ function stopRecording(el2) {
 });
 }
 
+Shiny.addCustomMessageHandler('recDone', function(el3) {
+  Shiny.setInputValue("rec-done", el3, {priority: "event"});
+});
+
+Shiny.addCustomMessageHandler('evalWavResult', function(result) {
+  Shiny.setInputValue("evalWav-result", result, {priority: "event"});
+});
 
 
 

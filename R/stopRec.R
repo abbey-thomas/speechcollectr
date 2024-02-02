@@ -3,7 +3,7 @@
 #' @description For use only inside a call to `observeEvent()` or `bindEvent()` in a Shiny application's server function.
 #' @param filename Required. A character vector giving the file name of the WAV file that will be saved.
 #'
-#' @return Returns a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument.
+#' @return Adds the value "rec-done" to the application's input object after saving a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument. The value of "rec-done" is equal to the value of the filename argument.
 #' @export
 #' @seealso Should be preceded by \code{\link{startRec}} in the application's server code.
 #'
@@ -103,5 +103,10 @@ stopRec <- function(filename) {
     inFile <- file(paste0(filename), "wb")
     writeBin(audioOut, inFile)
     close(inFile)
+  })
+
+  observeEvent(session$input[[paste0(el2)]], priority = -1, {
+    el3 <- paste(filename)
+    session$sendCustomMessage("recDone", el3)
   })
 }
