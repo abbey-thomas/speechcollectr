@@ -10,7 +10,9 @@ consentServer(
   result = c("disable", "hide"),
   delayResponse = 1000,
   agreeLab = "Agree",
+  agreeId = "consent-yes",
   disagreeLab = NULL,
+  disagreeId = "consent-no",
   cons2rec = FALSE,
   cons2recRequire = TRUE,
  
@@ -30,7 +32,11 @@ consentServer(
 
 \item{agreeLab}{Character. The text to be displayed on the button that the participant will click to give their consent. Defaults to "I agree".}
 
+\item{agreeId}{Character. The inputId for the "agree" button. Defaults to "consent-yes".}
+
 \item{disagreeLab}{If not \code{NULL} (the default), a button will be shown alongside the "agree" button, that the participant may click to decline their consent. The character string provided here will serve as the label for that button.}
+
+\item{disagreeId}{If disagreeLab is not \code{NULL}, a character string representing the inputId for the disagree button. Defaults to "consent-no"}
 
 \item{cons2rec}{Boolean. Should the participant be required to explicitly give their consent to be recorded? Default is \code{FALSE}.}
 
@@ -48,36 +54,33 @@ A value of type \code{integer} indicating whether the participant has given cons
 \description{
 Shiny Server function for documenting participant consent
 }
-\note{
-Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace \code{id} with the \code{id} you supplied for the module): \code{input[["id-agree"]]}.
-}
 \examples{
 if (interactive()) {
   ui <- shiny::fluidPage(
     shiny::actionButton("ok", "OK"),
     consentUI(id = "cons"),
-    shiny::actionButton("done", "DONE"),
     textOutput("result")
   )
   server <- function(input, output, session) {
     consent <- consentServer(id = "cons",
                              trigger = shiny::reactive(input$ok),
                              delayResponse = 3000,
+                             agreeId = "agree",
                              disagreeLab = "Decline",
+                             disagreeId = "disagree",
                              cons2rec = TRUE)
 
     shiny::observeEvent(input$ok, {
       shinyjs::hide("ok")
     })
 
-    # Show the output value. In principle you'd probably want a command that tests whether the output of the consentServer is > 0.
-    shiny::observeEvent(input$done, {
-      output$result <- shiny::renderText({consent()})
+    # Show the output value when the participant agrees.
+    shiny::observeEvent(input$agree, {
+      output$result <- shiny::renderText({consent$agree})
     })
  }
   shiny::shinyApp(ui = ui, server = server)
 }
-
 
 }
 \seealso{

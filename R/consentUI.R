@@ -14,28 +14,28 @@
 #'   ui <- shiny::fluidPage(
 #'     shiny::actionButton("ok", "OK"),
 #'     consentUI(id = "cons"),
-#'     shiny::actionButton("done", "DONE"),
 #'     textOutput("result")
 #'   )
 #'   server <- function(input, output, session) {
 #'     consent <- consentServer(id = "cons",
 #'                              trigger = shiny::reactive(input$ok),
 #'                              delayResponse = 3000,
+#'                              agreeId = "agree",
 #'                              disagreeLab = "Decline",
+#'                              disagreeId = "disagree",
 #'                              cons2rec = TRUE)
 #'
 #'     shiny::observeEvent(input$ok, {
 #'       shinyjs::hide("ok")
 #'     })
 #'
-#'     # Show the output value. In principle you'd probably want a command that tests whether the output of the consentServer is > 0.
-#'     shiny::observeEvent(input$done, {
+#'     # Show the output value when the participant agrees.
+#'     shiny::observeEvent(input$agree, {
 #'       output$result <- shiny::renderText({consent$agree})
 #'     })
 #'  }
 #'   shiny::shinyApp(ui = ui, server = server)
 #' }
-#'
 #'
 consentUI <- function(id = "consent",
                       title = "Consent Form",
@@ -54,22 +54,21 @@ consentUI <- function(id = "consent",
     if (!grepl("(\\.html$)",filename))
       stop(paste0("Consent form text must be in a .html file."))
   }
-  ns <- shiny::NS(id)
 
   ui <- shiny::tagList(
     shinyjs::useShinyjs(),
-    shinyjs::hidden(shiny::tags$div(id = ns("consent"),
-                                    htmltools::tags$h1(id = ns("title"), title),
-                                    htmltools::tags$span(id = ns("text"),
+    shinyjs::hidden(shiny::tags$div(id = paste0(id),
+                                    htmltools::tags$h1(id = paste0(id, "-title"), title),
+                                    htmltools::tags$span(id = paste0(id, "-text"),
                                                          if(!is.null(filename)) {
                                                            htmltools::includeHTML(filename)
                                                          }else{
                                                            shiny::HTML("<p>Participation in this experiment is voluntary and requires your informed consent. Refusal to take part in the study will NOT result in the loss of benefits to which you are otherwise entitled, and participants may withdraw from the study at any time without penalty. Participation in this study involves no more risk than participants would otherwise encounter in everyday life. All responses are treated as confidential.</p><br><p><b>If you understand the statements above and freely consent to participate in the study, click the 'Agree' button to begin the experiment. Consent is required for participation; if you do not wish to participate, you may close the browser window now, and no data will be saved or used.</b></p>")
                                                          }
                                     ),
-                                    shiny::uiOutput(ns("interface")),
+                                    shiny::uiOutput(paste0(id, "-interface")),
                                     htmltools::tags$hr(),
-                                    shinyjs::hidden(shiny::actionButton(inputId = ns("invis"), ""))
+                                    shinyjs::hidden(shiny::actionButton(inputId = paste0(id, "-invis"), ""))
     ))
   )
 

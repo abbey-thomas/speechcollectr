@@ -27,28 +27,28 @@ if (interactive()) {
   ui <- shiny::fluidPage(
     shiny::actionButton("ok", "OK"),
     consentUI(id = "cons"),
-    shiny::actionButton("done", "DONE"),
     textOutput("result")
   )
   server <- function(input, output, session) {
     consent <- consentServer(id = "cons",
                              trigger = shiny::reactive(input$ok),
                              delayResponse = 3000,
+                             agreeId = "agree",
                              disagreeLab = "Decline",
+                             disagreeId = "disagree",
                              cons2rec = TRUE)
 
     shiny::observeEvent(input$ok, {
       shinyjs::hide("ok")
     })
 
-    # Show the output value. In principle you'd probably want a command that tests whether the output of the consentServer is > 0.
-    shiny::observeEvent(input$done, {
+    # Show the output value when the participant agrees.
+    shiny::observeEvent(input$agree, {
       output$result <- shiny::renderText({consent$agree})
     })
  }
   shiny::shinyApp(ui = ui, server = server)
 }
-
 
 }
 \seealso{
