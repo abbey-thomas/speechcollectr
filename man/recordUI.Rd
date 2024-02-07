@@ -93,7 +93,7 @@ if (interactive()) {
     ## (since they need to be reactive).
     recordServer(id = "rec_module",
                  attempts = 3, overwrite = TRUE,
-                 outFile = reactive(paste0("www/rec", rvs$trial_n, ".wav")),
+                 outFile = reactive(paste0("rec", rvs$trial_n, ".wav")),
                  writtenStim = reactive(paste0("This is recording ", rvs$trial_n, ".")))
 
     ## As with all speechcollectr modules, the submit button's Id

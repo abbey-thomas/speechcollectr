@@ -21,6 +21,8 @@ Play Audio without an Explicit Play Button
 # NOTE: This example will only play audio from a saved app script
 # in the same directory as a 'www' subdirectory that contains the audio file.
 data("samp_wav")
+# create www if it does not exist
+if (!dir.exists("www")) {dir.create("www")}
 tuneR::writeWave(samp_wav, "www/sample.wav")
 
 library(shiny)

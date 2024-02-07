@@ -21,8 +21,8 @@
 #'
 #' @examples
 #' data("demographics")
-#' write.csv(demographics, "www/demographics.csv", row.names = FALSE)
-#' feedback <- surveyPrep(questionFile = "www/demographics.csv",
+#' write.csv(demographics, "demographics.csv", row.names = FALSE)
+#' feedback <- surveyPrep(questionFile = "demographics.csv",
 #'                        notListedLab = "Not listed:")
 #'
 surveyPrep <- function(questionFile = NULL,

@@ -79,7 +79,7 @@ if (interactive()){
      rateUI(id = "example",
             type = "button",
             n_scales = 2),
-     actionButton("submit", "SUBMIT")
+     actionButton("submit", "SUBMIT"),
      textOutput("confirmation")
    )
 

@@ -113,7 +113,7 @@ stopRec <- function(filename,
     close(inFile)
   })
 
-  observeEvent(session$input[[paste0(el2)]], priority = -1, {
+  shiny::observeEvent(session$input[[paste0(el2)]], priority = -1, {
     el3 <- list(finishedId = paste(finishedId),
                 outFile = paste(filename))
     session$sendCustomMessage("recDone", el3)

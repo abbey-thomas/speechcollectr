@@ -69,7 +69,7 @@ ui <- fluidPage(
     column(width = 8, offset = 2,
            actionButton("start", "Start"),
            hidden(actionButton("again", "Play Again")),
-           matchUI(n2find = 3)
+           matchUI()
            )
   )
 )
