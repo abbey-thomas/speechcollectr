@@ -11,6 +11,7 @@
 #' col2hex("white")
 #'
 #' @importFrom grDevices col2rgb
+#' @importFrom grDevices rgb
 #'
 col2hex <- function (cname) {
   colMat <- col2rgb(cname)

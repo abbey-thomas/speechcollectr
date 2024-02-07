@@ -72,7 +72,8 @@
 #'
 #'       output$trial <- renderUI({
 #'         radioButtons(inputId = "task",
-#'                      label = HTML(paste0("<h3>Select the word target word, <em>", rvs$targ, "</em>, from the choices below.</h3>")),
+#'                      label = HTML(paste0("<h3>Select the word target word, <em>",
+#'                                   rvs$targ, "</em>, from the choices below.</h3>")),
 #'                      choiceNames = choices,
 #'                      choiceValues = choices,
 #'                      selected = character())
@@ -88,7 +89,9 @@
 #'           counter$trial <- counter$trial + 1
 #'         }
 #'         output$feedback <- renderText({
-#'           paste0("Great job, player #", counter$pin, "! You found the correct answer. Click 'Start' to play again.")
+#'           paste0("Great job, player #", counter$pin,
+#'                  "! You found the correct answer.
+#'                     Click 'Start' to play again.")
 #'         })
 #'       } else {
 #'         output$feedback <- renderText({
@@ -112,7 +115,7 @@ randomStim <- function (dataFile,
   # Read in the data frame with the practice trials.
   if (!is.data.frame(dataFile)) {
     if (grepl("csv$", dataFile)) {
-      df_init <- read.csv(dataFile)
+      df_init <- utils::read.csv(dataFile)
     }
     else if (grepl("rds$", dataFile)) {
       df_init <- readRDS(dataFile)
@@ -124,8 +127,8 @@ randomStim <- function (dataFile,
 
   # Keep just the experimental trials for randomization
   if (n_practice > 0) {
-    exp_trials <- tail(df_init, -n_practice)
-    df_practice <- head(df_init, n_practice)
+    exp_trials <- utils::tail(df_init, -n_practice)
+    df_practice <- utils::head(df_init, n_practice)
   } else {
     exp_trials <- df_init
   }
@@ -219,7 +222,7 @@ randomStim <- function (dataFile,
 
   if (!is.null(outFile)) {
     if (grepl("csv$", outFile)) {
-      write.csv(df_end, outFile, row.names = FALSE)
+      utils::write.csv(df_end, outFile, row.names = FALSE)
     }
     else {
       saveRDS(df_end, outFile)

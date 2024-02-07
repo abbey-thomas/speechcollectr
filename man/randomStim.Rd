@@ -101,7 +101,8 @@ if (interactive()) {
 
       output$trial <- renderUI({
         radioButtons(inputId = "task",
-                     label = HTML(paste0("<h3>Select the word target word, <em>", rvs$targ, "</em>, from the choices below.</h3>")),
+                     label = HTML(paste0("<h3>Select the word target word, <em>",
+                                  rvs$targ, "</em>, from the choices below.</h3>")),
                      choiceNames = choices,
                      choiceValues = choices,
                      selected = character())
@@ -117,7 +118,9 @@ if (interactive()) {
           counter$trial <- counter$trial + 1
         }
         output$feedback <- renderText({
-          paste0("Great job, player #", counter$pin, "! You found the correct answer. Click 'Start' to play again.")
+          paste0("Great job, player #", counter$pin,
+                 "! You found the correct answer.
+                    Click 'Start' to play again.")
         })
       } else {
         output$feedback <- renderText({

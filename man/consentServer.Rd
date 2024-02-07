@@ -16,7 +16,7 @@ consentServer(
   cons2rec = FALSE,
   cons2recRequire = TRUE,
  
-    cons2recLab = "This experiment requires us to make audio recordings of your voice. Do you consent to having your voice recorded?",
+    cons2recLab = "This experiment requires us to make audio recordings of your voice.\\n                                         Do you consent to having your voice recorded?",
   cons2recYes = "I consent to my voice being recorded for this research.",
   cons2recNo = "I do NOT grant my consent for my voice to be recorded."
 )
@@ -84,7 +84,7 @@ if (interactive()) {
 
 }
 \seealso{
-Must be used with \code{\link{consentUI}}. If \code{cons2rec = TRUE}, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
+Must be used with \code{\link{consentUI}}. If \code{cons2rec = TRUE}, consider using \code{\link{recordUI}} and \code{\link{recordServer}}.
 
 Other Consent form module: 
 \code{\link{consentUI}()}

@@ -17,6 +17,7 @@ Imports:
     base64enc,
     data.table,
     dplyr,
+    ggplot2,
     htmltools,
     magrittr,
     RCurl,
@@ -26,7 +27,8 @@ Imports:
     shinyalert,
     shinyjs,
     shinyWidgets,
-    tidyr, 
+    tibble,
+    tidyr,
     timeR,
     tuneR
 Depends: 

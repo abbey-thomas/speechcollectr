@@ -92,7 +92,8 @@
 #'  shinyApp(ui = ui, server = server)
 #' }
 #'
-stopRec <- function(filename) {
+stopRec <- function(filename,
+                    finishedId = "rec-done") {
   session <- shiny::getDefaultReactiveDomain()
 
   randId <- paste0(sample(c(sample(letters, 10),
@@ -102,7 +103,7 @@ stopRec <- function(filename) {
   el2 <- paste0("rec-audio-", randId)
   session$sendCustomMessage("stopRec", el2)
 
-  observeEvent(session$input[[paste0(el2)]], {
+  shiny::observeEvent(session$input[[paste0(el2)]], {
     audio <- session$input[[paste0(el2)]]
     audioOut <- gsub("data:audio/wav;base64,", "", audio)
     audioOut <- gsub(" ", "+", audioOut)

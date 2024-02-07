@@ -13,7 +13,7 @@ transcribeServer(
   n_play = NULL,
   result = c("clear", "hide"),
  
-    instructions = "Play the audio file. Then, enter what you heard in the box below. Click the submit button when you are finished.",
+    instructions = "Play the audio file. Then, enter what you heard in the box below.\\n                                             Click the submit button when you are finished.",
   n_lines = 1,
   width = "100\%",
   submitLab = "SUBMIT"
@@ -21,6 +21,8 @@ transcribeServer(
 }
 \arguments{
 \item{id}{The module id. Must be the same as \code{\link{transcribeUI}}.}
+
+\item{trigger}{If not \code{NULL} (the default), a reactive expression returning the event that should trigger the appearance of the interface.}
 
 \item{audioFile}{The file path to a file relative to the applications www directory. (The file must be in the www directory, but the path should not include the "www/" prefix).}
 
@@ -39,8 +41,6 @@ transcribeServer(
 \item{width}{Character. Defaults to "100\%", defines how much of the horizontal space the transcription interface will occupy.}
 
 \item{submitLab}{The label on the submit button. Defaults to "SUBMIT".}
-
-\item{If}{not \code{NULL} (the default), a reactive expression returning the event that should trigger the appearance of the interface.}
 }
 \value{
 Returns a set of reactive values including the name of the audio file, the text the participant entered, and the number of times they clicked play.
@@ -61,9 +61,12 @@ if (interactive()) {
   ui <- fluidPage(
     actionButton("begin", "Begin"),
     transcribeUI(id = "transcribe"),
-    h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
-    h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
-    h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
+    h5("Click 'Begin' each time you want to transcribe.
+        The recording will not change from trial to trial."),
+    h5("To demonstrate the transcription evaluation procedure,
+        we'll use a different 'correct transcritiption' for each trial."),
+    h5("The correct answers for the first 4 trials are:
+        'a', 'ab', 'abc', 'abcd' (in that order).")
   )
 
   server <- function(input, output, session) {

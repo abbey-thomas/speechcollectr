@@ -11,7 +11,7 @@ rateUI(
   n_scales = 1,
   scaleFillCol = "white",
   scaleTextCol = "black",
-  scaleTextSz = "20px"
+  scaleTextSz = "16px"
 )
 }
 \arguments{
@@ -26,6 +26,8 @@ rateUI(
 \item{scaleFillCol}{A valid hexidecimal code or color name for the scale background. Defaults to white.}
 
 \item{scaleTextCol}{A valid hexidecimal code or color name for the scale text and border. Defaults to black.}
+
+\item{scaleTextSz}{Character. When type = \code{button}, a value indicating the size of the text on the scale. Defaults to "16px".}
 }
 \value{
 A shiny UI for likert scale tasks.

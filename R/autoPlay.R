@@ -7,9 +7,10 @@
 #' @export
 #'
 #' @examples
-#' # NOTE: This example will only play audio from a saved app script in the same directory as a 'www' subdirectory that contains the audio file.
+#' # NOTE: This example will only play audio from a saved app script
+#' # in the same directory as a 'www' subdirectory that contains the audio file.
 #' data("samp_wav")
-#' tuneR::writeWave("samp_wav", "www/sample.wav")
+#' tuneR::writeWave(samp_wav, "www/sample.wav")
 #'
 #' library(shiny)
 #'

@@ -48,14 +48,17 @@
 #'
 #'       # Once an answer for "age" is submitted, show the answer in the sidebar panel.
 #'       observeEvent(answers$age, {
-#'         output$answer <- renderText({paste0("Your answers were saved as ", answers$filename,". You are ", answers$age, " years old.")})
+#'         output$answer <- renderText({paste0("Your answers were saved as ",
+#'                                      answers$filename,". You are ", answers$age,
+#'                                      " years old.")})
 #'       })
 #'     })
 #'   }
 #'   shinyApp(ui = ui, server = server)
 #' }
 #'
-#' # Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+#' # Or, you can trigger events on click of the survey's submit button
+#' # using the module id in the following string: `input[["id-submit"]]`
 #' if (interactive()) {
 #'   ui <- fluidPage(
 #'     sidebarLayout(
@@ -101,7 +104,7 @@ surveyServer <- function (id = "survey",
     stop("Argument result must be either 'clear' or 'hide'")
 
   if (grepl("\\.csv$", questionFile)) {
-    qs_pre <- read.csv(file = questionFile)
+    qs_pre <- utils::read.csv(file = questionFile)
   } else if (is.data.frame(questionFile)) {
     qs_pre <- questionFile
   } else {
@@ -118,7 +121,7 @@ surveyServer <- function (id = "survey",
                                               ifelse(type == "radioButtons" | type == "radio", "r",
                                                      ifelse(type == "checkboxGroupInput" | type == "checkbox", "c",
                                                             as.character(type))))))) %>%
-    dplyr::mutate(across(everything(), .fns = as.character))
+    dplyr::mutate(dplyr::across(dplyr::everything(), .fns = as.character))
 
   if ("trigger_id" %in% colnames(qs_init)) {
     qs <- qs_init
@@ -134,7 +137,7 @@ surveyServer <- function (id = "survey",
     stop("Error: returnVals must be a character vector that contains ONLY a set of values from the 'id' column in 'questionFile', that you want returned as reactives.")
 
 
-  qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
+  qsl <- stats::setNames(split(qs, seq(nrow(qs))), rownames(qs))
 
   mandatory <- c(qs$id[qs$priority == "r"])
 
@@ -157,14 +160,14 @@ surveyServer <- function (id = "survey",
                             if ("trigger_id" %in% colnames(qs_init)) {
                               if (qsl[[i]]$id %in% qs$trigger_id) {
                                 qs_add <- qs %>%
-                                  filter(trigger_id == qsl[[i]]$id) %>%
-                                  filter(is.na(trigger_value)|
+                                  dplyr::filter(trigger_id == qsl[[i]]$id) %>%
+                                  dplyr::filter(is.na(trigger_value)|
                                            trigger_value == as.character(input[[paste0(qsl[[i]]$id)]]))
 
                                 if (nrow(qs_add) > 0) {
-                                  qs_add_l <- setNames(split(qs_add, seq(nrow(qs_add))), rownames(qs_add))
+                                  qs_add_l <- stats::setNames(split(qs_add, seq(nrow(qs_add))), rownames(qs_add))
                                   lapply(seq_along(qs_add_l), function(j) {
-                                    showElement(qs_add_l[[j]]$id)
+                                    shinyjs::showElement(qs_add_l[[j]]$id)
                                   })
                                 }
                               }
@@ -222,7 +225,7 @@ surveyServer <- function (id = "survey",
                                      ".csv"))) {
                 next
               } else {
-                write.csv(formInfo(),
+                utils::write.csv(formInfo(),
                           paste0(basen, formatC(i, width = 4,
                                                 format = "d", flag = "0"),
                                  ".csv"), row.names = FALSE)
@@ -238,7 +241,7 @@ surveyServer <- function (id = "survey",
             saveRDS(formInfo(), paste0(outFile))
             newFile <- outFile
           } else {
-            write.csv(formInfo(), outFile, row.names = FALSE)
+            utils::write.csv(formInfo(), outFile, row.names = FALSE)
             newFile <- outFile
           }
         }

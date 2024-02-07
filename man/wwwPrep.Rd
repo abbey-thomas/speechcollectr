@@ -21,7 +21,7 @@ wwwPrep(
 
 \item{path}{A character vector naming the path to the parent directory of 'www'. Defaults to working directory.}
 
-\item{recordJS}{Boolean. Should the JavaScript files for \code{localRecordUI()} and \code{localRecordServer()} be copied to 'www'?}
+\item{recordJS}{Boolean. Should the JavaScript files for audio recording be copied to 'www'? (Not necessary if using any of the speechcollectr audio recording functions)}
 
 \item{volumeCalibration}{Boolean. Should \code{cal_noise()} for testing headphone volume be copied to 'www'?}
 
@@ -36,5 +36,8 @@ A www subdirectory in the current working directory. Success messages will be pr
 Many shiny apps for speech experiments require resources (like WAV files) in the www subdirectory. This command takes care of gathering datafiles and putting them in the appropriate directory for
 }
 \examples{
-
+# If you wanted to use the Huggins Pitch Headphone Screen,
+# You could get the audio in the right place with the following command:
+wwwPrep(HugginsPitchScreen = TRUE)
+# But to run this only once, and not put it in your app.R file
 }

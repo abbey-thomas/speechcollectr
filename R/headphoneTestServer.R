@@ -183,8 +183,8 @@ headphoneTestServer <- function(id = "headphone_test",
                                                                                        "Sound 3" = "answer3"),
                                                                         selected = character(0),
                                                                         disabled = TRUE))
-              shinyjs::delay(500, enable("screenplay"))
-              shinyjs::delay(500, disable("choices"))
+              shinyjs::delay(500, shinyjs::enable("screenplay"))
+              shinyjs::delay(500, shinyjs::disable("choices"))
 
               shinyWidgets::updateProgressBar(session = session,
                                               id = session$ns("progress"),

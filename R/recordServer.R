@@ -4,7 +4,7 @@
 #' @param id The input ID associated with the record module. Must be the same as the id of `recordUI()`.
 #' @param outFile Character or reactive expression. Where to store the audio file. Can indicate any subdirectory of the present working directory. If dynamic, wrap in `reactive()`.
 #' @param attempts Numeric (Defaults to Inf). How many attempts to create this recording should the participant be allowed?
-#' @param Overwrite Boolean. Defaults to `FALSE` so that a unique digit is appended to each filename so that all recordings will be saved even when the filename value is the same. If `TRUE`, will overwrite a file of the same name.
+#' @param overwrite Boolean. Defaults to `FALSE` so that a unique digit is appended to each filename so that all recordings will be saved even when the filename value is the same. If `TRUE`, will overwrite a file of the same name.
 #' @param writtenStim Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.
 #' @param writtenDelay Integer. How many milliseconds should elapse between the time the participant clicks `record` and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.
 #'
@@ -53,13 +53,15 @@
 #'     })
 #'
 #'     ## Note that the call to recordServer() is at the top level of our app's server function
-#'     ## And the returned filename and text to be read are wrapped in reactive() (since they need to be reactive).
+#'     ## And the returned filename and text to be read are wrapped in reactive()
+#'     ## (since they need to be reactive).
 #'     recordServer(id = "rec_module",
 #'                  attempts = 3, overwrite = TRUE,
 #'                  outFile = reactive(paste0("www/rec", rvs$trial_n, ".wav")),
 #'                  writtenStim = reactive(paste0("This is recording ", rvs$trial_n, ".")))
 #'
-#'     ## As with all speechcollectr modules, the submit button's Id can be accessed with the module id + `-submit`
+#'     ## As with all speechcollectr modules, the submit button's Id
+#'     ## can be accessed with the module id + `-submit`
 #'     ## Here when the user clicks submit inside the recording module...
 #'     observeEvent(input[["rec_module-submit"]], {
 #'
@@ -162,8 +164,8 @@ recordServer <- function(id = "record",
   })
 
   retval <- shiny::eventReactive(session$input[[paste0(id, "-stop")]], {
-    return(list(n = isolate(record_rvs$n),
-                file = isolate(record_rvs$filepath)))
+    return(list(n = shiny::isolate(record_rvs$n),
+                file = shiny::isolate(record_rvs$filepath)))
   })
 
   return(retval)

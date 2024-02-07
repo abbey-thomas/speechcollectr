@@ -10,7 +10,8 @@
 #' @examples
 #' data("samp_wav")
 #' fs <- findSpeech(samp_wav)
-#' #find the beginning of the utterance in seconds (to compare with manual measurements in Praat, for example).
+#' #find the beginning of the utterance in seconds
+#' #(to compare with manual measurements in Praat, for example).
 #' fs$begin_s/samp_wav@samp.rate
 #' #now the end...
 #' fs$end_s/samp_wav@samp.rate

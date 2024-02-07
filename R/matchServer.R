@@ -258,7 +258,7 @@ matchServer <- function(id = "game",
         })
       })
 
-      observeEvent(triggerReturn(), {
+      shiny::observeEvent(triggerReturn(), {
         shinyjs::enable("matchdiv")
         rvs$correct <- 0
 

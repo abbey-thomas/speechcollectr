@@ -57,13 +57,15 @@
 #'     })
 #'
 #'     ## Note that the call to recordServer() is at the top level of our app's server function
-#'     ## And the returned filename and text to be read are wrapped in reactive() (since they need to be reactive).
+#'     ## And the returned filename and text to be read are wrapped in reactive()
+#'     ## (since they need to be reactive).
 #'     recordServer(id = "rec_module",
 #'                  attempts = 3, overwrite = TRUE,
 #'                  outFile = reactive(paste0("www/rec", rvs$trial_n, ".wav")),
 #'                  writtenStim = reactive(paste0("This is recording ", rvs$trial_n, ".")))
 #'
-#'     ## As with all speechcollectr modules, the submit button's Id can be accessed with the module id + `-submit`
+#'     ## As with all speechcollectr modules, the submit button's Id
+#'     ## can be accessed with the module id + `-submit`
 #'     ## Here when the user clicks submit inside the recording module...
 #'     observeEvent(input[["rec_module-submit"]], {
 #'

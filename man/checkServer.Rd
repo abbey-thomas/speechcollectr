@@ -35,7 +35,7 @@ The questionFile argument is the source for the questions that should be display
 \examples{
 # First get some sample questions for your participant.
 data("qualifications")
-write.csv(qualifications, "qualifications.csv", row.names = FALSE)
+utils::write.csv(qualifications, "qualifications.csv", row.names = FALSE)
 
 # Now ask the questions!
 if (interactive()) {

@@ -4,7 +4,7 @@
 \alias{stopRec}
 \title{Stop Recording User Audio and Save WAV File}
 \usage{
-stopRec(filename)
+stopRec(filename, finishedId = "rec-done")
 }
 \arguments{
 \item{filename}{Required. A character vector giving the file name of the WAV file that will be saved.}

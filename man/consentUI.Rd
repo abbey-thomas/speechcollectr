@@ -52,7 +52,7 @@ if (interactive()) {
 
 }
 \seealso{
-Must be used with \code{\link{consentServer}}. If \code{cons2rec = TRUE}, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
+Must be used with \code{\link{consentServer}}. If \code{cons2rec = TRUE}, consider using \code{\link{recordUI}} and \code{\link{recordServer}}.
 
 Other Consent form module: 
 \code{\link{consentServer}()}

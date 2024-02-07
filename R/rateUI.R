@@ -6,6 +6,7 @@
 #' @param n_scales Integer. How many scales should be displayed in the interface? Must be the same value as in the corresponding call to `rateServer()`
 #' @param scaleFillCol A valid hexidecimal code or color name for the scale background. Defaults to white.
 #' @param scaleTextCol A valid hexidecimal code or color name for the scale text and border. Defaults to black.
+#' @param scaleTextSz Character. When type = `button`, a value indicating the size of the text on the scale. Defaults to "16px".
 #'
 #' @return A shiny UI for likert scale tasks.
 #' @export
@@ -96,7 +97,7 @@ rateUI <- function(id = "rate",
                    n_scales = 1,
                    scaleFillCol = "white",
                    scaleTextCol = "black",
-                   scaleTextSz = "20px") {
+                   scaleTextSz = "16px") {
 
   fills <- col2hex(rep(c(scaleFillCol), length.out = n_scales))
   texts <- col2hex(rep(c(scaleTextCol), length.out = n_scales))

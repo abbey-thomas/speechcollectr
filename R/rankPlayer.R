@@ -11,7 +11,8 @@
 #' @export
 #' @examples
 #' # Erase the out file, "sample_rank.rds" after you run this example,
-#' # ...so you won't get the error of multiple "players" with the same ID next time you run the example!
+#' # ...so you won't get the error of multiple "players" with the same ID
+#'
 #' if (interactive()) {
 #'   library(shiny)
 #'   library(shinyalert)
@@ -61,7 +62,7 @@ rankPlayer <- function(score, playerId = NULL,
                       sc = score_col) %>%
         dplyr::mutate(pin = as.character(pin))
     } else if (grepl("\\.csv$", rankFile)) {
-      all <- read.csv(rankFile) %>%
+      all <- utils::read.csv(rankFile) %>%
         dplyr::rename(rank = rank_col,
                       pin = id_col,
                       sc = score_col) %>%
@@ -81,7 +82,7 @@ rankPlayer <- function(score, playerId = NULL,
   colnames(out) <- c(rank_col, id_col, score_col)
 
   if (grepl("\\.csv$", rankFile)) {
-    write.csv(out, rankFile, row.names = FALSE)
+    utils::write.csv(out, rankFile, row.names = FALSE)
   } else if (grepl("\\.rds$", rankFile)) {
     saveRDS(out, rankFile)
   }

@@ -20,7 +20,7 @@
 #' @examples
 #' # First get some sample questions for your participant.
 #' data("qualifications")
-#' write.csv(qualifications, "qualifications.csv", row.names = FALSE)
+#' utils::write.csv(qualifications, "qualifications.csv", row.names = FALSE)
 #'
 #' # Now ask the questions!
 #' if (interactive()) {
@@ -60,11 +60,11 @@ checkServer <- function(id = "check",
     stop("Argument 'questionFile' must be a valid file path (relative to the current directory) to an existing CSV file.")
 
 
-  qs <- read.csv(file = questionFile) %>%
+  qs <- utils::read.csv(file = questionFile) %>%
     dplyr::mutate(priority = ifelse(priority == "required"|priority == "req", "r",
                                     ifelse(priority == "optional"|priority == "opt", "o",
                                            as.character(priority)))) %>%
-    dplyr::mutate(across(everything(), .fns = as.character)) %>%
+    dplyr::mutate(dplyr::across(dplyr::everything(), .fns = as.character)) %>%
     tibble::rownames_to_column() %>%
     dplyr::mutate(label = paste0("(", rowname, " of ", nrow(.), ") ", label))
 
@@ -80,7 +80,7 @@ checkServer <- function(id = "check",
       rvs <- shiny::reactiveValues(n = 1, attempt = 1)
       returns <- shiny::reactiveValues()
 
-      observe({
+      shiny::observe({
         if (is.null(outFile)) {
           rvs$outFile <- NULL
         } else {
@@ -151,7 +151,7 @@ checkServer <- function(id = "check",
               if (grepl("rds$", rvs$outFile)) {
                 saveRDS(formInfo(), rvs$outFile)
               } else if (grepl("csv$", rvs$outFile)) {
-                write.csv(formInfo(), rvs$outFile, row.names = FALSE)
+                utils::write.csv(formInfo(), rvs$outFile, row.names = FALSE)
               }
             }
           }
@@ -174,7 +174,7 @@ checkServer <- function(id = "check",
 
       shiny::observeEvent(input$nqual, {
         shinyjs::hide("ck_div")
-        removeModal()
+        shiny::removeModal()
         returns$ineligible <- 1
       })
       return(returns)

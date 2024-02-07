@@ -20,11 +20,11 @@ recordServer(
 
 \item{attempts}{Numeric (Defaults to Inf). How many attempts to create this recording should the participant be allowed?}
 
+\item{overwrite}{Boolean. Defaults to \code{FALSE} so that a unique digit is appended to each filename so that all recordings will be saved even when the filename value is the same. If \code{TRUE}, will overwrite a file of the same name.}
+
 \item{writtenStim}{Either a character vector (for a single, static stimulus) or a reactive expression (created with reactive, for a stimulus that should be updated from trial to trial) representing a written stimulus that a participant will read while recording.}
 
 \item{writtenDelay}{Integer. How many milliseconds should elapse between the time the participant clicks \code{record} and the time the written stimulus appears? Defaults to 500. We recommend not using a value less than that.}
-
-\item{Overwrite}{Boolean. Defaults to \code{FALSE} so that a unique digit is appended to each filename so that all recordings will be saved even when the filename value is the same. If \code{TRUE}, will overwrite a file of the same name.}
 }
 \value{
 Returns a reactive expression containing: (1) \code{n}: the number of attempts at recording the current file and (2) \code{file}: the filename where only the most recent attempt is saved (previous attempts have been overwritten). Also returns a wav file in a filename comprising \code{outPrefix} and a unique four digit number.
@@ -74,13 +74,15 @@ if (interactive()) {
     })
 
     ## Note that the call to recordServer() is at the top level of our app's server function
-    ## And the returned filename and text to be read are wrapped in reactive() (since they need to be reactive).
+    ## And the returned filename and text to be read are wrapped in reactive()
+    ## (since they need to be reactive).
     recordServer(id = "rec_module",
                  attempts = 3, overwrite = TRUE,
                  outFile = reactive(paste0("www/rec", rvs$trial_n, ".wav")),
                  writtenStim = reactive(paste0("This is recording ", rvs$trial_n, ".")))
 
-    ## As with all speechcollectr modules, the submit button's Id can be accessed with the module id + `-submit`
+    ## As with all speechcollectr modules, the submit button's Id
+    ## can be accessed with the module id + `-submit`
     ## Here when the user clicks submit inside the recording module...
     observeEvent(input[["rec_module-submit"]], {
 

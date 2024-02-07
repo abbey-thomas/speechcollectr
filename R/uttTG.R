@@ -44,9 +44,9 @@ uttTG <- function(wave, outfile,
                         end_t, length(wave@left)/wave@samp.rate, "\"\"")))
   txt <- dplyr::bind_rows(tg_head, utt_tier)
   if (!is.null(outfile)) {
-    write.table(txt, file = outfile,
-                row.names = FALSE, col.names = FALSE,
-                quote = FALSE, sep = ",", qmethod = "double")
+    utils::write.table(txt, file = outfile,
+                       row.names = FALSE, col.names = FALSE,
+                       quote = FALSE, sep = ",", qmethod = "double")
   } else {
     return(txt)
   }

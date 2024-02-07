@@ -7,7 +7,7 @@
 #' @return A user interface that displays a custom consent form from a separate file, buttons for the participant to consent or decline, and (optionally) an opportunity for the participant to explicitly agree to audio recording.
 #' @note Events can be added to the "agree" button by accessing it among the app's inputs with the following (replace `id` with the `id` you supplied for the module): `input[["id-agree"]]`.
 #' @export
-#' @seealso Must be used with \code{\link{consentServer}}. If `cons2rec = TRUE`, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
+#' @seealso Must be used with \code{\link{consentServer}}. If `cons2rec = TRUE`, consider using \code{\link{recordUI}} and \code{\link{recordServer}}.
 #' @family Consent form module
 #' @examples
 #' if (interactive()) {

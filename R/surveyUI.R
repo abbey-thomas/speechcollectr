@@ -4,7 +4,6 @@
 #' @param questionFile A valid file path to an existing CSV file, formatted according to the instructions in \code{\link{surveyPrep}}. Must be the same as the one used in \code{\link{surveyServer}}.
 #' @param title The title of the survey to display to participants.
 #' @param subtitle The subtitle of the survey to display to participants.
-#' @param notListedLab For non-textInput questions, the name of the choice that will allow your participants to enter their own value for all questions that include this string in the 'options' column of `questionFile`.
 #' @param requiredLab The value that will be appended to required questions' labels. Defaults to asterisk (*).
 #' @param submitLab The label that should be displayed on the button participants will click to submit the form.
 #'
@@ -56,7 +55,8 @@
 #'   shinyApp(ui = ui, server = server)
 #' }
 #'
-#' # Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+#' # Or, you can trigger events on click of the survey's submit button
+#' #  using the module id in the following string: `input[["id-submit"]]`
 #' if (interactive()) {
 #'   ui <- fluidPage(
 #'     sidebarLayout(
@@ -97,7 +97,7 @@ surveyUI <- function (id = "survey",
 {
   ns <- shiny::NS(id)
   if (grepl("\\.csv$", questionFile)) {
-    qs_pre <- read.csv(file = questionFile)
+    qs_pre <- utils::read.csv(file = questionFile)
   } else if (is.data.frame(questionFile)) {
     qs_pre <- questionFile
   } else {
@@ -115,7 +115,7 @@ surveyUI <- function (id = "survey",
                                               ifelse(type == "radioButtons" |  type == "radio", "r",
                                                      ifelse(type == "checkboxGroupInput" |  type == "checkbox", "c",
                                                             as.character(type))))))) %>%
-    dplyr::mutate(across(everything(), .fns = as.character)) %>%
+    dplyr::mutate(dplyr::across(dplyr::everything(), .fns = as.character)) %>%
     dplyr::mutate(label = ifelse(priority == "r" & !is.null(requiredLab),
                                  paste0(label, " <span style=color:#CC3311>", requiredLab,
                                         "</span>"), as.character(label)))
@@ -128,7 +128,7 @@ surveyUI <- function (id = "survey",
   } else {
     qs <- qs_init %>% dplyr::mutate(trigger_id = NA)
   }
-  qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
+  qsl <- stats::setNames(split(qs, seq(nrow(qs))), rownames(qs))
   ui <- shiny::tagList(shinyjs::useShinyjs(),
                        shinyjs::hidden(
                          htmltools::tags$div(id = ns("survey_div"),

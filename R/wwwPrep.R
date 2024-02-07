@@ -4,7 +4,7 @@
 #' @param from A character vector of filenames or a single directory name. Leave `NULL` (default) if you only want to add one of the datasets included in the package.
 #' @param is_dir Boolean. Is 'from' a directory?
 #' @param path A character vector naming the path to the parent directory of 'www'. Defaults to working directory.
-#' @param recordJS Boolean. Should the JavaScript files for `localRecordUI()` and `localRecordServer()` be copied to 'www'?
+#' @param recordJS Boolean. Should the JavaScript files for audio recording be copied to 'www'? (Not necessary if using any of the speechcollectr audio recording functions)
 #' @param volumeCalibration Boolean. Should `cal_noise()` for testing headphone volume be copied to 'www'?
 #' @param HugginsPitchScreen Boolean. Should `HugginsPitchData()` for Huggins Pitch Headphone Screen be copied to 'www'?
 #' @param AntiphaseScreen Boolean. Should `AntiphaseData()` for Antiphase Headphone Screen be copied to 'www'?
@@ -13,11 +13,10 @@
 #' @export
 #'
 #' @examples
-#'
-# TO DO:
-
-# 2. Add game functions.
-# 3. Add examples.
+#' # If you wanted to use the Huggins Pitch Headphone Screen,
+#' # You could get the audio in the right place with the following command:
+#' wwwPrep(HugginsPitchScreen = TRUE)
+#' # But to run this only once, and not put it in your app.R file
 
 wwwPrep <- function(from = NULL, is_dir = FALSE,
                     path = ".",
@@ -103,7 +102,7 @@ wwwPrep <- function(from = NULL, is_dir = FALSE,
 
   if (isTRUE(demographics)) {
     demog <- demographics
-    write.csv(demog, "www/demographics.csv")
+    utils::write.csv(demog, "www/demographics.csv")
     cat("Success: Demographic survey questionnaire added to 'www' as 'demographics.csv'.")
   }
 

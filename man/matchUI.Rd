@@ -8,8 +8,7 @@ matchUI(
   id = "game",
   title = "Find a Match!",
  
-    instructions = "Click a button in the grid below to see the image it is hiding. Keep clicking buttons until you find the image that matches the one above.",
-  n2find
+    instructions = "Click a button in the grid below to see the image it is hiding.\\n                                  Keep clicking buttons until you find\\n                                  the image that matches the one above."
 )
 }
 \arguments{
@@ -35,7 +34,7 @@ ui <- fluidPage(
     column(width = 8, offset = 2,
            actionButton("start", "Start"),
            hidden(actionButton("again", "Play Again")),
-           matchUI(n2find = 3)
+           matchUI()
            )
   )
 )

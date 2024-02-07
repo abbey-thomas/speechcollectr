@@ -63,9 +63,12 @@ if (interactive()) {
   ui <- fluidPage(
     actionButton("begin", "Begin"),
     transcribeUI(id = "transcribe"),
-    h5("Click 'Begin' each time you want to transcribe. The recording will not change from trial to trial."),
-    h5("To demonstrate the transcription evaluation procedure, we'll use a different 'correct transcritiption' for each trial."),
-    h5("The correct answers for the first 4 trials are: 'a', 'ab', 'abc', 'abcd' (in that order).")
+    h5("Click 'Begin' each time you want to transcribe.
+        The recording will not change from trial to trial."),
+    h5("To demonstrate the transcription evaluation procedure,
+        we'll use a different 'correct transcritiption' for each trial."),
+    h5("The correct answers for the first 4 trials are:
+        'a', 'ab', 'abc', 'abcd' (in that order).")
   )
 
   server <- function(input, output, session) {

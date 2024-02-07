@@ -25,8 +25,6 @@ surveyUI(
 \item{requiredLab}{The value that will be appended to required questions' labels. Defaults to asterisk (*).}
 
 \item{submitLab}{The label that should be displayed on the button participants will click to submit the form.}
-
-\item{notListedLab}{For non-textInput questions, the name of the choice that will allow your participants to enter their own value for all questions that include this string in the 'options' column of \code{questionFile}.}
 }
 \value{
 A Shiny user interface with the questions specified in the \code{questionFile} CSV file.
@@ -81,7 +79,8 @@ if (interactive()) {
   shinyApp(ui = ui, server = server)
 }
 
-# Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+# Or, you can trigger events on click of the survey's submit button
+#  using the module id in the following string: `input[["id-submit"]]`
 if (interactive()) {
   ui <- fluidPage(
     sidebarLayout(

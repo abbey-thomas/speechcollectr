@@ -6,7 +6,7 @@
 #' @param wait Integer. How long should we wait to display the scale(s) after the trigger event occurs? In milliseconds.
 #' @param n_scales Integer. The number of scales to be displayed on the page. Must match the value given in the corresponding call to `rateUI()`
 #' @param answer_all If `n_scales` > 1, does the participant need to give a response on each scale or only one of them?
-#' @param answers A list with length `n_scales`. The answer choices for each scale should be a character vector in this list. If `type="slider"`, each scale must have EXACTLY 2 answers (the first representing the lower extreme and the second representing the higher extreme). If `n_scales` > 1 and the options are different for each scale, the character vectors should be wrapped in a list.
+#' @param choices A list with length `n_scales`. The answer choices for each scale should be a character vector in this list. If `type="slider"`, each scale must have EXACTLY 2 answers (the first representing the lower extreme and the second representing the higher extreme). If `n_scales` > 1 and the options are different for each scale, the character vectors should be wrapped in a list.
 #' @param instructions Instructions that will appear at the top of the page.
 #' @param pretext Character. The text that will appear above the likert scale.
 #' @param scale_labs Character. The individual label that will appear above each scale if `n_scales` > 1.
@@ -17,7 +17,6 @@
 #' @param sliderMax Numeric. The upper limit of the slider. Default is `100`.
 #' @param pips List with two elements. Where to place numeric markers on the slider scale. See Details for more information.
 #' @param step Numeric. The distance between consecutive points (i.e., potential answers) on the slider. Default is `.01`,
-#' @param showAnswer Boolean. Defaults to `FALSE`. Whether to display the current numeric value of the slider above the handle.
 #'
 #' @return Returns a reactive vector of the answers selected from each scale when the participant clicks submit.
 #' @details Notes on sliders:
@@ -79,7 +78,7 @@
 #'      rateUI(id = "example",
 #'             type = "button",
 #'             n_scales = 2),
-#'      actionButton("submit", "SUBMIT")
+#'      actionButton("submit", "SUBMIT"),
 #'      textOutput("confirmation")
 #'    )
 #'
@@ -243,7 +242,7 @@ rateServer <- function(id = "rate",
                                                                                  choiceValues = answers[[i]],
                                                                                  width = "100%",
                                                                                  selected = character(),
-                                                                                 checkIcon = list(yes = icon("check")),
+                                                                                 checkIcon = list(yes = shiny::icon("check")),
                                                                                  justified = TRUE,
                                                                                  direction = "vertical",
                                                                                  status = paste0("likert", i)))
@@ -276,7 +275,7 @@ rateServer <- function(id = "rate",
                                                                                               choiceValues = answers[[i]],
                                                                                               width = "100%",
                                                                                               selected = character(),
-                                                                                              checkIcon = list(yes = icon("check")),
+                                                                                              checkIcon = list(yes = shiny::icon("check")),
                                                                                               justified = TRUE,
                                                                                               direction = "horizontal",
                                                                                               status = paste0("likert", i))))

@@ -34,7 +34,8 @@ Get current player's rank among group of past players
 }
 \examples{
 # Erase the out file, "sample_rank.rds" after you run this example,
-# ...so you won't get the error of multiple "players" with the same ID next time you run the example!
+# ...so you won't get the error of multiple "players" with the same ID
+
 if (interactive()) {
   library(shiny)
   library(shinyalert)

@@ -15,7 +15,7 @@
 #' @param cons2recNo Character. Label for the radio button the participant will click to decline consent to audio recording. Defaults to a generic statement.
 #'
 #' @return A value of type `integer` indicating whether the participant has given consent to the experiment and to record (=2), consent to everything not including recording (=1), or not consented to any portion of the experiment (=0).
-#' @seealso Must be used with \code{\link{consentUI}}. If `cons2rec = TRUE`, consider using \code{\link{recorderUI}} and \code{\link{recorderServer}}.
+#' @seealso Must be used with \code{\link{consentUI}}. If `cons2rec = TRUE`, consider using \code{\link{recordUI}} and \code{\link{recordServer}}.
 #' @export
 #' @family Consent form module
 #' @examples
@@ -56,7 +56,8 @@ consentServer <- function(id = "consent",
                           disagreeId = "consent-no",
                           cons2rec = FALSE,
                           cons2recRequire = TRUE,
-                          cons2recLab = "This experiment requires us to make audio recordings of your voice. Do you consent to having your voice recorded?",
+                          cons2recLab = "This experiment requires us to make audio recordings of your voice.
+                                         Do you consent to having your voice recorded?",
                           cons2recYes = "I consent to my voice being recorded for this research.",
                           cons2recNo = "I do NOT grant my consent for my voice to be recorded."){
 
@@ -93,10 +94,10 @@ consentServer <- function(id = "consent",
         )
       })
 
-      shinyjs::delay(delayResponse, click(paste(id, "-invis")))
+      shinyjs::delay(delayResponse, shinyjs::click(paste(id, "-invis")))
     })
   } else {
-    observe({
+    shiny::observe({
       shinyjs::showElement(id)
 
       session$output[[paste0(id, "-interface")]] <- shiny::renderUI({
@@ -141,7 +142,7 @@ consentServer <- function(id = "consent",
         if (isTRUE(react$rec_req)) {
           shiny::showModal(shiny::modalDialog(title = "Consent to Record Required!",
                                               shiny::tags$p("You must consent to voice recording to continue with this experiment. If you do not wish to participate, you may close your browser window; no information will be saved. Otherwise, click 'Return to Experiment' below to return to the consent form."),
-                                              footer = shiny::actionButton(inputId = ns("return"), label = "Return to Experiment")
+                                              footer = shiny::actionButton(inputId = paste0(id, "-return"), label = "Return to Experiment")
           ))
         } else {
           returns$agree <- 1

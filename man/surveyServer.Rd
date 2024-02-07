@@ -72,14 +72,17 @@ if (interactive()) {
 
       # Once an answer for "age" is submitted, show the answer in the sidebar panel.
       observeEvent(answers$age, {
-        output$answer <- renderText({paste0("Your answers were saved as ", answers$filename,". You are ", answers$age, " years old.")})
+        output$answer <- renderText({paste0("Your answers were saved as ",
+                                     answers$filename,". You are ", answers$age,
+                                     " years old.")})
       })
     })
   }
   shinyApp(ui = ui, server = server)
 }
 
-# Or, you can trigger events on click of the survey's submit button using the module id in the following string: `input[["id-submit"]]`
+# Or, you can trigger events on click of the survey's submit button
+# using the module id in the following string: `input[["id-submit"]]`
 if (interactive()) {
   ui <- fluidPage(
     sidebarLayout(

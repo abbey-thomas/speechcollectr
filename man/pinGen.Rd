@@ -41,12 +41,15 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 
-  #Putting the pinGen() here, outside the observeEvent expression, generates one and only one ID # per session... The safer option!
+  #Putting the pinGen() here, outside the observeEvent expression,
+  #generates one and only one ID # per session... The safer option!
   pin <- pinGen(file = "pins.rds",
                 reactive = TRUE)
 
   observeEvent(input$assignID, {
-    # If you put pinGen() here, be sure to disable or hide the button you use to trigger pin generation! You do not want this to be generated multiple times for a participant.
+    # If you put pinGen() here, be sure to disable or hide the button
+    # you use to trigger pin generation! You do not want this to be
+    # generated multiple times for a participant.
     shinyjs::disable("assignID")
     output$pin <- renderText({paste0("Your ID # is ", pin())})
   })

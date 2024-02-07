@@ -27,7 +27,7 @@
 #'
 surveyPrep <- function(questionFile = NULL,
                        notListedLab = NULL) {
-   qs <- read.csv(file = questionFile)
+   qs <- utils::read.csv(file = questionFile)
    tmp <- tempfile(fileext = ".rds")
    qf <- paste0(questionFile)
    nll <- paste0(notListedLab)
@@ -74,7 +74,7 @@ surveyPrep <- function(questionFile = NULL,
    for (i in 1:nrow(qs)) {
       rowID[i] <- qs$id[i]
 
-      idck <- qs %>% filter(id == qs$id[i])
+      idck <- qs %>% dplyr::filter(id == qs$id[i])
       if (nrow(idck) > 1) {
          id[i] <- paste0("ID '", qs$id[i], "' is used more than once.")
       } else {id[i] <- "No errors"}
@@ -126,7 +126,7 @@ surveyPrep <- function(questionFile = NULL,
    if (interactive()) {
       ans <- readline("Would you like to preview these questions in a demo shiny app? (y|n)")
       if (substr(ans,1,1) == "y") {
-         qsl <- setNames(split(qs, seq(nrow(qs))), rownames(qs))
+         qsl <- stats::setNames(split(qs, seq(nrow(qs))), rownames(qs))
 
          ui <- shiny::fluidPage(
             shiny::fluidRow(
