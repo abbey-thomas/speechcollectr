@@ -49,7 +49,7 @@ if (interactive()) {
     ## Get background javascript ready
     useShinyjs(),
     tags$head(
-      useRecorder(directory = "www")
+      useRecorder()
     ),
 
     actionButton("next_trial", "NEXT"),

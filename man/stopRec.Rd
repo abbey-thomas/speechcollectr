@@ -8,9 +8,11 @@ stopRec(filename)
 }
 \arguments{
 \item{filename}{Required. A character vector giving the file name of the WAV file that will be saved.}
+
+\item{finishedId}{Character. ID of the input object created when the recording is saved.}
 }
 \value{
-Adds the value "rec-done" to the application's input object after saving a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument. The value of "rec-done" is equal to the value of the filename argument.
+Adds a to the application's input object (with the inputId given by finishedId) after saving a WAV file containing the audio data recorded from the user's microphone, stored in the location given in the filename argument. The value of the object with the inputId given by "finishedId" is equal to the name of the returned file.
 }
 \description{
 For use only inside a call to \code{observeEvent()} or \code{bindEvent()} in a Shiny application's server function.
@@ -43,7 +45,8 @@ if (interactive()){
 
        ### Hide the stop button until user clicks start
        hidden(actionButton(inputId = "stop",
-                           label = "stop"))
+                           label = "stop")),
+       textOutput(outputId = "file_saved")
    )
  )
 
@@ -59,7 +62,7 @@ if (interactive()){
      rvs$trial_n <- rvs$trial_n + 1
 
      ### Start the recording
-     startRec()
+     startRec(readyId = "ready")
 
      ### Disable the start button
      disable("start")
@@ -68,7 +71,7 @@ if (interactive()){
      delay(500, showElement("stop"))
    })
 
-   observeEvent(input[["rec-ready"]], {
+   observeEvent(input$ready, {
      showElement("textDiv")
      output$read_this <- renderText({paste0("This is recording ",
                                             rvs$trial_n, ".")})
@@ -78,7 +81,8 @@ if (interactive()){
    observeEvent(input$stop, {
 
      ### Stop recording
-     stopRec(filename = paste0("rec", rvs$trial_n, ".wav"))
+     stopRec(filename = paste0("rec", rvs$trial_n, ".wav"),
+             finishedId = "done")
 
      ### Enable the start button
      enable("start")
@@ -86,6 +90,10 @@ if (interactive()){
      ### Hide the stop button
      hide("stop")
      hide("textDiv")
+   })
+
+   observeEvent(input$done, {
+     output$file_saved <- renderText({paste0("The file '", input$done, "' was saved.")})
    })
  }
 

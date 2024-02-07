@@ -51,7 +51,7 @@
 #'      rvs$trial_n <- rvs$trial_n + 1
 #'
 #'      ### Start the recording
-#'      startRec(readyId = "ready)
+#'      startRec(readyId = "ready")
 #'
 #'      ### Disable the start button
 #'      disable("start")
@@ -82,7 +82,7 @@
 #'    })
 #'
 #'    observeEvent(input$done, {
-#'      output$file_saved <- renderText({paste0("The file '", input$done, "' was saved.")})
+#'      output$file_saved <- renderText({paste0("The file ", input$done, " was saved.")})
 #'    })
 #'  }
 #'
