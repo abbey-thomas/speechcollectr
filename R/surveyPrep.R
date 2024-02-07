@@ -13,6 +13,8 @@
 #' \item{"priority:"}{Specifies whether an item is required or not. There are two accepted options (required and optional), denoted by the following values (values separated by pipe (|) are treated as equivalent): 'required'|'req'|'r' and 'optional'|'opt'|'o'.}
 #' \item{"type:"} {Tells Shiny which `*Input()` function to use for each question. Acceptable types are any of the following (equivalent options separated by '|'): 'textInput'|'text'|'t', 'selectInput'|'select'|'s', 'numericInput'|'numeric'|'n', 'checkboxGroupInput'|'checkbox'|'c',  and 'radioButtons'|'radio'|'r'.}
 #' \item{"options:"} {Contains the list of options for all non-textInput questions. All options in the list should be separated by commas, and no enclosing parantheses are needed. If you wish to include an option for participants to enter a value not listed among these options, place the value for the `notListedLab` as the last option in the row. This will tell R to insert a textInput UI when the participant selects the not listed option. The value they enter will be accessible using the input ID associated with this row in the input CSV file. If you do not wish users to be able to specify a value when the select not listed, simply leave the `notListedLab` argument as `NULL`. If a question is of type numericInput, this column must contain two values, the minimum and the maximum numeric options, separated by a comma. If a question is of type textInput, the value in this column should be '' (an empty vector) or `NA`. If all questions are of type textInput, this column may be omitted.}
+#' \item{"trigger_id:"} {Optional. For questions that appear conditionally based on an answer to a previous question. Should contain the id (from the id column) of the question used to trigger the appearance of the question in this row. If the question's appearance is not conditional on any other answers, this column's value should be set to NA.}
+#' \item{"trigger_value:"} {Optional. For questions that appear conditionally based on an answer to a previous question. Should contain the ANSWER to the question identified in trigger_id that will trigger the appearance of the question in this row. If the question's appearance is not conditional on any answers, this column's value should be set to NA. This cannot be NA if trigger_id has a value other than NA for this row.}
 #' }
 #' @export
 #' @note The data frame produced by this function is only for informational purposes. Do NOT use this function in a shiny app to present to participants. To present a survey to participants use `surveyUI()` and `surveyServer()`. If any errors are found in your input question file, please return open the input question file in a text editor, correct any mistakes, and rerun this function until all cells in the output say 'No errors'.
@@ -26,7 +28,9 @@
 surveyPrep <- function(questionFile = NULL,
                        notListedLab = NULL) {
    qs <- read.csv(file = questionFile)
-
+   tmp <- tempfile(fileext = ".rds")
+   qf <- paste0(questionFile)
+   nll <- paste0(notListedLab)
    if (!"id" %in% colnames(qs))
       stop("Your question file must contain a column called 'id' that gives a unique input ID for each question.")
    if (!"label" %in% colnames(qs))
@@ -35,9 +39,14 @@ surveyPrep <- function(questionFile = NULL,
       stop("Your question file must contain a column called 'priority', and all values in this column must be either 'required'|'req'|'r'  or 'optional'|'opt'|'o' (equivalent options separated by '|').")
    if (!"type" %in% colnames(qs))
       stop("Your question file must contain a column called 'type' that tells shiny what function to use for each question. Values must be one of (equivalent options separated by '|'): 'textInput'|'text'|'t', 'selectInput'|'select'|'s', 'numericInput'|'numeric'|'n', or 'radioButtons'|'radio'|'r'.")
-   extra <- qs %>% dplyr::select(-(c(id, label, priority, type, options)))
+   if ("trigger_id" %in% colnames(qs)) {
+      extra <- qs %>% dplyr::select(-(c(id, label, priority, type, options, trigger_id, trigger_value)))
+   } else {
+      extra <- qs %>% dplyr::select(-(c(id, label, priority, type, options)))
+   }
+
    if (ncol(extra) != 0)
-      stop("You seem to have extra columns in your dataset. Your CSV file must contain ALL and ONLY the following columns: id, label, type, required, and options (options may be omitted if ALL your questions are of the type textInput). Any additional columns will be ignored.")
+      stop("You seem to have extra columns in your dataset. Your CSV file must contain ONLY the following columns: id, label, type, required, options (options may be omitted if ALL your questions are of the type textInput), trigger_id, and trigger_value. Any additional columns will be ignored.")
 
 
    qs <- qs %>%
@@ -59,6 +68,8 @@ surveyPrep <- function(questionFile = NULL,
    label <- c()
    type <- c()
    options <- c()
+   trigger_id <- c()
+   trigger_value <- c()
 
    for (i in 1:nrow(qs)) {
       rowID[i] <- qs$id[i]
@@ -122,72 +133,17 @@ surveyPrep <- function(questionFile = NULL,
                shiny::column(width = 8,
                              offset = 2,
                              htmltools::tags$br(),
-                             lapply(seq_along(qsl), function(i) {
-                                if (qsl[[i]]$type != "t") {
-                                   opts <- gsub(", ", ",", qsl[[i]]$options)
-                                   opts <- c(unlist(strsplit(opts, ",")))
-                                }
-
-                                if (qsl[[i]]$type == "n") {
-                                   opts <- as.numeric(opts)
-                                   opts <- c(opts[1]:opts[2])
-                                }
-
-                                if (qsl[[i]]$type == "r") {
-                                   vals <- gsub("[^[:alnum:]]", "", opts)
-                                }
-
-                                if (qsl[[i]]$type == "t") {
-                                   input <- shiny::textInput(inputId = qsl[[i]]$id,
-                                                             label = qsl[[i]]$label,
-                                                             width = '100%')
-                                } else if (qsl[[i]]$type == "s"|qsl[[i]]$type == "n") {
-                                   input <- shiny::selectInput(inputId = qsl[[i]]$id,
-                                                               label = qsl[[i]]$label,
-                                                               choices = opts,
-                                                               selected = character())
-                                } else if (qsl[[i]]$type == "r") {
-                                   input <- shiny::radioButtons(inputId = qsl[[i]]$id,
-                                                                label = qsl[[i]]$label,
-                                                                width = '100%',
-                                                                choiceNames = opts,
-                                                                choiceValues = vals,
-                                                                selected = character())
-                                } else {
-                                   input <- shiny::checkboxGroupInput(inputId = qsl[[i]]$id,
-                                                                      label = qsl[[i]]$label,
-                                                                      width = '100%',
-                                                                      choiceNames = opts,
-                                                                      choiceValues = vals,
-                                                                      selected = character())
-                                }
-                                return(input)
-                             }),
-                             shiny::actionButton("close", "CLOSE")
+                             surveyUI(questionFile = qf,
+                                      submitLab = "CLOSE")
                )
             )
          )
 
          server <- function(input, output, session) {
-            lapply(seq_along(qsl), function(i){
-               shiny::observeEvent(input[[paste0(qsl[[i]]$id)]], {
-                  if (as.character(input[[paste0(qsl[[i]]$id)]]) == notListedLab) {
-                     shiny::insertUI(paste0("#", qsl[[i]]$id),
-                                     where = "afterEnd",
-                                     ui = shiny::textInput(
-                                        inputId = paste0(qsl[[i]]$id, "_nl"),
-                                        label = "Type your answer to add it to the list of choices above:"))
-                  }
-               })
-
-               shiny::observeEvent(input[[paste0(qsl[[i]]$id, "_nl")]], {
-                  tmp <- input[[paste0(qsl[[i]]$id, "_nl")]]
-                  shiny::updateSelectInput(session, paste0(qsl[[i]]$id),
-                                           choices = tmp,
-                                           selected = tmp)
-               })
-            })
-            shiny::observeEvent(input$close, {shiny::stopApp()})
+            surveyServer(questionFile = qf, notListedLab = nll,
+                         outFile = tempfile(fileext = ".csv"),
+                         result = "hide")
+            shiny::observeEvent(input[["survey-submit"]], {shiny::stopApp()})
             session$onSessionEnded(function() {shiny::stopApp()})
          }
          app <- shiny::shinyApp(ui = ui, server = server)
@@ -198,5 +154,3 @@ surveyPrep <- function(questionFile = NULL,
    }
    return(as.data.frame(feedback))
 }
-
-
