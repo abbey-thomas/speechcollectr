@@ -36,7 +36,7 @@ function startRecording(el) {
 
 		/* use the stream */
 		input = audioContext.createMediaStreamSource(stream);
-		Shiny.setInputValue("rec-ready", "yes", {priority: "event"});
+		Shiny.setInputValue(el, "yes", {priority: "event"});
 		rec = new Recorder(input,{numChannels:1});
 
 		rec.record();
@@ -66,7 +66,7 @@ function stopRecording(el2) {
 }
 
 Shiny.addCustomMessageHandler('recDone', function(el3) {
-  Shiny.setInputValue("rec-done", el3, {priority: "event"});
+  Shiny.setInputValue(el3.finishedId, el3.outFile, {priority: "event"});
 });
 
 Shiny.addCustomMessageHandler('evalWavResult', function(result) {
