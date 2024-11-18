@@ -90,57 +90,44 @@
 #'   }
 #'   shinyApp(ui = ui, server = server)
 #' }
-surveyServer <- function (id = "survey",
-                          questionFile,
-                          notListedLab = NULL,
-                          outFile = NULL,
-                          returnVals = NULL,
-                          result = c("clear","hide")){
+surveyServer <- function (id = "survey", questionFile, notListedLab = NULL,
+                          outFile = NULL, returnVals = NULL, result = c("clear", "hide"))
+{
   if (!file.exists(questionFile) | !grepl("csv$", questionFile))
     stop("Argument 'questionFile' must be a valid file path (relative to the current directory) to an existing CSV file.")
   if (!grepl("csv$", outFile) & !grepl("rds$", outFile))
     stop("Argument 'outFile' must be of the format '.csv' or '.rds'.")
   if (result != "clear" & result != "hide")
     stop("Argument result must be either 'clear' or 'hide'")
-
   if (grepl("\\.csv$", questionFile)) {
     qs_pre <- utils::read.csv(file = questionFile)
-  } else if (is.data.frame(questionFile)) {
+  }
+  else if (is.data.frame(questionFile)) {
     qs_pre <- questionFile
-  } else {
+  }
+  else {
     stop("questionFile must be a valid path to a .csv file or a data.frame in your current R environment!")
   }
-
-  qs_init <- qs_pre %>%
-    dplyr::mutate(priority = ifelse(priority ==  "required" | priority == "req", "r",
-                                    ifelse(priority == "optional" | priority == "opt", "o",
-                                           as.character(priority)))) %>%
-    dplyr::mutate(type = ifelse(type == "textInput" | type == "text", "t",
-                                ifelse(type == "selectInput" | type ==  "select", "s",
-                                       ifelse(type == "numericInput" | type == "numeric", "n",
-                                              ifelse(type == "radioButtons" | type == "radio", "r",
-                                                     ifelse(type == "checkboxGroupInput" | type == "checkbox", "c",
-                                                            as.character(type))))))) %>%
+  qs_init <- qs_pre %>% dplyr::mutate(priority = ifelse(priority ==
+                                                          "required" | priority == "req", "r", ifelse(priority ==
+                                                                                                        "optional" | priority == "opt", "o", as.character(priority)))) %>%
+    dplyr::mutate(type = ifelse(type == "textInput" | type ==
+                                  "text", "t", ifelse(type == "selectInput" | type ==
+                                                        "select", "s", ifelse(type == "numericInput" | type ==
+                                                                                "numeric", "n", ifelse(type == "radioButtons" |
+                                                                                                         type == "radio", "r", ifelse(type == "checkboxGroupInput" |
+                                                                                                                                        type == "checkbox", "c", as.character(type))))))) %>%
     dplyr::mutate(dplyr::across(dplyr::everything(), .fns = as.character))
-
   if ("trigger_id" %in% colnames(qs_init)) {
     qs <- qs_init
-
-    #if (!all((qs_init$trigger_id %in% qs_init$id)|is.na(qs_init$trigger_id)))
-    #  stop("Error: The trigger_id column must contain ONLY NA or a value from the 'id' column in 'questionFile'.")
-
-  } else {
+  }
+  else {
     qs <- qs_init %>% dplyr::mutate(trigger_id = NA)
   }
-
   if (!all(returnVals %in% qs_init$id))
     stop("Error: returnVals must be a character vector that contains ONLY a set of values from the 'id' column in 'questionFile', that you want returned as reactives.")
-
-
   qsl <- stats::setNames(split(qs, seq(nrow(qs))), rownames(qs))
-
   mandatory <- c(qs$id[qs$priority == "r"])
-
   shiny::moduleServer(id = id, function(input, output, session) {
     ns <- session$ns
     returns <- shiny::reactiveValues()
@@ -150,28 +137,25 @@ surveyServer <- function (id = "survey",
     lapply(seq_along(qsl), function(i) {
       shiny::observeEvent(input[[paste0(qsl[[i]]$id)]],
                           {
-                            if (as.character(input[[paste0(qsl[[i]]$id)]]) == notListedLab) {
+                            if (any(as.character(input[[paste0(qsl[[i]]$id)]]) ==
+                                    notListedLab)) {
                               shiny::insertUI(paste0("#", ns(qsl[[i]]$id)),
-                                              where = "afterEnd",
-                                              ui = shiny::textInput(inputId = ns(paste0(qsl[[i]]$id, "_nl")),
-                                                                    label = "Type your answer to add it to the list of choices above:"))
+                                              where = "afterEnd", ui = shiny::textInput(inputId = ns(paste0(qsl[[i]]$id,
+                                                                                                            "_nl")), label = "Type your answer to add it to the list of choices above:"))
                             }
-
                             if ("trigger_id" %in% colnames(qs_init)) {
                               if (qsl[[i]]$id %in% qs$trigger_id) {
-                                qs_add <- qs %>%
-                                  dplyr::filter(trigger_id == qsl[[i]]$id) %>%
-                                  dplyr::filter(is.na(trigger_value)|
-                                           trigger_value == as.character(input[[paste0(qsl[[i]]$id)]]))
-
+                                qs_add <- qs %>% dplyr::filter(trigger_id ==
+                                                                 qsl[[i]]$id) %>% dplyr::filter(is.na(trigger_value) |
+                                                                                                  trigger_value == as.character(input[[paste0(qsl[[i]]$id)]]))
                                 if (nrow(qs_add) > 0) {
-                                  qs_add_l <- stats::setNames(split(qs_add, seq(nrow(qs_add))), rownames(qs_add))
+                                  qs_add_l <- stats::setNames(split(qs_add,
+                                                                    seq(nrow(qs_add))), rownames(qs_add))
                                   lapply(seq_along(qs_add_l), function(j) {
                                     shinyjs::showElement(qs_add_l[[j]]$id)
                                   })
                                 }
                               }
-
                             }
                           })
       shiny::observeEvent(input[[paste0(qsl[[i]]$id, "_nl")]],
@@ -181,16 +165,19 @@ surveyServer <- function (id = "survey",
                                                      choices = tmp, selected = tmp)
                           })
     })
+
     shiny::observe({
       filled <- vapply(mandatory, function(x) {
-        !is.null(input[[x]]) && input[[x]] != ""
+        length(input[[x]]) > 0
       }, logical(1))
       filled <- all(filled)
       shinyjs::toggleState(id = "submit", condition = filled)
     })
 
     formInfo <- shiny::reactive({
-      info <- sapply(c(qs$id), function(x) input[[x]])
+      info <- sapply(c(qs$id), function(x) {
+        input[[x]]
+      })
       names(info) <- c(qs$id)
       info <- t(info)
       info
@@ -200,53 +187,54 @@ surveyServer <- function (id = "survey",
       if (!is.null(outFile)) {
         if (file.exists(outFile)) {
           basen <- gsub("\\.[[:alpha:]]{3}$", "", outFile)
-
           if (grepl("rds$", outFile)) {
-            for (i in 0:9999){
-              if (file.exists(paste0(basen, formatC(i, width = 4,
-                                                    format = "d", flag = "0"),
+            for (i in 0:9999) {
+              if (file.exists(paste0(basen, formatC(i,
+                                                    width = 4, format = "d", flag = "0"),
                                      ".rds"))) {
                 next
-              } else {
-                saveRDS(formInfo(), paste0(basen, formatC(i, width = 4,
-                                                          format = "d", flag = "0"),
+              }
+              else {
+                saveRDS(formInfo(), paste0(basen, formatC(i,
+                                                          width = 4, format = "d", flag = "0"),
                                            ".rds"))
-                newFile <- paste0(basen, formatC(i, width = 4,
-                                                 format = "d", flag = "0"),
+                newFile <- paste0(basen, formatC(i,
+                                                 width = 4, format = "d", flag = "0"),
                                   ".rds")
                 break
               }
             }
-          } else if (grepl("csv$", outFile)) {
-            for (i in 0:9999){
-              if (file.exists(paste0(basen,
-                                     formatC(i, width = 4,
-                                             format = "d", flag = "0"),
+          }
+          else if (grepl("csv$", outFile)) {
+            for (i in 0:9999) {
+              if (file.exists(paste0(basen, formatC(i,
+                                                    width = 4, format = "d", flag = "0"),
                                      ".csv"))) {
                 next
-              } else {
-                utils::write.csv(formInfo(),
-                          paste0(basen, formatC(i, width = 4,
-                                                format = "d", flag = "0"),
-                                 ".csv"), row.names = FALSE)
-                newFile <- paste0(basen, formatC(i, width = 4,
-                                                 format = "d", flag = "0"),
+              }
+              else {
+                utils::write.csv(formInfo(), paste0(basen,
+                                                    formatC(i, width = 4, format = "d",
+                                                            flag = "0"), ".csv"), row.names = FALSE)
+                newFile <- paste0(basen, formatC(i,
+                                                 width = 4, format = "d", flag = "0"),
                                   ".csv")
                 break
               }
             }
           }
-        } else {
+        }
+        else {
           if (grepl("rds$", outFile)) {
             saveRDS(formInfo(), paste0(outFile))
             newFile <- outFile
-          } else {
+          }
+          else {
             utils::write.csv(formInfo(), outFile, row.names = FALSE)
             newFile <- outFile
           }
         }
       }
-
       if (result == "hide") {
         shinyjs::disable("submit")
         shinyjs::hide("survey_div")
@@ -255,13 +243,11 @@ surveyServer <- function (id = "survey",
         shinyjs::disable("submit")
         shinyjs::reset("survey_div")
       }
-
       if (length(returnVals) > 0) {
         for (i in 1:length(returnVals)) {
           returns[[returnVals[i]]] <- input[[paste0(returnVals[i])]]
         }
       }
-
       returns[["filename"]] <- newFile
     })
     return(returns)
