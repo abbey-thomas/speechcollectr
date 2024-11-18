@@ -37,7 +37,7 @@
 #'    # Give the reactive value output a name, so it can be checked and accessed later.
 #'            phones <- headphoneTestServer(id = "headphone_test", type = "huggins",
 #'                                          n_trials = 6, threshold = 4, n_attempts = 2)
-#'            observe({
+#'            observeEvent(phones(), {
 #'              if (phones() == 1) {
 #'                  output$done <- renderText("Headphone test successfully completed!")
 #'                  }

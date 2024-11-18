@@ -12,8 +12,8 @@ transcribeServer(
   allowPause = FALSE,
   n_play = NULL,
   result = c("clear", "hide"),
- 
-    instructions = "Play the audio file. Then, enter what you heard in the box below.\\n                                             Click the submit button when you are finished.",
+  instructions =
+    "Play the audio file. Then, enter what you heard in the box below.\\n                                             Click the submit button when you are finished.",
   n_lines = 1,
   width = "100\%",
   submitLab = "SUBMIT"

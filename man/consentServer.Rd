@@ -15,8 +15,8 @@ consentServer(
   disagreeId = "consent-no",
   cons2rec = FALSE,
   cons2recRequire = TRUE,
- 
-    cons2recLab = "This experiment requires us to make audio recordings of your voice.\\n                                         Do you consent to having your voice recorded?",
+  cons2recLab =
+    "This experiment requires us to make audio recordings of your voice.\\n                                         Do you consent to having your voice recorded?",
   cons2recYes = "I consent to my voice being recorded for this research.",
   cons2recNo = "I do NOT grant my consent for my voice to be recorded."
 )
