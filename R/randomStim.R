@@ -151,7 +151,9 @@ randomStim <- function (dataFile,
     blockCol <- "block"
     exp_trials <- exp_trials %>%
       dplyr::mutate(block = rep(c(1:n_blocks), each = n_perBlock))
-    df_practice <- df_practice %>% dplyr::mutate(block = 0)
+    if (n_practice > 0){
+      df_practice <- df_practice %>% dplyr::mutate(block = 0)
+    }
   }
 
   # Send some errors if we're not set up for varying numbers of trials per block
@@ -203,15 +205,13 @@ randomStim <- function (dataFile,
       dplyr::mutate(block_num = rep(c(1:n_blocks), each = n_perBlock))
   }
 
-  #if (is.null(blockCol)) {
-  df_practice <- df_practice %>%
-    dplyr::mutate(block_num = 0,
-                  trial_num = c(1:n_practice))
-  #} else
-
   df_exp <- block_ord %>% dplyr::left_join(trial_ord)
 
   if (n_practice > 0) {
+    df_practice <- df_practice %>%
+      dplyr::mutate(block_num = 0,
+                    trial_num = c(1:n_practice))
+
     df_end <- dplyr::bind_rows(df_practice, df_exp) %>%
       dplyr::arrange(block_num, trial_num)
   } else {
